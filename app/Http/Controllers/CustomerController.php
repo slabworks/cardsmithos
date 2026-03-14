@@ -54,6 +54,8 @@ class CustomerController extends Controller
     {
         $this->authorize('view', $customer);
 
+        $customer->load('cards');
+
         return Inertia::render('customers/show', [
             'customer' => $customer,
         ]);

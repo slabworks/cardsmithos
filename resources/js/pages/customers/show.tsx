@@ -1,5 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
-import { Pencil } from 'lucide-react';
+import { Pencil, Plus } from 'lucide-react';
+import CardController from '@/actions/App/Http/Controllers/CardController';
 import CustomerController from '@/actions/App/Http/Controllers/CustomerController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -29,6 +30,12 @@ export default function CustomersShow({
         address: string | null;
         notes: string | null;
         referral_source: string | null;
+        cards: Array<{
+            id: number;
+            name: string;
+            status: string;
+            estimated_fee: string | null;
+        }>;
     };
 }) {
     const breadcrumbs: BreadcrumbItem[] = [
@@ -120,6 +127,54 @@ export default function CustomersShow({
                         <p className="text-sm">{customer.referral_source}</p>
                     </div>
                 )}
+
+                <section className="rounded-lg border border-sidebar-border bg-card">
+                    <div className="flex items-center justify-between border-b border-sidebar-border px-4 py-3">
+                        <h2 className="font-medium">Cards</h2>
+                        <Button size="sm" asChild>
+                            <Link
+                                href={CardController.create.url({
+                                    customer: customer.id,
+                                })}
+                            >
+                                <Plus className="mr-1 size-4" />
+                                Add card
+                            </Link>
+                        </Button>
+                    </div>
+                    {customer.cards.length === 0 ? (
+                        <p className="px-4 py-6 text-sm text-muted-foreground">
+                            No cards yet.
+                        </p>
+                    ) : (
+                        <ul className="divide-y divide-sidebar-border">
+                            {customer.cards.map((card) => (
+                                <li
+                                    key={card.id}
+                                    className="flex items-center justify-between px-4 py-3"
+                                >
+                                    <Link
+                                        href={CardController.edit.url({
+                                            customer: customer.id,
+                                            card: card.id,
+                                        })}
+                                        className="hover:underline"
+                                    >
+                                        {card.name}
+                                        {card.estimated_fee != null && (
+                                            <span className="ml-2 text-muted-foreground">
+                                                ${card.estimated_fee}
+                                            </span>
+                                        )}
+                                    </Link>
+                                    <Badge variant="outline">
+                                        {card.status.replace('_', ' ')}
+                                    </Badge>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </section>
             </div>
         </AppLayout>
     );
