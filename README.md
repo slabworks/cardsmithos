@@ -122,6 +122,7 @@ Contributions are welcome and appreciated.
 - Follow existing code style and project structure.
 - Keep pull requests focused and small when possible.
 - Document notable behavior changes in your PR description.
+- AI-assisted coding is welcome; however, every backend feature must include automated test coverage and the full test suite must pass before merge.
 
 ## Support
 
