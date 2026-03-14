@@ -31,9 +31,18 @@
         </style>
 
         <title inertia>{{ config('app.name', 'Laravel') }}</title>
+        <meta name="description" content="{{ config('cardsmithos.description', config('app.name').' — Trading card repair shop CRM') }}">
 
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="{{ config('app.url') }}">
+        <meta property="og:title" content="{{ config('app.name') }}">
+        <meta property="og:description" content="{{ config('cardsmithos.description', config('app.name').' — Trading card repair shop CRM') }}">
         <meta property="og:image" content="{{ config('app.url') }}/og.webp">
         <meta property="og:image:type" content="image/webp">
+
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="{{ config('app.name') }}">
+        <meta name="twitter:description" content="{{ config('cardsmithos.description', config('app.name').' — Trading card repair shop CRM') }}">
 
         <link rel="icon" href="/favicon.ico" sizes="any">
         <link rel="apple-touch-icon" href="/apple-touch-icon.png">

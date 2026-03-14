@@ -32,6 +32,27 @@ export default function Welcome({
     return (
         <>
             <Head title="Cardsmith OS — Trading card repair shop CRM">
+                <meta
+                    name="description"
+                    content="Open-source CRM for trading card repair shops. Track submissions, manage jobs, and keep your shop organized—without lock-in or subscription fees."
+                />
+                <meta
+                    property="og:title"
+                    content="Cardsmith OS — Trading card repair shop CRM"
+                />
+                <meta
+                    property="og:description"
+                    content="Open-source CRM for trading card repair shops. Track submissions, manage jobs, and keep your shop organized—without lock-in or subscription fees."
+                />
+                <meta name="twitter:card" content="summary_large_image" />
+                <meta
+                    name="twitter:title"
+                    content="Cardsmith OS — Trading card repair shop CRM"
+                />
+                <meta
+                    name="twitter:description"
+                    content="Open-source CRM for trading card repair shops. Track submissions, manage jobs, and keep your shop organized—without lock-in or subscription fees."
+                />
                 <link rel="preconnect" href="https://fonts.bunny.net" />
                 <link
                     href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600"
@@ -145,7 +166,9 @@ export default function Welcome({
                                 <p className="text-sm leading-relaxed text-[#575754]">
                                     Accept and track customer submissions from
                                     intake through completion. Keep notes,
-                                    photos, and status in one place.
+                                    photos, and status in one place. Estimate
+                                    fees from restoration hours and your hourly
+                                    rate.
                                 </p>
                             </div>
                             <div className="rounded-lg border border-[#e8e8e6] bg-[#fafaf9] p-6">
@@ -155,7 +178,7 @@ export default function Welcome({
                                 <p className="text-sm leading-relaxed text-[#575754]">
                                     Manage repair jobs with clear statuses and
                                     workflows. See what’s in queue, in progress,
-                                    and ready for pickup.
+                                    and repaired.
                                 </p>
                             </div>
                             <div className="rounded-lg border border-[#e8e8e6] bg-[#fafaf9] p-6">
@@ -163,9 +186,10 @@ export default function Welcome({
                                     Shop management
                                 </h3>
                                 <p className="text-sm leading-relaxed text-[#575754]">
-                                    Built for repair shop operations. Modern
-                                    stack: Laravel, React, Tailwind. Self-host
-                                    or run it your way.
+                                    Set your hourly rate, company details, and
+                                    tax. Built for repair shop operations.
+                                    Modern stack: Laravel, React, Tailwind.
+                                    Self-host or run it your way.
                                 </p>
                             </div>
                         </div>
