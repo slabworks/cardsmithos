@@ -33,6 +33,20 @@ test('customer can be created', function () {
     ]);
 });
 
+test('creating a customer creates a service waiver', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)->post(route('customers.store'), [
+        'name' => 'Jane Doe',
+        'email' => 'jane@example.com',
+    ]);
+
+    $customer = Customer::where('email', 'jane@example.com')->first();
+    expect($customer)->not->toBeNull();
+    expect($customer->serviceWaiver)->not->toBeNull();
+    expect($customer->serviceWaiver->expires_at->isFuture())->toBeTrue();
+});
+
 test('customer show displays customer', function () {
     $user = User::factory()->create();
     $customer = Customer::factory()->for($user)->create(['name' => 'Acme']);
@@ -43,6 +57,21 @@ test('customer show displays customer', function () {
     $response->assertInertia(fn (Assert $page) => $page
         ->component('customers/show')
         ->where('customer.name', 'Acme'));
+});
+
+test('customer show includes waiver URL when waiver not signed', function () {
+    $user = User::factory()->create();
+    $customer = Customer::factory()->for($user)->create();
+    $customer->serviceWaiver()->create([
+        'expires_at' => now()->addDays(30),
+    ]);
+
+    $response = $this->actingAs($user)->get(route('customers.show', $customer));
+
+    $response->assertSuccessful();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('customers/show')
+        ->where('waiverUrl', fn ($url) => str_contains($url, '/waiver/'.$customer->id) && str_contains($url, 'signature=')));
 });
 
 test('customer show forbidden for other user', function () {

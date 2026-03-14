@@ -1,10 +1,12 @@
 import { Head, Link } from '@inertiajs/react';
-import { Pencil, Plus } from 'lucide-react';
+import { Copy, Pencil, Plus } from 'lucide-react';
+import { useState } from 'react';
 import CardController from '@/actions/App/Http/Controllers/CardController';
 import CustomerController from '@/actions/App/Http/Controllers/CustomerController';
 import PaymentController from '@/actions/App/Http/Controllers/PaymentController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import AppLayout from '@/layouts/app-layout';
 import { index } from '@/routes/customers';
 import type { BreadcrumbItem } from '@/types';
@@ -21,6 +23,7 @@ const statusBadgeVariant: Record<string, 'default' | 'secondary' | 'outline'> =
 
 export default function CustomersShow({
     customer,
+    waiverUrl,
 }: {
     customer: {
         id: number;
@@ -47,7 +50,17 @@ export default function CustomersShow({
         }>;
         lifetime_value: string | number | null;
     };
+    waiverUrl: string | null;
 }) {
+    const [copied, setCopied] = useState(false);
+
+    const copyWaiverUrl = () => {
+        if (!waiverUrl) return;
+        void navigator.clipboard.writeText(waiverUrl).then(() => {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        });
+    };
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Customers', href: index() },
         {
@@ -156,6 +169,33 @@ export default function CustomersShow({
                             Referral source
                         </h2>
                         <p className="text-sm">{customer.referral_source}</p>
+                    </div>
+                )}
+
+                {waiverUrl && (
+                    <div className="rounded-lg border border-sidebar-border bg-card p-4">
+                        <h2 className="mb-2 text-sm font-medium text-muted-foreground">
+                            Waiver link
+                        </h2>
+                        <p className="mb-2 text-sm text-muted-foreground">
+                            Share this link with the customer to collect their waiver for card repair services.
+                        </p>
+                        <div className="flex gap-2">
+                            <Input
+                                readOnly
+                                value={waiverUrl}
+                                className="font-mono text-sm"
+                            />
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={copyWaiverUrl}
+                            >
+                                <Copy className="mr-1 size-4" />
+                                {copied ? 'Copied' : 'Copy'}
+                            </Button>
+                        </div>
                     </div>
                 )}
 
