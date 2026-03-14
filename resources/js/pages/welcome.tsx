@@ -7,8 +7,17 @@ const PATREON_URL = 'https://www.patreon.com/c/CardSmithOS';
 
 function ExternalIcon() {
     return (
-        <svg className="h-3.5 w-3.5 shrink-0" viewBox="0 0 10 11" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M7.70833 6.95834V2.79167H3.54167M2.5 8L7.5 3.00001" stroke="currentColor" strokeLinecap="square" />
+        <svg
+            className="h-3.5 w-3.5 shrink-0"
+            viewBox="0 0 10 11"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+        >
+            <path
+                d="M7.70833 6.95834V2.79167H3.54167M2.5 8L7.5 3.00001"
+                stroke="currentColor"
+                strokeLinecap="square"
+            />
         </svg>
     );
 }
@@ -32,7 +41,9 @@ export default function Welcome({
             <div className="min-h-screen bg-white text-[#1b1b18]">
                 <header className="border-b border-[#e8e8e6] bg-white">
                     <div className="mx-auto flex max-w-4xl items-center justify-between gap-4 px-6 py-4 lg:px-8">
-                        <span className="text-lg font-semibold tracking-tight">Cardsmith OS</span>
+                        <span className="text-lg font-semibold tracking-tight">
+                            Cardsmith OS
+                        </span>
                         <nav className="flex items-center gap-3 text-sm">
                             <a
                                 href={GITHUB_URL}
@@ -52,7 +63,10 @@ export default function Welcome({
                                 Patreon
                                 <ExternalIcon />
                             </a>
-                            <span className="h-4 w-px bg-[#e3e3e0]" aria-hidden />
+                            <span
+                                className="h-4 w-px bg-[#e3e3e0]"
+                                aria-hidden
+                            />
                             {auth.user ? (
                                 <Link
                                     href={dashboard()}
@@ -88,7 +102,9 @@ export default function Welcome({
                             Run your trading card repair shop in one place
                         </h1>
                         <p className="mx-auto max-w-2xl text-lg leading-relaxed text-[#575754]">
-                            Cardsmith OS is an open-source CRM for repair shops. Track submissions, manage jobs, and keep your shop organized—without lock-in or subscription fees.
+                            Cardsmith OS is an open-source CRM for repair shops.
+                            Track submissions, manage jobs, and keep your shop
+                            organized—without lock-in or subscription fees.
                         </p>
                         {auth.user ? (
                             <p className="mt-6">
@@ -123,30 +139,46 @@ export default function Welcome({
                         </h2>
                         <div className="grid gap-6 sm:grid-cols-3">
                             <div className="rounded-lg border border-[#e8e8e6] bg-[#fafaf9] p-6">
-                                <h3 className="mb-2 font-medium text-[#1b1b18]">Submissions</h3>
+                                <h3 className="mb-2 font-medium text-[#1b1b18]">
+                                    Submissions
+                                </h3>
                                 <p className="text-sm leading-relaxed text-[#575754]">
-                                    Accept and track customer submissions from intake through completion. Keep notes, photos, and status in one place.
+                                    Accept and track customer submissions from
+                                    intake through completion. Keep notes,
+                                    photos, and status in one place.
                                 </p>
                             </div>
                             <div className="rounded-lg border border-[#e8e8e6] bg-[#fafaf9] p-6">
-                                <h3 className="mb-2 font-medium text-[#1b1b18]">Job tracking</h3>
+                                <h3 className="mb-2 font-medium text-[#1b1b18]">
+                                    Job tracking
+                                </h3>
                                 <p className="text-sm leading-relaxed text-[#575754]">
-                                    Manage repair jobs with clear statuses and workflows. See what’s in queue, in progress, and ready for pickup.
+                                    Manage repair jobs with clear statuses and
+                                    workflows. See what’s in queue, in progress,
+                                    and ready for pickup.
                                 </p>
                             </div>
                             <div className="rounded-lg border border-[#e8e8e6] bg-[#fafaf9] p-6">
-                                <h3 className="mb-2 font-medium text-[#1b1b18]">Shop management</h3>
+                                <h3 className="mb-2 font-medium text-[#1b1b18]">
+                                    Shop management
+                                </h3>
                                 <p className="text-sm leading-relaxed text-[#575754]">
-                                    Built for repair shop operations. Modern stack: Laravel, React, Tailwind. Self-host or run it your way.
+                                    Built for repair shop operations. Modern
+                                    stack: Laravel, React, Tailwind. Self-host
+                                    or run it your way.
                                 </p>
                             </div>
                         </div>
                     </section>
 
                     <section className="rounded-lg border border-[#e8e8e6] bg-[#fafaf9] p-6 lg:p-8">
-                        <h2 className="mb-2 text-lg font-medium text-[#1b1b18]">Open source</h2>
+                        <h2 className="mb-2 text-lg font-medium text-[#1b1b18]">
+                            Open source
+                        </h2>
                         <p className="mb-4 text-sm leading-relaxed text-[#575754]">
-                            Cardsmith OS is free and open source (MIT). You can contribute code, docs, or ideas—or support the project on Patreon to help keep development going.
+                            Cardsmith OS is free and open source (MIT). You can
+                            contribute code, docs, or ideas—or support the
+                            project on Patreon to help keep development going.
                         </p>
                         <p className="flex flex-wrap items-center gap-4 text-sm">
                             <a
