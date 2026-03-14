@@ -3,6 +3,14 @@ import { Form, Head } from '@inertiajs/react';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
@@ -19,6 +27,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function Business({
     businessSettings,
+    waiverAgreementText,
 }: {
     businessSettings: {
         hourly_rate: string | null;
@@ -27,6 +36,7 @@ export default function Business({
         company_name: string | null;
         tax_rate: string | null;
     };
+    waiverAgreementText: string;
 }) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -162,6 +172,32 @@ export default function Business({
                             </>
                         )}
                     </Form>
+
+                    <div className="border-t pt-6">
+                        <Heading
+                            variant="small"
+                            title="Service waiver"
+                            description="View the waiver text customers sign when they use the waiver link"
+                        />
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Button variant="outline" size="sm" className="mt-2">
+                                    Read service waiver
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-h-[85vh] max-w-2xl overflow-y-auto">
+                                <DialogHeader>
+                                    <DialogTitle>Service waiver</DialogTitle>
+                                    <DialogDescription>
+                                        This is the agreement customers sign when they use the waiver link.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
+                                    {waiverAgreementText}
+                                </p>
+                            </DialogContent>
+                        </Dialog>
+                    </div>
                 </div>
             </SettingsLayout>
         </AppLayout>

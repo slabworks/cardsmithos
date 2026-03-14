@@ -172,32 +172,38 @@ export default function CustomersShow({
                     </div>
                 )}
 
-                {waiverUrl && (
-                    <div className="rounded-lg border border-sidebar-border bg-card p-4">
-                        <h2 className="mb-2 text-sm font-medium text-muted-foreground">
-                            Waiver link
-                        </h2>
-                        <p className="mb-2 text-sm text-muted-foreground">
-                            Share this link with the customer to collect their waiver for card repair services.
+                <div className="rounded-lg border border-sidebar-border bg-card p-4">
+                    <h2 className="mb-2 text-sm font-medium text-muted-foreground">
+                        Waiver
+                    </h2>
+                    {waiverUrl ? (
+                        <>
+                            <p className="mb-2 text-sm text-muted-foreground">
+                                Share this link with the customer to collect their waiver for card repair services.
+                            </p>
+                            <div className="flex flex-wrap items-center gap-2">
+                                <Input
+                                    readOnly
+                                    value={waiverUrl}
+                                    className="font-mono text-sm"
+                                />
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={copyWaiverUrl}
+                                >
+                                    <Copy className="mr-1 size-4" />
+                                    {copied ? 'Copied' : 'Copy'}
+                                </Button>
+                            </div>
+                        </>
+                    ) : (
+                        <p className="text-sm text-muted-foreground">
+                            Waiver signed.
                         </p>
-                        <div className="flex gap-2">
-                            <Input
-                                readOnly
-                                value={waiverUrl}
-                                className="font-mono text-sm"
-                            />
-                            <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={copyWaiverUrl}
-                            >
-                                <Copy className="mr-1 size-4" />
-                                {copied ? 'Copied' : 'Copy'}
-                            </Button>
-                        </div>
-                    </div>
-                )}
+                    )}
+                </div>
 
                 <section className="rounded-lg border border-sidebar-border bg-card">
                     <div className="flex items-center justify-between border-b border-sidebar-border px-4 py-3">

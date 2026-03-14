@@ -20,6 +20,7 @@ class BusinessSettingsController extends Controller
 
         return Inertia::render('settings/business', [
             'businessSettings' => $settings,
+            'waiverAgreementText' => config('cardsmithos.waiver.agreement_text', 'I agree to the terms for card repair services.'),
         ]);
     }
 
