@@ -7,7 +7,7 @@ return [
 
     'waiver' => [
         'expiration_days' => (int) env('WAIVER_EXPIRATION_DAYS', 30),
-        'agreement_text' => env('WAIVER_AGREEMENT_TEXT', <<<TEXT
+        'agreement_text' => env('WAIVER_AGREEMENT_TEXT', <<<'TEXT'
 """
         
         SERVICE WAIVER AGREEMENT

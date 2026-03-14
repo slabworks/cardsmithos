@@ -181,7 +181,11 @@ export default function Business({
                         />
                         <Dialog>
                             <DialogTrigger asChild>
-                                <Button variant="outline" size="sm" className="mt-2">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="mt-2"
+                                >
                                     Read service waiver
                                 </Button>
                             </DialogTrigger>
@@ -189,10 +193,11 @@ export default function Business({
                                 <DialogHeader>
                                     <DialogTitle>Service waiver</DialogTitle>
                                     <DialogDescription>
-                                        This is the agreement customers sign when they use the waiver link.
+                                        This is the agreement customers sign
+                                        when they use the waiver link.
                                     </DialogDescription>
                                 </DialogHeader>
-                                <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
+                                <p className="text-sm leading-relaxed whitespace-pre-wrap text-foreground">
                                     {waiverAgreementText}
                                 </p>
                             </DialogContent>

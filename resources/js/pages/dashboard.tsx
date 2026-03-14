@@ -1,3 +1,4 @@
+import { Head, Link } from '@inertiajs/react';
 import {
     Chart as ChartJS,
     BarElement,
@@ -7,7 +8,6 @@ import {
     Title,
     Tooltip,
 } from 'chart.js';
-import { Head, Link } from '@inertiajs/react';
 import { DollarSign, TrendingUp, User, Users } from 'lucide-react';
 import { Bar } from 'react-chartjs-2';
 import CustomerController from '@/actions/App/Http/Controllers/CustomerController';
@@ -61,7 +61,11 @@ function formatCurrency(value: number): string {
 function formatMonthLabel(ym: string): string {
     const [year, month] = ym.split('-');
     const date = new Date(parseInt(year, 10), parseInt(month, 10) - 1);
-    return date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+
+    return date.toLocaleDateString('en-US', {
+        month: 'short',
+        year: '2-digit',
+    });
 }
 
 export default function Dashboard({
@@ -98,7 +102,8 @@ export default function Dashboard({
             y: {
                 beginAtZero: true,
                 ticks: {
-                    callback: (value: number) => formatCurrency(value),
+                    callback: (value: string | number) =>
+                        formatCurrency(Number(value)),
                 },
             },
         },
@@ -120,7 +125,7 @@ export default function Dashboard({
                             <div className="text-2xl font-bold">
                                 {formatCurrency(totalPayments)}
                             </div>
-                            <p className="text-muted-foreground text-xs">
+                            <p className="text-xs text-muted-foreground">
                                 Sum of all payment amounts
                             </p>
                         </CardContent>
@@ -136,7 +141,7 @@ export default function Dashboard({
                             <div className="text-2xl font-bold">
                                 {totalCustomers}
                             </div>
-                            <p className="text-muted-foreground text-xs">
+                            <p className="text-xs text-muted-foreground">
                                 Total customer count
                             </p>
                         </CardContent>
@@ -161,7 +166,7 @@ export default function Dashboard({
                                             {newestCustomer.name}
                                         </Link>
                                     </div>
-                                    <p className="text-muted-foreground text-xs">
+                                    <p className="text-xs text-muted-foreground">
                                         Added{' '}
                                         {new Date(
                                             newestCustomer.created_at,
@@ -171,7 +176,7 @@ export default function Dashboard({
                             ) : (
                                 <>
                                     <div className="text-2xl font-bold">—</div>
-                                    <p className="text-muted-foreground text-xs">
+                                    <p className="text-xs text-muted-foreground">
                                         No customers yet
                                     </p>
                                 </>
@@ -179,7 +184,7 @@ export default function Dashboard({
                         </CardContent>
                     </Card>
                 </div>
-                <Card className="border-sidebar-border/70 flex-1 dark:border-sidebar-border">
+                <Card className="flex-1 border-sidebar-border/70 dark:border-sidebar-border">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <TrendingUp className="size-5" />

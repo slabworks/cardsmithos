@@ -55,7 +55,10 @@ export default function CustomersShow({
     const [copied, setCopied] = useState(false);
 
     const copyWaiverUrl = () => {
-        if (!waiverUrl) return;
+        if (!waiverUrl) {
+            return;
+        }
+
         void navigator.clipboard.writeText(waiverUrl).then(() => {
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
@@ -91,7 +94,9 @@ export default function CustomersShow({
                             )}
                             <Badge
                                 variant={
-                                    customer.waiver_agreed ? 'default' : 'outline'
+                                    customer.waiver_agreed
+                                        ? 'default'
+                                        : 'outline'
                                 }
                             >
                                 {customer.waiver_agreed
@@ -179,7 +184,8 @@ export default function CustomersShow({
                     {waiverUrl ? (
                         <>
                             <p className="mb-2 text-sm text-muted-foreground">
-                                Share this link with the customer to collect their waiver for card repair services.
+                                Share this link with the customer to collect
+                                their waiver for card repair services.
                             </p>
                             <div className="flex flex-wrap items-center gap-2">
                                 <Input

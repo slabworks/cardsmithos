@@ -153,10 +153,15 @@ export default function CustomersEdit({
                             <div className="grid gap-2">
                                 <Label>Waiver</Label>
                                 <p className="text-sm text-muted-foreground">
-                                    {customer.waiver_agreed && customer.waiver_agreed_at
-                                        ? `Signed on ${new Date(customer.waiver_agreed_at).toLocaleDateString(undefined, {
+                                    {customer.waiver_agreed &&
+                                    customer.waiver_agreed_at
+                                        ? `Signed on ${new Date(
+                                              customer.waiver_agreed_at,
+                                          ).toLocaleDateString(undefined, {
                                               dateStyle: 'medium',
-                                          })} at ${new Date(customer.waiver_agreed_at).toLocaleTimeString(undefined, {
+                                          })} at ${new Date(
+                                              customer.waiver_agreed_at,
+                                          ).toLocaleTimeString(undefined, {
                                               timeStyle: 'short',
                                           })}`
                                         : 'Not signed. Waiver status is updated only when the customer signs via the waiver link.'}
