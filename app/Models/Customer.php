@@ -50,4 +50,12 @@ class Customer extends Model
     {
         return $this->hasMany(Card::class);
     }
+
+    /**
+     * @return HasMany<Payment>
+     */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
 }

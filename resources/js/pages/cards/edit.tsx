@@ -198,9 +198,7 @@ export default function CardsEdit({
                                 </Button>
                             </DialogTrigger>
                             <DialogContent>
-                                <DialogTitle>
-                                    Delete {card.name}?
-                                </DialogTitle>
+                                <DialogTitle>Delete {card.name}?</DialogTitle>
                                 <DialogDescription>
                                     This will permanently delete this card and
                                     its data. This cannot be undone.

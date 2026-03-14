@@ -54,7 +54,8 @@ class CustomerController extends Controller
     {
         $this->authorize('view', $customer);
 
-        $customer->load('cards');
+        $customer->load('cards', 'payments');
+        $customer->loadSum('payments as lifetime_value', 'amount');
 
         return Inertia::render('customers/show', [
             'customer' => $customer,

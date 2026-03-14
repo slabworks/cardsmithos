@@ -2,6 +2,7 @@ import { Head, Link } from '@inertiajs/react';
 import { Pencil, Plus } from 'lucide-react';
 import CardController from '@/actions/App/Http/Controllers/CardController';
 import CustomerController from '@/actions/App/Http/Controllers/CustomerController';
+import PaymentController from '@/actions/App/Http/Controllers/PaymentController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
@@ -36,6 +37,14 @@ export default function CustomersShow({
             status: string;
             estimated_fee: string | null;
         }>;
+        payments: Array<{
+            id: number;
+            amount: string;
+            paid_at: string;
+            method: string;
+            reference: string | null;
+        }>;
+        lifetime_value: string | number | null;
     };
 }) {
     const breadcrumbs: BreadcrumbItem[] = [
@@ -55,17 +64,29 @@ export default function CustomersShow({
                         <h1 className="text-xl font-semibold">
                             {customer.name}
                         </h1>
-                        {customer.status && (
-                            <Badge
-                                variant={
-                                    statusBadgeVariant[customer.status] ??
-                                    'outline'
-                                }
-                                className="mt-1"
-                            >
-                                {customer.status.replace('_', ' ')}
-                            </Badge>
-                        )}
+                        <div className="mt-1 flex flex-wrap items-center gap-2">
+                            {customer.status && (
+                                <Badge
+                                    variant={
+                                        statusBadgeVariant[customer.status] ??
+                                        'outline'
+                                    }
+                                >
+                                    {customer.status.replace('_', ' ')}
+                                </Badge>
+                            )}
+                            {customer.lifetime_value != null && (
+                                <span className="text-sm font-medium text-muted-foreground">
+                                    Lifetime value: $
+                                    {Number(
+                                        customer.lifetime_value,
+                                    ).toLocaleString('en-US', {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2,
+                                    })}
+                                </span>
+                            )}
+                        </div>
                     </div>
                     <div className="flex gap-2">
                         <Button variant="outline" size="sm" asChild>
@@ -170,6 +191,59 @@ export default function CustomersShow({
                                     <Badge variant="outline">
                                         {card.status.replace('_', ' ')}
                                     </Badge>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </section>
+
+                <section className="rounded-lg border border-sidebar-border bg-card">
+                    <div className="flex items-center justify-between border-b border-sidebar-border px-4 py-3">
+                        <h2 className="font-medium">Payments</h2>
+                        <Button size="sm" asChild>
+                            <Link
+                                href={PaymentController.create.url({
+                                    customer: customer.id,
+                                })}
+                            >
+                                <Plus className="mr-1 size-4" />
+                                Add payment
+                            </Link>
+                        </Button>
+                    </div>
+                    {customer.payments.length === 0 ? (
+                        <p className="px-4 py-6 text-sm text-muted-foreground">
+                            No payments yet.
+                        </p>
+                    ) : (
+                        <ul className="divide-y divide-sidebar-border">
+                            {customer.payments.map((payment) => (
+                                <li
+                                    key={payment.id}
+                                    className="flex items-center justify-between px-4 py-3"
+                                >
+                                    <Link
+                                        href={PaymentController.edit.url({
+                                            customer: customer.id,
+                                            payment: payment.id,
+                                        })}
+                                        className="hover:underline"
+                                    >
+                                        ${payment.amount}
+                                        {payment.paid_at && (
+                                            <span className="ml-2 text-muted-foreground">
+                                                {payment.paid_at.slice(0, 10)}
+                                            </span>
+                                        )}
+                                        {payment.reference && (
+                                            <span className="ml-2 text-muted-foreground">
+                                                {payment.reference}
+                                            </span>
+                                        )}
+                                    </Link>
+                                    <span className="text-sm text-muted-foreground capitalize">
+                                        {payment.method?.replace('_', ' ')}
+                                    </span>
                                 </li>
                             ))}
                         </ul>
