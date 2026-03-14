@@ -1,0 +1,44 @@
+<?php
+
+use App\Models\User;
+use Inertia\Testing\AssertableInertia as Assert;
+
+test('business settings page is displayed and creates default settings', function () {
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)->get(route('business.edit'));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('settings/business')
+        ->has('businessSettings')
+    );
+
+    $this->assertDatabaseHas('business_settings', [
+        'user_id' => $user->id,
+    ]);
+});
+
+test('business settings can be updated', function () {
+    $user = User::factory()->create();
+    $user->businessSettings()->create([
+        'hourly_rate' => 100,
+        'currency' => 'USD',
+    ]);
+
+    $response = $this->actingAs($user)->patch(route('business.update'), [
+        'hourly_rate' => 125.50,
+        'default_fixed_rate' => 50,
+        'currency' => 'USD',
+        'company_name' => 'Acme Restorations',
+        'tax_rate' => 8.5,
+    ]);
+
+    $response->assertSessionHasNoErrors()->assertRedirect(route('business.edit'));
+
+    $user->businessSettings->refresh();
+    expect((float) $user->businessSettings->hourly_rate)->toBe(125.50);
+    expect((float) $user->businessSettings->default_fixed_rate)->toBe(50.0);
+    expect($user->businessSettings->company_name)->toBe('Acme Restorations');
+    expect((float) $user->businessSettings->tax_rate)->toBe(8.5);
+});

@@ -50,9 +50,15 @@ class CardController extends Controller
     {
         $this->authorize('update', $card);
 
+        $settings = auth()->user()?->businessSettings;
+        $hourlyRate = $settings?->hourly_rate;
+        $taxRate = $settings?->tax_rate;
+
         return Inertia::render('cards/edit', [
             'customer' => $customer,
             'card' => $card,
+            'hourlyRate' => $hourlyRate !== null ? (float) $hourlyRate : null,
+            'taxRate' => $taxRate !== null ? (float) $taxRate : null,
             'statusOptions' => array_map(
                 fn (CardStatus $case) => [
                     'value' => $case->value,

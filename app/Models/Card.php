@@ -48,7 +48,7 @@ class Card extends Model
     {
         static::saving(function (Card $card): void {
             if ($card->restoration_hours !== null) {
-                $rate = config('cardsmithos.hourly_rate', 100);
+                $rate = auth()->user()?->businessSettings?->hourly_rate ?? 0;
                 $card->estimated_fee = (float) $card->restoration_hours * (float) $rate;
             } else {
                 $card->estimated_fee = null;

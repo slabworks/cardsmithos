@@ -22,6 +22,8 @@ import type { BreadcrumbItem } from '@/types';
 export default function CardsEdit({
     customer,
     card,
+    hourlyRate,
+    taxRate,
     statusOptions,
     conditionOptions,
 }: {
@@ -35,9 +37,22 @@ export default function CardsEdit({
         condition_after: string | null;
         restoration_hours: string | null;
     };
+    hourlyRate: number | null;
+    taxRate: number | null;
     statusOptions: Array<{ value: string; label: string; color: string }>;
     conditionOptions: Array<{ value: string; label: string; color: string }>;
 }) {
+    const hours = card.restoration_hours
+        ? Number(card.restoration_hours)
+        : null;
+    const subtotal =
+        hourlyRate != null && hours != null && hours > 0
+            ? hours * hourlyRate
+            : null;
+    const estimatedFee =
+        subtotal != null && taxRate != null && taxRate > 0
+            ? subtotal * (1 + taxRate / 100)
+            : subtotal;
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Customers', href: index() },
         {
@@ -155,6 +170,34 @@ export default function CardsEdit({
                                 <InputError
                                     message={errors.restoration_hours}
                                 />
+                                {hourlyRate != null && (
+                                    <p className="text-sm text-muted-foreground">
+                                        {estimatedFee != null ? (
+                                            <>
+                                                Estimated fee: $
+                                                {estimatedFee.toLocaleString(
+                                                    'en-US',
+                                                    {
+                                                        minimumFractionDigits: 2,
+                                                        maximumFractionDigits: 2,
+                                                    },
+                                                )}{' '}
+                                                ({card.restoration_hours} hours
+                                                × ${hourlyRate}/hr
+                                                {taxRate != null &&
+                                                taxRate > 0 ? (
+                                                    <> + {taxRate}% tax</>
+                                                ) : null}
+                                                )
+                                            </>
+                                        ) : (
+                                            <>
+                                                Estimated fee: — (enter
+                                                restoration hours above)
+                                            </>
+                                        )}
+                                    </p>
+                                )}
                             </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="work_done">Work done</Label>

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Settings\BusinessSettingsController;
 use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\Settings\SecurityController;
 use Illuminate\Support\Facades\Route;
@@ -9,6 +10,9 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('settings/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('settings/profile', [ProfileController::class, 'update'])->name('profile.update');
+
+    Route::get('settings/business', [BusinessSettingsController::class, 'edit'])->name('business.edit');
+    Route::patch('settings/business', [BusinessSettingsController::class, 'update'])->name('business.update');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {

@@ -36,8 +36,9 @@ test('card store forbidden for other users customer', function () {
     $response->assertForbidden();
 });
 
-test('card estimated_fee is computed from restoration_hours', function () {
+test('card estimated_fee is computed from restoration_hours and business hourly rate', function () {
     $user = User::factory()->create();
+    $user->businessSettings()->create(['hourly_rate' => 100, 'currency' => 'USD']);
     $customer = Customer::factory()->for($user)->create();
 
     $this->actingAs($user)->post(
@@ -50,7 +51,25 @@ test('card estimated_fee is computed from restoration_hours', function () {
     );
 
     $card = Card::where('customer_id', $customer->id)->first();
-    expect((float) $card->estimated_fee)->toBe(250.0); // 2.5 * 100 default
+    expect((float) $card->estimated_fee)->toBe(250.0); // 2.5 * 100
+});
+
+test('card estimated_fee uses user business settings hourly rate when set', function () {
+    $user = User::factory()->create();
+    $user->businessSettings()->create(['hourly_rate' => 80, 'currency' => 'USD']);
+    $customer = Customer::factory()->for($user)->create();
+
+    $this->actingAs($user)->post(
+        route('customers.cards.store', $customer),
+        [
+            'name' => 'Test Card',
+            'status' => 'pending',
+            'restoration_hours' => 2.5,
+        ]
+    );
+
+    $card = Card::where('customer_id', $customer->id)->first();
+    expect((float) $card->estimated_fee)->toBe(200.0); // 2.5 * 80
 });
 
 test('card can be updated', function () {
