@@ -31,6 +31,7 @@ export default function CustomersShow({
         address: string | null;
         notes: string | null;
         referral_source: string | null;
+        waiver_agreed: boolean | null;
         cards: Array<{
             id: number;
             name: string;
@@ -75,6 +76,15 @@ export default function CustomersShow({
                                     {customer.status.replace('_', ' ')}
                                 </Badge>
                             )}
+                            <Badge
+                                variant={
+                                    customer.waiver_agreed ? 'default' : 'outline'
+                                }
+                            >
+                                {customer.waiver_agreed
+                                    ? 'Waiver signed'
+                                    : 'Waiver not signed'}
+                            </Badge>
                             {customer.lifetime_value != null && (
                                 <span className="text-sm font-medium text-muted-foreground">
                                     Lifetime value: $

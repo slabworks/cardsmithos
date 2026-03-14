@@ -28,6 +28,8 @@ class CustomerFactory extends Factory
             'address' => fake()->optional(0.5)->address(),
             'notes' => fake()->optional(0.3)->paragraph(),
             'referral_source' => fake()->optional(0.4)->word(),
+            'waiver_agreed' => fake()->optional(0.3)->boolean(),
+            'waiver_agreed_at' => fake()->optional(0.3)->dateTimeBetween('-1 year'),
         ];
     }
 }

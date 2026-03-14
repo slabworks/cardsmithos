@@ -26,6 +26,8 @@ class Customer extends Model
         'address',
         'notes',
         'referral_source',
+        'waiver_agreed',
+        'waiver_agreed_at',
     ];
 
     /**
@@ -35,6 +37,8 @@ class Customer extends Model
     {
         return [
             'status' => CustomerStatus::class,
+            'waiver_agreed' => 'boolean',
+            'waiver_agreed_at' => 'datetime',
         ];
     }
 

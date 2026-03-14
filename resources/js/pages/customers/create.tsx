@@ -108,6 +108,40 @@ export default function CustomersCreate({
                                 />
                                 <InputError message={errors.referral_source} />
                             </div>
+                            <div className="grid gap-2">
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="hidden"
+                                        name="waiver_agreed"
+                                        value="0"
+                                    />
+                                    <input
+                                        id="waiver_agreed"
+                                        type="checkbox"
+                                        name="waiver_agreed"
+                                        value="1"
+                                        className="h-4 w-4 rounded border-input"
+                                    />
+                                    <Label
+                                        htmlFor="waiver_agreed"
+                                        className="font-normal"
+                                    >
+                                        Waiver agreed
+                                    </Label>
+                                </div>
+                                <InputError message={errors.waiver_agreed} />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="waiver_agreed_at">
+                                    Waiver agreed on
+                                </Label>
+                                <Input
+                                    id="waiver_agreed_at"
+                                    name="waiver_agreed_at"
+                                    type="datetime-local"
+                                />
+                                <InputError message={errors.waiver_agreed_at} />
+                            </div>
                             <div className="flex gap-2">
                                 <Button type="submit" disabled={processing}>
                                     Create customer

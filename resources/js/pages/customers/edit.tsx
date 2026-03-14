@@ -32,6 +32,8 @@ export default function CustomersEdit({
         address: string | null;
         notes: string | null;
         referral_source: string | null;
+        waiver_agreed: boolean | null;
+        waiver_agreed_at: string | null;
     };
     statusOptions: Array<{ value: string; label: string; color: string }>;
 }) {
@@ -147,6 +149,52 @@ export default function CustomersEdit({
                                     }
                                 />
                                 <InputError message={errors.referral_source} />
+                            </div>
+                            <div className="grid gap-2">
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="hidden"
+                                        name="waiver_agreed"
+                                        value="0"
+                                    />
+                                    <input
+                                        id="waiver_agreed"
+                                        type="checkbox"
+                                        name="waiver_agreed"
+                                        value="1"
+                                        defaultChecked={
+                                            customer.waiver_agreed ?? false
+                                        }
+                                        className="h-4 w-4 rounded border-input"
+                                    />
+                                    <Label
+                                        htmlFor="waiver_agreed"
+                                        className="font-normal"
+                                    >
+                                        Waiver agreed
+                                    </Label>
+                                </div>
+                                <InputError message={errors.waiver_agreed} />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="waiver_agreed_at">
+                                    Waiver agreed on
+                                </Label>
+                                <Input
+                                    id="waiver_agreed_at"
+                                    name="waiver_agreed_at"
+                                    type="datetime-local"
+                                    defaultValue={
+                                        customer.waiver_agreed_at
+                                            ? new Date(
+                                                  customer.waiver_agreed_at,
+                                              )
+                                                  .toISOString()
+                                                  .slice(0, 16)
+                                            : ''
+                                    }
+                                />
+                                <InputError message={errors.waiver_agreed_at} />
                             </div>
                             <div className="flex gap-2">
                                 <Button type="submit" disabled={processing}>
