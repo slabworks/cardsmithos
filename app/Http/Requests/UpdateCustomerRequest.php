@@ -27,8 +27,6 @@ class UpdateCustomerRequest extends FormRequest
             'address' => ['nullable', 'string'],
             'notes' => ['nullable', 'string'],
             'referral_source' => ['nullable', 'string', 'max:255'],
-            'waiver_agreed' => ['nullable', 'boolean'],
-            'waiver_agreed_at' => ['nullable', 'date'],
         ];
     }
 }

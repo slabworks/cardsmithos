@@ -151,50 +151,16 @@ export default function CustomersEdit({
                                 <InputError message={errors.referral_source} />
                             </div>
                             <div className="grid gap-2">
-                                <div className="flex items-center gap-2">
-                                    <input
-                                        type="hidden"
-                                        name="waiver_agreed"
-                                        value="0"
-                                    />
-                                    <input
-                                        id="waiver_agreed"
-                                        type="checkbox"
-                                        name="waiver_agreed"
-                                        value="1"
-                                        defaultChecked={
-                                            customer.waiver_agreed ?? false
-                                        }
-                                        className="h-4 w-4 rounded border-input"
-                                    />
-                                    <Label
-                                        htmlFor="waiver_agreed"
-                                        className="font-normal"
-                                    >
-                                        Waiver agreed
-                                    </Label>
-                                </div>
-                                <InputError message={errors.waiver_agreed} />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="waiver_agreed_at">
-                                    Waiver agreed on
-                                </Label>
-                                <Input
-                                    id="waiver_agreed_at"
-                                    name="waiver_agreed_at"
-                                    type="datetime-local"
-                                    defaultValue={
-                                        customer.waiver_agreed_at
-                                            ? new Date(
-                                                  customer.waiver_agreed_at,
-                                              )
-                                                  .toISOString()
-                                                  .slice(0, 16)
-                                            : ''
-                                    }
-                                />
-                                <InputError message={errors.waiver_agreed_at} />
+                                <Label>Waiver</Label>
+                                <p className="text-sm text-muted-foreground">
+                                    {customer.waiver_agreed && customer.waiver_agreed_at
+                                        ? `Signed on ${new Date(customer.waiver_agreed_at).toLocaleDateString(undefined, {
+                                              dateStyle: 'medium',
+                                          })} at ${new Date(customer.waiver_agreed_at).toLocaleTimeString(undefined, {
+                                              timeStyle: 'short',
+                                          })}`
+                                        : 'Not signed. Waiver status is updated only when the customer signs via the waiver link.'}
+                                </p>
                             </div>
                             <div className="flex gap-2">
                                 <Button type="submit" disabled={processing}>
