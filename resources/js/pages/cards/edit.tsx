@@ -4,6 +4,15 @@ import CardController from '@/actions/App/Http/Controllers/CardController';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
@@ -171,6 +180,62 @@ export default function CardsEdit({
                         </>
                     )}
                 </Form>
+
+                <div className="max-w-xl space-y-4 border-t pt-8">
+                    <Heading
+                        variant="small"
+                        title="Delete card"
+                        description="Permanently remove this card and its data"
+                    />
+                    <div className="space-y-4 rounded-lg border border-red-100 bg-red-50 p-4 dark:border-red-200/10 dark:bg-red-700/10">
+                        <p className="text-sm text-red-600 dark:text-red-100">
+                            Once deleted, this card cannot be recovered.
+                        </p>
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Button variant="destructive">
+                                    Delete card
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogTitle>
+                                    Delete {card.name}?
+                                </DialogTitle>
+                                <DialogDescription>
+                                    This will permanently delete this card and
+                                    its data. This cannot be undone.
+                                </DialogDescription>
+                                <Form
+                                    {...CardController.destroy.form({
+                                        customer: customer.id,
+                                        card: card.id,
+                                    })}
+                                    className="mt-4"
+                                >
+                                    {({ processing }) => (
+                                        <DialogFooter className="gap-2">
+                                            <DialogClose asChild>
+                                                <Button
+                                                    type="button"
+                                                    variant="secondary"
+                                                >
+                                                    Cancel
+                                                </Button>
+                                            </DialogClose>
+                                            <Button
+                                                type="submit"
+                                                variant="destructive"
+                                                disabled={processing}
+                                            >
+                                                Delete card
+                                            </Button>
+                                        </DialogFooter>
+                                    )}
+                                </Form>
+                            </DialogContent>
+                        </Dialog>
+                    </div>
+                </div>
             </div>
         </AppLayout>
     );
