@@ -192,11 +192,6 @@ export default function CustomersShow({
                                         className="hover:underline"
                                     >
                                         {card.name}
-                                        {card.estimated_fee != null && (
-                                            <span className="ml-2 text-muted-foreground">
-                                                ${card.estimated_fee}
-                                            </span>
-                                        )}
                                     </Link>
                                     <Badge variant="outline">
                                         {card.status.replace('_', ' ')}
