@@ -4,6 +4,15 @@ import CustomerController from '@/actions/App/Http/Controllers/CustomerControlle
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
@@ -156,6 +165,62 @@ export default function CustomersEdit({
                         </>
                     )}
                 </Form>
+
+                <div className="max-w-xl space-y-4 border-t pt-8">
+                    <Heading
+                        variant="small"
+                        title="Delete customer"
+                        description="Permanently remove this customer and their data"
+                    />
+                    <div className="space-y-4 rounded-lg border border-red-100 bg-red-50 p-4 dark:border-red-200/10 dark:bg-red-700/10">
+                        <p className="text-sm text-red-600 dark:text-red-100">
+                            Once deleted, this customer cannot be recovered.
+                        </p>
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Button variant="destructive">
+                                    Delete customer
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogTitle>
+                                    Delete {customer.name}?
+                                </DialogTitle>
+                                <DialogDescription>
+                                    This will permanently delete this customer
+                                    and any associated data. This cannot be
+                                    undone.
+                                </DialogDescription>
+                                <Form
+                                    {...CustomerController.destroy.form(
+                                        customer,
+                                    )}
+                                    className="mt-4"
+                                >
+                                    {({ processing }) => (
+                                        <DialogFooter className="gap-2">
+                                            <DialogClose asChild>
+                                                <Button
+                                                    type="button"
+                                                    variant="secondary"
+                                                >
+                                                    Cancel
+                                                </Button>
+                                            </DialogClose>
+                                            <Button
+                                                type="submit"
+                                                variant="destructive"
+                                                disabled={processing}
+                                            >
+                                                Delete customer
+                                            </Button>
+                                        </DialogFooter>
+                                    )}
+                                </Form>
+                            </DialogContent>
+                        </Dialog>
+                    </div>
+                </div>
             </div>
         </AppLayout>
     );
