@@ -8,6 +8,8 @@ use Database\Factories\CardFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class Card extends Model
 {
@@ -27,6 +29,7 @@ class Card extends Model
         'restoration_hours',
         'estimated_fee',
         'photos',
+        'timeline_share_token',
     ];
 
     /**
@@ -59,5 +62,28 @@ class Card extends Model
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function activities(): HasMany
+    {
+        return $this->hasMany(CardActivity::class)->orderByDesc('occurred_at');
+    }
+
+    public function ensureTimelineShareToken(): string
+    {
+        if ($this->timeline_share_token === null || $this->timeline_share_token === '') {
+            $this->timeline_share_token = Str::random(64);
+            $this->save();
+        }
+
+        return $this->timeline_share_token;
+    }
+
+    public function rotateTimelineShareToken(): string
+    {
+        $this->timeline_share_token = Str::random(64);
+        $this->save();
+
+        return $this->timeline_share_token;
     }
 }

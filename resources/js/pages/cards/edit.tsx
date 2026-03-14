@@ -1,6 +1,10 @@
 import { Head, Link } from '@inertiajs/react';
 import { Form } from '@inertiajs/react';
+import { Copy, Pencil, Plus, RefreshCw, Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import CardActivityController from '@/actions/App/Http/Controllers/CardActivityController';
 import CardController from '@/actions/App/Http/Controllers/CardController';
+import CardTimelineController from '@/actions/App/Http/Controllers/CardTimelineController';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
@@ -19,29 +23,66 @@ import AppLayout from '@/layouts/app-layout';
 import { index } from '@/routes/customers';
 import type { BreadcrumbItem } from '@/types';
 
+type Activity = {
+    id: number;
+    type: string;
+    title: string;
+    description: string | null;
+    occurred_at: string;
+};
+
 export default function CardsEdit({
     customer,
     card,
     hourlyRate,
     taxRate,
+    timelineShareUrl = '',
     statusOptions,
     conditionOptions,
+    activityTypeOptions = [],
 }: {
     customer: { id: number; name: string };
     card: {
         id: number;
         name: string;
-        work_done: string | null;
+        work_done?: string | null;
         status: string;
-        condition_before: string | null;
-        condition_after: string | null;
-        restoration_hours: string | null;
+        condition_before?: string | null;
+        condition_after?: string | null;
+        restoration_hours?: string | null;
+        activities?: Activity[];
     };
     hourlyRate: number | null;
     taxRate: number | null;
+    timelineShareUrl?: string;
     statusOptions: Array<{ value: string; label: string; color: string }>;
     conditionOptions: Array<{ value: string; label: string; color: string }>;
+    activityTypeOptions?: Array<{ value: string; label: string }>;
 }) {
+    const [copied, setCopied] = useState(false);
+    const [addingActivity, setAddingActivity] = useState(false);
+    const [editingActivityId, setEditingActivityId] = useState<number | null>(
+        null,
+    );
+
+    const activities = card.activities ?? [];
+
+    const copyTimelineUrl = () => {
+        void navigator.clipboard.writeText(timelineShareUrl ?? '').then(() => {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        });
+    };
+
+    const formatOccurredAt = (iso: string) => {
+        const d = new Date(iso);
+
+        return d.toLocaleString(undefined, {
+            dateStyle: 'medium',
+            timeStyle: 'short',
+        });
+    };
+
     const hours = card.restoration_hours
         ? Number(card.restoration_hours)
         : null;
@@ -223,6 +264,438 @@ export default function CardsEdit({
                         </>
                     )}
                 </Form>
+
+                <section className="max-w-xl space-y-4 border-t pt-8">
+                    <Heading
+                        variant="small"
+                        title="Timeline"
+                        description="Activity and milestones for this card. Share the link below for a public read-only view."
+                    />
+                    <div className="rounded-lg border border-sidebar-border bg-card p-4">
+                        <p className="mb-2 text-sm text-muted-foreground">
+                            Anyone with this link can view the timeline (no
+                            login required).
+                        </p>
+                        <div className="flex flex-wrap items-center gap-2">
+                            <Input
+                                readOnly
+                                value={timelineShareUrl}
+                                className="font-mono text-sm"
+                            />
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={copyTimelineUrl}
+                            >
+                                <Copy className="mr-1 size-4" />
+                                {copied ? 'Copied' : 'Copy link'}
+                            </Button>
+                            <Form
+                                {...CardTimelineController.rotateToken.form({
+                                    customer: customer.id,
+                                    card: card.id,
+                                })}
+                                className="inline-block"
+                            >
+                                <Button
+                                    type="submit"
+                                    variant="outline"
+                                    size="sm"
+                                >
+                                    <RefreshCw className="mr-1 size-4" />
+                                    Reset link
+                                </Button>
+                            </Form>
+                        </div>
+                    </div>
+                    <div className="rounded-lg border border-sidebar-border bg-card">
+                        <div className="flex items-center justify-between border-b border-sidebar-border px-4 py-3">
+                            <h2 className="font-medium">Entries</h2>
+                            <Button
+                                size="sm"
+                                variant={
+                                    addingActivity ? 'secondary' : 'default'
+                                }
+                                onClick={() =>
+                                    setAddingActivity((prev) => !prev)
+                                }
+                            >
+                                <Plus className="mr-1 size-4" />
+                                {addingActivity ? 'Cancel' : 'Add entry'}
+                            </Button>
+                        </div>
+                        {addingActivity && (
+                            <div className="border-b border-sidebar-border p-4">
+                                <Form
+                                    {...CardActivityController.store.form({
+                                        customer: customer.id,
+                                        card: card.id,
+                                    })}
+                                    className="space-y-3"
+                                >
+                                    {({ errors }) => (
+                                        <>
+                                            <div className="grid gap-2">
+                                                <Label htmlFor="new_type">
+                                                    Type *
+                                                </Label>
+                                                <select
+                                                    id="new_type"
+                                                    name="type"
+                                                    required
+                                                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
+                                                >
+                                                    {activityTypeOptions.map(
+                                                        (opt) => (
+                                                            <option
+                                                                key={opt.value}
+                                                                value={
+                                                                    opt.value
+                                                                }
+                                                            >
+                                                                {opt.label}
+                                                            </option>
+                                                        ),
+                                                    )}
+                                                </select>
+                                                <InputError
+                                                    message={errors.type}
+                                                />
+                                            </div>
+                                            <div className="grid gap-2">
+                                                <Label htmlFor="new_title">
+                                                    Title *
+                                                </Label>
+                                                <Input
+                                                    id="new_title"
+                                                    name="title"
+                                                    required
+                                                />
+                                                <InputError
+                                                    message={errors.title}
+                                                />
+                                            </div>
+                                            <div className="grid gap-2">
+                                                <Label htmlFor="new_description">
+                                                    Description
+                                                </Label>
+                                                <textarea
+                                                    id="new_description"
+                                                    name="description"
+                                                    rows={2}
+                                                    className="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
+                                                />
+                                                <InputError
+                                                    message={errors.description}
+                                                />
+                                            </div>
+                                            <div className="grid gap-2">
+                                                <Label htmlFor="new_occurred_at">
+                                                    Date & time *
+                                                </Label>
+                                                <Input
+                                                    id="new_occurred_at"
+                                                    name="occurred_at"
+                                                    type="datetime-local"
+                                                    required
+                                                    defaultValue={new Date()
+                                                        .toISOString()
+                                                        .slice(0, 16)}
+                                                />
+                                                <InputError
+                                                    message={errors.occurred_at}
+                                                />
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <Button type="submit" size="sm">
+                                                    Add
+                                                </Button>
+                                                <Button
+                                                    type="button"
+                                                    size="sm"
+                                                    variant="outline"
+                                                    onClick={() =>
+                                                        setAddingActivity(false)
+                                                    }
+                                                >
+                                                    Cancel
+                                                </Button>
+                                            </div>
+                                        </>
+                                    )}
+                                </Form>
+                            </div>
+                        )}
+                        {activities.length === 0 && !addingActivity ? (
+                            <p className="px-4 py-6 text-sm text-muted-foreground">
+                                No timeline entries yet.
+                            </p>
+                        ) : (
+                            <ul className="divide-y divide-sidebar-border">
+                                {activities.map((activity) => (
+                                    <li
+                                        key={activity.id}
+                                        className="flex items-start justify-between gap-4 px-4 py-3"
+                                    >
+                                        <div className="min-w-0 flex-1">
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                <span className="text-xs font-medium text-muted-foreground uppercase">
+                                                    {activityTypeOptions.find(
+                                                        (o) =>
+                                                            o.value ===
+                                                            activity.type,
+                                                    )?.label ?? activity.type}
+                                                </span>
+                                                <span className="text-xs text-muted-foreground">
+                                                    {formatOccurredAt(
+                                                        activity.occurred_at,
+                                                    )}
+                                                </span>
+                                            </div>
+                                            <p className="font-medium">
+                                                {activity.title}
+                                            </p>
+                                            {activity.description && (
+                                                <p className="mt-1 text-sm text-muted-foreground">
+                                                    {activity.description}
+                                                </p>
+                                            )}
+                                        </div>
+                                        <div className="flex shrink-0 gap-1">
+                                            <Dialog
+                                                open={
+                                                    editingActivityId ===
+                                                    activity.id
+                                                }
+                                                onOpenChange={(open) =>
+                                                    !open &&
+                                                    setEditingActivityId(null)
+                                                }
+                                            >
+                                                <DialogTrigger asChild>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="size-8"
+                                                        onClick={() =>
+                                                            setEditingActivityId(
+                                                                activity.id,
+                                                            )
+                                                        }
+                                                    >
+                                                        <Pencil className="size-4" />
+                                                    </Button>
+                                                </DialogTrigger>
+                                                <DialogContent>
+                                                    <DialogTitle>
+                                                        Edit entry
+                                                    </DialogTitle>
+                                                    <DialogDescription>
+                                                        Update this timeline
+                                                        entry.
+                                                    </DialogDescription>
+                                                    <Form
+                                                        {...CardActivityController.update.form(
+                                                            {
+                                                                customer:
+                                                                    customer.id,
+                                                                card: card.id,
+                                                                activity:
+                                                                    activity.id,
+                                                            },
+                                                        )}
+                                                        className="mt-4 space-y-3"
+                                                        onSuccess={() =>
+                                                            setEditingActivityId(
+                                                                null,
+                                                            )
+                                                        }
+                                                    >
+                                                        {({ errors }) => (
+                                                            <>
+                                                                <div className="grid gap-2">
+                                                                    <Label>
+                                                                        Type *
+                                                                    </Label>
+                                                                    <select
+                                                                        name="type"
+                                                                        required
+                                                                        defaultValue={
+                                                                            activity.type
+                                                                        }
+                                                                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
+                                                                    >
+                                                                        {activityTypeOptions.map(
+                                                                            (
+                                                                                opt,
+                                                                            ) => (
+                                                                                <option
+                                                                                    key={
+                                                                                        opt.value
+                                                                                    }
+                                                                                    value={
+                                                                                        opt.value
+                                                                                    }
+                                                                                >
+                                                                                    {
+                                                                                        opt.label
+                                                                                    }
+                                                                                </option>
+                                                                            ),
+                                                                        )}
+                                                                    </select>
+                                                                    <InputError
+                                                                        message={
+                                                                            errors.type
+                                                                        }
+                                                                    />
+                                                                </div>
+                                                                <div className="grid gap-2">
+                                                                    <Label>
+                                                                        Title *
+                                                                    </Label>
+                                                                    <Input
+                                                                        name="title"
+                                                                        defaultValue={
+                                                                            activity.title
+                                                                        }
+                                                                        required
+                                                                    />
+                                                                    <InputError
+                                                                        message={
+                                                                            errors.title
+                                                                        }
+                                                                    />
+                                                                </div>
+                                                                <div className="grid gap-2">
+                                                                    <Label>
+                                                                        Description
+                                                                    </Label>
+                                                                    <textarea
+                                                                        name="description"
+                                                                        defaultValue={
+                                                                            activity.description ??
+                                                                            ''
+                                                                        }
+                                                                        rows={2}
+                                                                        className="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
+                                                                    />
+                                                                    <InputError
+                                                                        message={
+                                                                            errors.description
+                                                                        }
+                                                                    />
+                                                                </div>
+                                                                <div className="grid gap-2">
+                                                                    <Label>
+                                                                        Date &
+                                                                        time *
+                                                                    </Label>
+                                                                    <Input
+                                                                        name="occurred_at"
+                                                                        type="datetime-local"
+                                                                        required
+                                                                        defaultValue={
+                                                                            activity.occurred_at
+                                                                                ? new Date(
+                                                                                      activity.occurred_at,
+                                                                                  )
+                                                                                      .toISOString()
+                                                                                      .slice(
+                                                                                          0,
+                                                                                          16,
+                                                                                      )
+                                                                                : ''
+                                                                        }
+                                                                    />
+                                                                    <InputError
+                                                                        message={
+                                                                            errors.occurred_at
+                                                                        }
+                                                                    />
+                                                                </div>
+                                                                <DialogFooter>
+                                                                    <DialogClose
+                                                                        asChild
+                                                                    >
+                                                                        <Button
+                                                                            type="button"
+                                                                            variant="secondary"
+                                                                        >
+                                                                            Cancel
+                                                                        </Button>
+                                                                    </DialogClose>
+                                                                    <Button
+                                                                        type="submit"
+                                                                        size="sm"
+                                                                    >
+                                                                        Save
+                                                                    </Button>
+                                                                </DialogFooter>
+                                                            </>
+                                                        )}
+                                                    </Form>
+                                                </DialogContent>
+                                            </Dialog>
+                                            <Dialog>
+                                                <DialogTrigger asChild>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="size-8 text-destructive hover:text-destructive"
+                                                    >
+                                                        <Trash2 className="size-4" />
+                                                    </Button>
+                                                </DialogTrigger>
+                                                <DialogContent>
+                                                    <DialogTitle>
+                                                        Remove this entry?
+                                                    </DialogTitle>
+                                                    <DialogDescription>
+                                                        This timeline entry will
+                                                        be permanently removed.
+                                                    </DialogDescription>
+                                                    <Form
+                                                        {...CardActivityController.destroy.form(
+                                                            {
+                                                                customer:
+                                                                    customer.id,
+                                                                card: card.id,
+                                                                activity:
+                                                                    activity.id,
+                                                            },
+                                                        )}
+                                                        className="mt-4"
+                                                    >
+                                                        <DialogFooter className="gap-2">
+                                                            <DialogClose
+                                                                asChild
+                                                            >
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="secondary"
+                                                                >
+                                                                    Cancel
+                                                                </Button>
+                                                            </DialogClose>
+                                                            <Button
+                                                                type="submit"
+                                                                variant="destructive"
+                                                            >
+                                                                Remove
+                                                            </Button>
+                                                        </DialogFooter>
+                                                    </Form>
+                                                </DialogContent>
+                                            </Dialog>
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </div>
+                </section>
 
                 <div className="max-w-xl space-y-4 border-t pt-8">
                     <Heading

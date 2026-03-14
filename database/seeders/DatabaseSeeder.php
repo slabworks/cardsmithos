@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Card;
+use App\Models\CardActivity;
 use App\Models\Customer;
 use App\Models\Payment;
 use App\Models\User;
@@ -28,7 +29,13 @@ class DatabaseSeeder extends Seeder
                 Card::factory()
                     ->count(rand(2, 6))
                     ->for($customer)
-                    ->create();
+                    ->create()
+                    ->each(function (Card $card): void {
+                        CardActivity::factory()
+                            ->count(rand(0, 5))
+                            ->for($card)
+                            ->create();
+                    });
                 Payment::factory()
                     ->count(rand(0, 4))
                     ->for($customer)
