@@ -1,8 +1,10 @@
 import { Head, Link } from '@inertiajs/react';
-import { Plus, Users } from 'lucide-react';
+import { Plus, Search, Users } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import CustomerController from '@/actions/App/Http/Controllers/CustomerController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import AppLayout from '@/layouts/app-layout';
 import { create, index } from '@/routes/customers';
 import type { BreadcrumbItem } from '@/types';
@@ -29,6 +31,18 @@ export default function CustomersIndex({
         email: string | null;
     }>;
 }) {
+    const [search, setSearch] = useState('');
+    const filtered = useMemo(() => {
+        const q = search.toLowerCase();
+        if (!q) return customers;
+        return customers.filter(
+            (c) =>
+                c.name.toLowerCase().includes(q) ||
+                c.email?.toLowerCase().includes(q) ||
+                c.status?.replace('_', ' ').toLowerCase().includes(q),
+        );
+    }, [customers, search]);
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Customers" />
@@ -42,6 +56,17 @@ export default function CustomersIndex({
                         </Link>
                     </Button>
                 </div>
+                {customers.length > 0 && (
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                            placeholder="Search customers..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="pl-9"
+                        />
+                    </div>
+                )}
                 <div className="rounded-lg border border-sidebar-border bg-card">
                     {customers.length === 0 ? (
                         <div className="flex flex-col items-center justify-center gap-2 py-12 text-center">
@@ -55,9 +80,15 @@ export default function CustomersIndex({
                                 </Link>
                             </Button>
                         </div>
+                    ) : filtered.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center gap-2 py-12 text-center">
+                            <p className="text-sm text-muted-foreground">
+                                No customers match your search
+                            </p>
+                        </div>
                     ) : (
                         <ul className="divide-y divide-sidebar-border">
-                            {customers.map((customer) => (
+                            {filtered.map((customer) => (
                                 <li key={customer.id}>
                                     <Link
                                         href={CustomerController.show.url(
