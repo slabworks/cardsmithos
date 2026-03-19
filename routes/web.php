@@ -5,6 +5,7 @@ use App\Http\Controllers\CardController;
 use App\Http\Controllers\CardTimelineController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\WaiverController;
 use Illuminate\Support\Facades\Route;
@@ -30,6 +31,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('customers.cards.timeline.rotate-token');
     Route::resource('customers.cards.activities', CardActivityController::class)->only(['store', 'update', 'destroy'])->scoped();
     Route::resource('customers.payments', PaymentController::class)->except(['index', 'show'])->scoped();
+    Route::get('customers/{customer}/invoices/create', [InvoiceController::class, 'create'])->name('customers.invoices.create');
+    Route::post('customers/{customer}/invoices/download', [InvoiceController::class, 'download'])->name('customers.invoices.download')->middleware('signed:relative');
 });
 
 require __DIR__.'/settings.php';
