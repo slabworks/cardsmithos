@@ -1,8 +1,9 @@
 import { Head, Link } from '@inertiajs/react';
-import { Copy, Pencil, Plus } from 'lucide-react';
+import { Copy, FileDown, Pencil, Plus } from 'lucide-react';
 import { useState } from 'react';
 import CardController from '@/actions/App/Http/Controllers/CardController';
 import CustomerController from '@/actions/App/Http/Controllers/CustomerController';
+import InvoiceController from '@/actions/App/Http/Controllers/InvoiceController';
 import PaymentController from '@/actions/App/Http/Controllers/PaymentController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -117,6 +118,16 @@ export default function CustomersShow({
                         </div>
                     </div>
                     <div className="flex gap-2">
+                        <Button variant="outline" size="sm" asChild>
+                            <Link
+                                href={InvoiceController.create.url({
+                                    customer: customer.id,
+                                })}
+                            >
+                                <FileDown className="mr-1 size-4" />
+                                Generate invoice
+                            </Link>
+                        </Button>
                         <Button variant="outline" size="sm" asChild>
                             <Link href={CustomerController.edit.url(customer)}>
                                 <Pencil className="mr-1 size-4" />
