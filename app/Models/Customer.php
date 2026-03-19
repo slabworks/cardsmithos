@@ -65,6 +65,14 @@ class Customer extends Model
     }
 
     /**
+     * @return HasMany<Shipment>
+     */
+    public function shipments(): HasMany
+    {
+        return $this->hasMany(Shipment::class);
+    }
+
+    /**
      * @return HasOne<ServiceWaiver>
      */
     public function serviceWaiver(): HasOne

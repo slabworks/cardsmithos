@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Payment;
+use App\Models\Shipment;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -20,7 +21,7 @@ class DashboardController extends Controller
         $customerIds = $request->user()->customers()->pluck('id');
 
         $totalPayments = Payment::whereIn('customer_id', $customerIds)->sum('amount');
-        $totalCustomers = $request->user()->customers()->count();
+        $totalShipmentFees = Shipment::whereIn('customer_id', $customerIds)->sum('amount');
         $newestCustomer = $request->user()
             ->customers()
             ->latest()
@@ -29,8 +30,8 @@ class DashboardController extends Controller
         $revenueByMonth = $this->revenueByMonth($customerIds);
 
         return Inertia::render('dashboard', [
-            'totalPayments' => (float) $totalPayments,
-            'totalCustomers' => $totalCustomers,
+            'totalPayments' => (float) $totalPayments - (float) $totalShipmentFees,
+            'totalShipmentFees' => (float) $totalShipmentFees,
             'newestCustomer' => $newestCustomer,
             'revenueByMonth' => $revenueByMonth,
         ]);
@@ -48,14 +49,26 @@ class DashboardController extends Controller
         }
 
         $driver = DB::connection()->getDriverName();
-        $monthExpression = $driver === 'sqlite'
+        $paymentMonthExpression = $driver === 'sqlite'
             ? "strftime('%Y-%m', paid_at)"
             : "DATE_FORMAT(paid_at, '%Y-%m')";
+        $shipmentMonthExpression = $driver === 'sqlite'
+            ? "strftime('%Y-%m', shipped_at)"
+            : "DATE_FORMAT(shipped_at, '%Y-%m')";
 
-        $totals = Payment::query()
+        $paymentTotals = Payment::query()
             ->whereIn('customer_id', $customerIds)
             ->where('paid_at', '>=', Carbon::now()->subMonths(11)->startOfMonth())
-            ->selectRaw("{$monthExpression} as month, COALESCE(SUM(amount), 0) as total")
+            ->selectRaw("{$paymentMonthExpression} as month, COALESCE(SUM(amount), 0) as total")
+            ->groupBy('month')
+            ->orderBy('month')
+            ->pluck('total', 'month')
+            ->map(fn ($total) => (float) $total);
+
+        $shipmentTotals = Shipment::query()
+            ->whereIn('customer_id', $customerIds)
+            ->where('shipped_at', '>=', Carbon::now()->subMonths(11)->startOfMonth())
+            ->selectRaw("{$shipmentMonthExpression} as month, COALESCE(SUM(amount), 0) as total")
             ->groupBy('month')
             ->orderBy('month')
             ->pluck('total', 'month')
@@ -63,7 +76,7 @@ class DashboardController extends Controller
 
         return $months->map(fn (string $month) => [
             'month' => $month,
-            'total' => $totals->get($month, 0.0),
+            'total' => $paymentTotals->get($month, 0.0) - $shipmentTotals->get($month, 0.0),
         ])->values()->all();
     }
 }

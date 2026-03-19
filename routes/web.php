@@ -7,6 +7,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\ShipmentController;
 use App\Http\Controllers\WaiverController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
@@ -33,6 +34,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('customers.payments', PaymentController::class)->except(['index', 'show'])->scoped();
     Route::get('customers/{customer}/invoices/create', [InvoiceController::class, 'create'])->name('customers.invoices.create');
     Route::post('customers/{customer}/invoices/download', [InvoiceController::class, 'download'])->name('customers.invoices.download')->middleware('signed:relative');
+    Route::post('customers/{customer}/shipments', [ShipmentController::class, 'store'])->name('customers.shipments.store');
 });
 
 require __DIR__.'/settings.php';

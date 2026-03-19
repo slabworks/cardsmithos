@@ -81,7 +81,7 @@ class CustomerController extends Controller
     {
         $this->authorize('view', $customer);
 
-        $customer->load('cards', 'payments', 'serviceWaiver');
+        $customer->load('cards', 'payments', 'shipments', 'serviceWaiver');
         $customer->loadSum('payments as lifetime_value', 'amount');
 
         $waiverUrl = self::waiverUrl($customer);

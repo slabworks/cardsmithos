@@ -8,7 +8,7 @@ import {
     Title,
     Tooltip,
 } from 'chart.js';
-import { DollarSign, TrendingUp, User, Users } from 'lucide-react';
+import { DollarSign, Package, TrendingUp, User } from 'lucide-react';
 import { Bar } from 'react-chartjs-2';
 import CustomerController from '@/actions/App/Http/Controllers/CustomerController';
 import {
@@ -42,7 +42,7 @@ type RevenueByMonth = { month: string; total: number };
 
 type DashboardProps = {
     totalPayments: number;
-    totalCustomers: number;
+    totalShipmentFees: number;
     newestCustomer: {
         id: number;
         name: string;
@@ -70,7 +70,7 @@ function formatMonthLabel(ym: string): string {
 
 export default function Dashboard({
     totalPayments,
-    totalCustomers,
+    totalShipmentFees,
     newestCustomer,
     revenueByMonth,
 }: DashboardProps) {
@@ -117,7 +117,7 @@ export default function Dashboard({
                     <Card className="border-sidebar-border/70 dark:border-sidebar-border">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">
-                                Total payments
+                                Revenue (less shipping)
                             </CardTitle>
                             <DollarSign className="size-4 text-muted-foreground" />
                         </CardHeader>
@@ -126,23 +126,23 @@ export default function Dashboard({
                                 {formatCurrency(totalPayments)}
                             </div>
                             <p className="text-xs text-muted-foreground">
-                                Sum of all payment amounts
+                                Total payments minus shipment fees
                             </p>
                         </CardContent>
                     </Card>
                     <Card className="border-sidebar-border/70 dark:border-sidebar-border">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">
-                                Total customers
+                                Shipment costs
                             </CardTitle>
-                            <Users className="size-4 text-muted-foreground" />
+                            <Package className="size-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">
-                                {totalCustomers}
+                                {formatCurrency(totalShipmentFees)}
                             </div>
                             <p className="text-xs text-muted-foreground">
-                                Total customer count
+                                Sum of all shipment fees
                             </p>
                         </CardContent>
                     </Card>

@@ -1,13 +1,24 @@
-import { Head, Link } from '@inertiajs/react';
+import { Form, Head, Link } from '@inertiajs/react';
 import { Copy, FileDown, Pencil, Plus } from 'lucide-react';
 import { useState } from 'react';
 import CardController from '@/actions/App/Http/Controllers/CardController';
 import CustomerController from '@/actions/App/Http/Controllers/CustomerController';
 import InvoiceController from '@/actions/App/Http/Controllers/InvoiceController';
 import PaymentController from '@/actions/App/Http/Controllers/PaymentController';
+import ShipmentController from '@/actions/App/Http/Controllers/ShipmentController';
+import InputError from '@/components/input-error';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import { index } from '@/routes/customers';
 import type { BreadcrumbItem } from '@/types';
@@ -49,11 +60,19 @@ export default function CustomersShow({
             method: string;
             reference: string | null;
         }>;
+        shipments: Array<{
+            id: number;
+            amount: string;
+            shipped_at: string;
+            reference: string | null;
+            tracking_number: string | null;
+        }>;
         lifetime_value: string | number | null;
     };
     waiverUrl: string | null;
 }) {
     const [copied, setCopied] = useState(false);
+    const [isShipmentModalOpen, setIsShipmentModalOpen] = useState(false);
 
     const copyWaiverUrl = () => {
         if (!waiverUrl) {
@@ -317,6 +336,150 @@ export default function CustomersShow({
                         </ul>
                     )}
                 </section>
+                <section className="rounded-lg border border-sidebar-border bg-card">
+                    <div className="flex items-center justify-between border-b border-sidebar-border px-4 py-3">
+                        <h2 className="font-medium">Shipments</h2>
+                        <Button
+                            size="sm"
+                            onClick={() => setIsShipmentModalOpen(true)}
+                        >
+                            <Plus className="mr-1 size-4" />
+                            Add shipment
+                        </Button>
+                    </div>
+                    {customer.shipments.length === 0 ? (
+                        <p className="px-4 py-6 text-sm text-muted-foreground">
+                            No shipments yet.
+                        </p>
+                    ) : (
+                        <ul className="divide-y divide-sidebar-border">
+                            {customer.shipments.map((shipment) => (
+                                <li
+                                    key={shipment.id}
+                                    className="flex items-center justify-between px-4 py-3"
+                                >
+                                    <div>
+                                        <p className="font-medium">
+                                            ${shipment.amount}
+                                        </p>
+                                        <p className="text-sm text-muted-foreground">
+                                            {shipment.shipped_at?.slice(0, 10)}
+                                            {shipment.reference && (
+                                                <span className="ml-2">
+                                                    {shipment.reference}
+                                                </span>
+                                            )}
+                                        </p>
+                                    </div>
+                                    {shipment.tracking_number && (
+                                        <span className="text-sm text-muted-foreground">
+                                            {shipment.tracking_number}
+                                        </span>
+                                    )}
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </section>
+
+                <Dialog
+                    open={isShipmentModalOpen}
+                    onOpenChange={setIsShipmentModalOpen}
+                >
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Add shipment</DialogTitle>
+                            <DialogDescription>
+                                Track return shipping fees for {customer.name}.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <Form
+                            {...ShipmentController.store.form({
+                                customer: customer.id,
+                            })}
+                            resetOnSuccess
+                            onSuccess={() => setIsShipmentModalOpen(false)}
+                            className="space-y-4"
+                        >
+                            {({ errors, processing }) => (
+                                <>
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="shipment_amount">
+                                            Amount *
+                                        </Label>
+                                        <Input
+                                            id="shipment_amount"
+                                            name="amount"
+                                            type="number"
+                                            step="0.01"
+                                            min="0"
+                                            required
+                                        />
+                                        <InputError message={errors.amount} />
+                                    </div>
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="shipment_shipped_at">
+                                            Shipment date *
+                                        </Label>
+                                        <Input
+                                            id="shipment_shipped_at"
+                                            name="shipped_at"
+                                            type="date"
+                                            defaultValue={new Date()
+                                                .toISOString()
+                                                .slice(0, 10)}
+                                            required
+                                        />
+                                        <InputError
+                                            message={errors.shipped_at}
+                                        />
+                                    </div>
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="shipment_tracking_number">
+                                            Tracking number
+                                        </Label>
+                                        <Input
+                                            id="shipment_tracking_number"
+                                            name="tracking_number"
+                                        />
+                                        <InputError
+                                            message={errors.tracking_number}
+                                        />
+                                    </div>
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="shipment_reference">
+                                            Reference
+                                        </Label>
+                                        <Input
+                                            id="shipment_reference"
+                                            name="reference"
+                                        />
+                                        <InputError
+                                            message={errors.reference}
+                                        />
+                                    </div>
+                                    <DialogFooter>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            onClick={() =>
+                                                setIsShipmentModalOpen(false)
+                                            }
+                                        >
+                                            Cancel
+                                        </Button>
+                                        <Button
+                                            type="submit"
+                                            disabled={processing}
+                                        >
+                                            Save shipment
+                                        </Button>
+                                    </DialogFooter>
+                                </>
+                            )}
+                        </Form>
+                    </DialogContent>
+                </Dialog>
             </div>
         </AppLayout>
     );

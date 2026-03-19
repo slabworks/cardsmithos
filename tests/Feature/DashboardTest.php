@@ -2,6 +2,7 @@
 
 use App\Models\Customer;
 use App\Models\Payment;
+use App\Models\Shipment;
 use App\Models\User;
 
 test('guests are redirected to the login page', function () {
@@ -18,11 +19,11 @@ test('authenticated users can visit the dashboard', function () {
     $response->assertInertia(fn ($page) => $page
         ->component('dashboard')
         ->has('totalPayments')
-        ->has('totalCustomers')
+        ->has('totalShipmentFees')
         ->has('newestCustomer')
         ->has('revenueByMonth')
         ->where('totalPayments', 0)
-        ->where('totalCustomers', 0)
+        ->where('totalShipmentFees', 0)
         ->where('newestCustomer', null)
         ->has('revenueByMonth')
     );
@@ -49,10 +50,50 @@ test('dashboard shows stats and newest customer when user has customers and paym
     $response->assertInertia(fn ($page) => $page
         ->component('dashboard')
         ->where('totalPayments', 225)
-        ->where('totalCustomers', 2)
+        ->where('totalShipmentFees', 0)
         ->has('newestCustomer')
         ->where('newestCustomer.name', 'Newest Customer')
         ->where('newestCustomer.id', $customer2->id)
         ->has('revenueByMonth')
+    );
+});
+
+test('dashboard subtracts shipment fees from all payment-derived metrics', function () {
+    $user = User::factory()->create();
+    $customer = Customer::factory()->for($user)->create();
+
+    Payment::factory()->for($customer)->create([
+        'amount' => 100.00,
+        'paid_at' => now()->format('Y-m-d'),
+    ]);
+    Payment::factory()->for($customer)->create([
+        'amount' => 50.00,
+        'paid_at' => now()->subMonth()->format('Y-m-d'),
+    ]);
+
+    Shipment::factory()->for($customer)->create([
+        'amount' => 15.00,
+        'shipped_at' => now()->format('Y-m-d'),
+    ]);
+    Shipment::factory()->for($customer)->create([
+        'amount' => 10.00,
+        'shipped_at' => now()->subMonth()->format('Y-m-d'),
+    ]);
+
+    $otherUser = User::factory()->create();
+    $otherCustomer = Customer::factory()->for($otherUser)->create();
+    Payment::factory()->for($otherCustomer)->create(['amount' => 999.00]);
+    Shipment::factory()->for($otherCustomer)->create(['amount' => 500.00]);
+
+    $this->actingAs($user);
+    $response = $this->get(route('dashboard'));
+
+    $response->assertOk();
+    $response->assertInertia(fn ($page) => $page
+        ->component('dashboard')
+        ->where('totalPayments', 125)
+        ->where('totalShipmentFees', 25)
+        ->where('revenueByMonth.10.total', 40)
+        ->where('revenueByMonth.11.total', 85)
     );
 });
