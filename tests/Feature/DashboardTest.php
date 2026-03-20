@@ -20,11 +20,11 @@ test('authenticated users can visit the dashboard', function () {
         ->component('dashboard')
         ->has('totalPayments')
         ->has('totalShipmentFees')
-        ->has('newestCustomer')
+        ->has('totalExpenses')
         ->has('revenueByMonth')
         ->where('totalPayments', 0)
         ->where('totalShipmentFees', 0)
-        ->where('newestCustomer', null)
+        ->where('totalExpenses', 0)
         ->has('revenueByMonth')
     );
 });
@@ -51,9 +51,7 @@ test('dashboard shows stats and newest customer when user has customers and paym
         ->component('dashboard')
         ->where('totalPayments', 225)
         ->where('totalShipmentFees', 0)
-        ->has('newestCustomer')
-        ->where('newestCustomer.name', 'Newest Customer')
-        ->where('newestCustomer.id', $customer2->id)
+        ->where('totalExpenses', 0)
         ->has('revenueByMonth')
     );
 });
