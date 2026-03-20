@@ -4,6 +4,7 @@ import { dashboard, login, register } from '@/routes';
 const GITHUB_URL = 'https://github.com/slabworks/cardsmithos';
 const GITHUB_CONTRIBUTING = `${GITHUB_URL}#contributing`;
 const PATREON_URL = 'https://www.patreon.com/c/CardSmithOS';
+const DISCORD_URL = 'https://discord.gg/ycBacKEyhW';
 
 function ExternalIcon() {
     return (
@@ -82,6 +83,15 @@ export default function Welcome({
                                 className="inline-flex items-center gap-1 rounded px-2.5 py-1.5 text-[#575754] hover:bg-[#f5f5f4] hover:text-[#1b1b18]"
                             >
                                 Patreon
+                                <ExternalIcon />
+                            </a>
+                            <a
+                                href={DISCORD_URL}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 rounded px-2.5 py-1.5 text-[#575754] hover:bg-[#f5f5f4] hover:text-[#1b1b18]"
+                            >
+                                Discord
                                 <ExternalIcon />
                             </a>
                             <span
@@ -230,6 +240,15 @@ export default function Welcome({
                                 className="inline-flex items-center gap-1.5 font-medium text-[#1b1b18] underline underline-offset-4 hover:no-underline"
                             >
                                 Support on Patreon
+                                <ExternalIcon />
+                            </a>
+                            <a
+                                href={DISCORD_URL}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1.5 font-medium text-[#1b1b18] underline underline-offset-4 hover:no-underline"
+                            >
+                                Discord
                                 <ExternalIcon />
                             </a>
                         </p>
