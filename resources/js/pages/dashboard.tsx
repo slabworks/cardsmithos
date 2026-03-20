@@ -1,4 +1,4 @@
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import {
     Chart as ChartJS,
     BarElement,
@@ -8,8 +8,10 @@ import {
     Title,
     Tooltip,
 } from 'chart.js';
-import { DollarSign, Package, Receipt, TrendingUp } from 'lucide-react';
+import { DollarSign, Kanban, Package, Receipt, TrendingUp } from 'lucide-react';
 import { Bar } from 'react-chartjs-2';
+import CardController from '@/actions/App/Http/Controllers/CardController';
+import { Badge } from '@/components/ui/badge';
 import {
     Card,
     CardContent,
@@ -39,11 +41,25 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 type RevenueByMonth = { month: string; total: number };
 
+type KanbanCard = {
+    id: number;
+    name: string;
+    status: string;
+    condition_before: string | null;
+    estimated_fee: string | null;
+    customer: { id: number; name: string };
+};
+
 type DashboardProps = {
     totalPayments: number;
     totalShipmentFees: number;
     totalExpenses: number;
     revenueByMonth: RevenueByMonth[];
+    cardsByStatus: {
+        backlog: KanbanCard[];
+        pending: KanbanCard[];
+        in_progress: KanbanCard[];
+    };
 };
 
 function formatCurrency(value: number): string {
@@ -63,11 +79,31 @@ function formatMonthLabel(ym: string): string {
     });
 }
 
+const conditionColors: Record<string, string> = {
+    near_mint: 'text-emerald-600 bg-emerald-50 border-emerald-200',
+    lightly_played: 'text-green-600 bg-green-50 border-green-200',
+    moderately_played: 'text-yellow-600 bg-yellow-50 border-yellow-200',
+    heavily_played: 'text-orange-600 bg-orange-50 border-orange-200',
+    damaged: 'text-red-600 bg-red-50 border-red-200',
+};
+
+const columns: {
+    key: keyof DashboardProps['cardsByStatus'];
+    label: string;
+    color: string;
+    dotColor: string;
+}[] = [
+    { key: 'backlog', label: 'Backlog', color: 'border-slate-400', dotColor: 'bg-slate-400' },
+    { key: 'pending', label: 'Pending', color: 'border-amber-400', dotColor: 'bg-amber-400' },
+    { key: 'in_progress', label: 'In Progress', color: 'border-blue-400', dotColor: 'bg-blue-400' },
+];
+
 export default function Dashboard({
     totalPayments,
     totalShipmentFees,
     totalExpenses,
     revenueByMonth,
+    cardsByStatus,
 }: DashboardProps) {
     const hasRevenue = revenueByMonth.some((r) => r.total > 0);
     const chartData = {
@@ -108,6 +144,65 @@ export default function Dashboard({
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
+                <Card className="border-sidebar-border/70 dark:border-sidebar-border">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <Kanban className="size-5" />
+                            Work board
+                        </CardTitle>
+                        <CardDescription>
+                            All cards across customers by status
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="grid min-w-[640px] grid-cols-3 gap-4">
+                            {columns.map((col) => {
+                                const cards = cardsByStatus[col.key];
+
+                                return (
+                                    <div key={col.key} className={`rounded-lg border-t-2 ${col.color} bg-muted/40 p-3`}>
+                                        <div className="mb-3 flex items-center gap-2">
+                                            <span className={`size-2 rounded-full ${col.dotColor}`} />
+                                            <span className="text-sm font-medium">{col.label}</span>
+                                            <span className="ml-auto text-xs text-muted-foreground">{cards.length}</span>
+                                        </div>
+                                        {cards.length === 0 ? (
+                                            <p className="py-4 text-center text-xs text-muted-foreground">No cards</p>
+                                        ) : (
+                                            <div className="flex flex-col gap-2">
+                                                {cards.map((card) => (
+                                                    <Link
+                                                        key={card.id}
+                                                        href={CardController.edit.url({
+                                                            customer: card.customer.id,
+                                                            card: card.id,
+                                                        })}
+                                                        className="rounded-md border border-sidebar-border bg-card p-3 shadow-sm transition-shadow hover:shadow-md"
+                                                    >
+                                                        <p className="text-sm font-medium">{card.name}</p>
+                                                        <p className="mt-0.5 text-xs text-muted-foreground">{card.customer.name}</p>
+                                                        <div className="mt-2 flex items-center gap-2">
+                                                            {card.condition_before && (
+                                                                <Badge variant="outline" className={`text-[10px] ${conditionColors[card.condition_before] ?? ''}`}>
+                                                                    {card.condition_before.replace(/_/g, ' ')}
+                                                                </Badge>
+                                                            )}
+                                                            {card.estimated_fee && (
+                                                                <span className="ml-auto text-xs font-medium text-muted-foreground">
+                                                                    {formatCurrency(Number(card.estimated_fee))}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </Link>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </CardContent>
+                </Card>
                 <div className="grid auto-rows-min gap-4 md:grid-cols-3">
                     <Card className="border-sidebar-border/70 dark:border-sidebar-border">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

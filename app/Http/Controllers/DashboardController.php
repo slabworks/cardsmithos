@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\CardStatus;
+use App\Models\Card;
 use App\Models\Expense;
 use App\Models\Payment;
 use App\Models\Shipment;
@@ -27,11 +29,25 @@ class DashboardController extends Controller
 
         $revenueByMonth = $this->revenueByMonth($customerIds);
 
+        $kanbanValues = collect(CardStatus::kanbanStatuses())->map(fn (CardStatus $s) => $s->value);
+
+        $cards = Card::whereIn('customer_id', $customerIds)
+            ->whereIn('status', $kanbanValues)
+            ->with('customer:id,name')
+            ->select('id', 'customer_id', 'name', 'status', 'condition_before', 'estimated_fee')
+            ->get()
+            ->groupBy(fn (Card $card) => $card->status->value);
+
         return Inertia::render('dashboard', [
             'totalPayments' => (float) $totalPayments - (float) $totalShipmentFees,
             'totalShipmentFees' => (float) $totalShipmentFees,
             'totalExpenses' => $totalExpenses,
             'revenueByMonth' => $revenueByMonth,
+            'cardsByStatus' => [
+                'backlog' => $cards->get('backlog', collect())->values(),
+                'pending' => $cards->get('pending', collect())->values(),
+                'in_progress' => $cards->get('in_progress', collect())->values(),
+            ],
         ]);
     }
 
