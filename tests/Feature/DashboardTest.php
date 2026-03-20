@@ -1,5 +1,7 @@
 <?php
 
+use App\Enums\CardStatus;
+use App\Models\Card;
 use App\Models\Customer;
 use App\Models\Payment;
 use App\Models\Shipment;
@@ -26,6 +28,11 @@ test('authenticated users can visit the dashboard', function () {
         ->where('totalShipmentFees', 0)
         ->where('totalExpenses', 0)
         ->has('revenueByMonth')
+        ->has('cardsByStatus', fn ($prop) => $prop
+            ->has('backlog')
+            ->has('pending')
+            ->has('in_progress')
+        )
     );
 });
 
@@ -93,5 +100,81 @@ test('dashboard subtracts shipment fees from all payment-derived metrics', funct
         ->where('totalShipmentFees', 25)
         ->where('revenueByMonth.10.total', 40)
         ->where('revenueByMonth.11.total', 85)
+    );
+});
+
+test('dashboard groups kanban cards by status', function () {
+    $user = User::factory()->create();
+    $customer = Customer::factory()->for($user)->create();
+
+    $backlogCard = Card::factory()->for($customer)->create([
+        'name' => 'Backlog Card',
+        'status' => CardStatus::Backlog,
+    ]);
+    $pendingCard = Card::factory()->for($customer)->create([
+        'name' => 'Pending Card',
+        'status' => CardStatus::Pending,
+    ]);
+    $inProgressCard = Card::factory()->for($customer)->create([
+        'name' => 'In Progress Card',
+        'status' => CardStatus::InProgress,
+    ]);
+
+    $this->actingAs($user);
+    $response = $this->get(route('dashboard'));
+
+    $response->assertOk();
+    $response->assertInertia(fn ($page) => $page
+        ->component('dashboard')
+        ->has('cardsByStatus.backlog', 1)
+        ->has('cardsByStatus.pending', 1)
+        ->has('cardsByStatus.in_progress', 1)
+        ->where('cardsByStatus.backlog.0.name', 'Backlog Card')
+        ->where('cardsByStatus.pending.0.name', 'Pending Card')
+        ->where('cardsByStatus.in_progress.0.name', 'In Progress Card')
+        ->where('cardsByStatus.backlog.0.customer.name', $customer->name)
+    );
+});
+
+test('dashboard excludes repaired cards from kanban board', function () {
+    $user = User::factory()->create();
+    $customer = Customer::factory()->for($user)->create();
+
+    Card::factory()->for($customer)->create([
+        'status' => CardStatus::Repaired,
+    ]);
+    Card::factory()->for($customer)->create([
+        'status' => CardStatus::Backlog,
+    ]);
+
+    $this->actingAs($user);
+    $response = $this->get(route('dashboard'));
+
+    $response->assertOk();
+    $response->assertInertia(fn ($page) => $page
+        ->component('dashboard')
+        ->has('cardsByStatus.backlog', 1)
+        ->has('cardsByStatus.pending', 0)
+        ->has('cardsByStatus.in_progress', 0)
+    );
+});
+
+test('dashboard excludes other users cards from kanban board', function () {
+    $user = User::factory()->create();
+    $otherUser = User::factory()->create();
+
+    $customer = Customer::factory()->for($user)->create();
+    $otherCustomer = Customer::factory()->for($otherUser)->create();
+
+    Card::factory()->for($customer)->create(['status' => CardStatus::Backlog]);
+    Card::factory()->for($otherCustomer)->create(['status' => CardStatus::Backlog]);
+
+    $this->actingAs($user);
+    $response = $this->get(route('dashboard'));
+
+    $response->assertOk();
+    $response->assertInertia(fn ($page) => $page
+        ->component('dashboard')
+        ->has('cardsByStatus.backlog', 1)
     );
 });
