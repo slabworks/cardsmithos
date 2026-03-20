@@ -11,7 +11,6 @@ import {
 import { DollarSign, Kanban, Package, Receipt, TrendingUp } from 'lucide-react';
 import { Bar } from 'react-chartjs-2';
 import CardController from '@/actions/App/Http/Controllers/CardController';
-import { Badge } from '@/components/ui/badge';
 import {
     Card,
     CardContent,
@@ -45,8 +44,6 @@ type KanbanCard = {
     id: number;
     name: string;
     status: string;
-    condition_before: string | null;
-    estimated_fee: string | null;
     customer: { id: number; name: string };
 };
 
@@ -78,14 +75,6 @@ function formatMonthLabel(ym: string): string {
         year: '2-digit',
     });
 }
-
-const conditionColors: Record<string, string> = {
-    near_mint: 'text-emerald-600 bg-emerald-50 border-emerald-200',
-    lightly_played: 'text-green-600 bg-green-50 border-green-200',
-    moderately_played: 'text-yellow-600 bg-yellow-50 border-yellow-200',
-    heavily_played: 'text-orange-600 bg-orange-50 border-orange-200',
-    damaged: 'text-red-600 bg-red-50 border-red-200',
-};
 
 const columns: {
     key: keyof DashboardProps['cardsByStatus'];
@@ -144,8 +133,8 @@ export default function Dashboard({
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-                <Card className="border-sidebar-border/70 dark:border-sidebar-border">
-                    <CardHeader>
+                <Card className="flex max-h-[80vh] flex-col border-sidebar-border/70 dark:border-sidebar-border">
+                    <CardHeader className="shrink-0">
                         <CardTitle className="flex items-center gap-2">
                             <Kanban className="size-5" />
                             Work board
@@ -154,14 +143,14 @@ export default function Dashboard({
                             All cards across customers by status
                         </CardDescription>
                     </CardHeader>
-                    <CardContent>
-                        <div className="grid min-w-[640px] grid-cols-3 gap-4">
+                    <CardContent className="flex min-h-0 flex-1 flex-col overflow-hidden">
+                        <div className="grid min-h-0 min-w-[640px] flex-1 grid-cols-3 gap-4">
                             {columns.map((col) => {
                                 const cards = cardsByStatus[col.key];
 
                                 return (
-                                    <div key={col.key} className={`rounded-lg border-t-2 ${col.color} bg-muted/40 p-3`}>
-                                        <div className="mb-3 flex items-center gap-2">
+                                    <div key={col.key} className={`flex min-h-0 flex-col overflow-hidden rounded-lg border-t-2 ${col.color} bg-muted/40 p-3`}>
+                                        <div className="mb-3 flex shrink-0 items-center gap-2">
                                             <span className={`size-2 rounded-full ${col.dotColor}`} />
                                             <span className="text-sm font-medium">{col.label}</span>
                                             <span className="ml-auto text-xs text-muted-foreground">{cards.length}</span>
@@ -169,7 +158,7 @@ export default function Dashboard({
                                         {cards.length === 0 ? (
                                             <p className="py-4 text-center text-xs text-muted-foreground">No cards</p>
                                         ) : (
-                                            <div className="flex flex-col gap-2">
+                                            <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto">
                                                 {cards.map((card) => (
                                                     <Link
                                                         key={card.id}
@@ -181,18 +170,6 @@ export default function Dashboard({
                                                     >
                                                         <p className="text-sm font-medium">{card.name}</p>
                                                         <p className="mt-0.5 text-xs text-muted-foreground">{card.customer.name}</p>
-                                                        <div className="mt-2 flex items-center gap-2">
-                                                            {card.condition_before && (
-                                                                <Badge variant="outline" className={`text-[10px] ${conditionColors[card.condition_before] ?? ''}`}>
-                                                                    {card.condition_before.replace(/_/g, ' ')}
-                                                                </Badge>
-                                                            )}
-                                                            {card.estimated_fee && (
-                                                                <span className="ml-auto text-xs font-medium text-muted-foreground">
-                                                                    {formatCurrency(Number(card.estimated_fee))}
-                                                                </span>
-                                                            )}
-                                                        </div>
                                                     </Link>
                                                 ))}
                                             </div>
