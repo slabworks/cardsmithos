@@ -8,10 +8,9 @@ import {
     Title,
     Tooltip,
 } from 'chart.js';
-import { DollarSign, Kanban, Package, TrendingUp, User } from 'lucide-react';
+import { DollarSign, Kanban, Package, Receipt, TrendingUp } from 'lucide-react';
 import { Bar } from 'react-chartjs-2';
 import CardController from '@/actions/App/Http/Controllers/CardController';
-import CustomerController from '@/actions/App/Http/Controllers/CustomerController';
 import { Badge } from '@/components/ui/badge';
 import {
     Card,
@@ -54,11 +53,7 @@ type KanbanCard = {
 type DashboardProps = {
     totalPayments: number;
     totalShipmentFees: number;
-    newestCustomer: {
-        id: number;
-        name: string;
-        created_at: string;
-    } | null;
+    totalExpenses: number;
     revenueByMonth: RevenueByMonth[];
     cardsByStatus: {
         backlog: KanbanCard[];
@@ -106,7 +101,7 @@ const columns: {
 export default function Dashboard({
     totalPayments,
     totalShipmentFees,
-    newestCustomer,
+    totalExpenses,
     revenueByMonth,
     cardsByStatus,
 }: DashboardProps) {
@@ -221,7 +216,7 @@ export default function Dashboard({
                                 {formatCurrency(totalPayments)}
                             </div>
                             <p className="text-xs text-muted-foreground">
-                                Total payments minus shipment fees
+                                Sum of all tracked payments
                             </p>
                         </CardContent>
                     </Card>
@@ -244,38 +239,17 @@ export default function Dashboard({
                     <Card className="border-sidebar-border/70 dark:border-sidebar-border">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">
-                                Newest customer
+                                Total expenses
                             </CardTitle>
-                            <User className="size-4 text-muted-foreground" />
+                            <Receipt className="size-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
-                            {newestCustomer ? (
-                                <>
-                                    <div className="text-2xl font-bold">
-                                        <Link
-                                            href={CustomerController.show.url(
-                                                newestCustomer,
-                                            )}
-                                            className="text-primary hover:underline"
-                                        >
-                                            {newestCustomer.name}
-                                        </Link>
-                                    </div>
-                                    <p className="text-xs text-muted-foreground">
-                                        Added{' '}
-                                        {new Date(
-                                            newestCustomer.created_at,
-                                        ).toLocaleDateString()}
-                                    </p>
-                                </>
-                            ) : (
-                                <>
-                                    <div className="text-2xl font-bold">—</div>
-                                    <p className="text-xs text-muted-foreground">
-                                        No customers yet
-                                    </p>
-                                </>
-                            )}
+                            <div className="text-2xl font-bold">
+                                {formatCurrency(totalExpenses)}
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                                Sum of all tracked expenses
+                            </p>
                         </CardContent>
                     </Card>
                 </div>

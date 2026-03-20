@@ -5,6 +5,7 @@ use App\Http\Controllers\CardController;
 use App\Http\Controllers\CardTimelineController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ShipmentController;
@@ -26,6 +27,7 @@ Route::inertia('/', 'welcome', [
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', DashboardController::class)->name('dashboard');
+    Route::resource('expenses', ExpenseController::class);
     Route::resource('customers', CustomerController::class);
     Route::resource('customers.cards', CardController::class)->except(['index', 'show'])->scoped();
     Route::post('customers/{customer}/cards/{card}/timeline/rotate-token', [CardTimelineController::class, 'rotateToken'])

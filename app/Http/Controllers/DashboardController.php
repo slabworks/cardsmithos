@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\CardStatus;
 use App\Models\Card;
+use App\Models\Expense;
 use App\Models\Payment;
 use App\Models\Shipment;
 use Carbon\Carbon;
@@ -24,10 +25,7 @@ class DashboardController extends Controller
 
         $totalPayments = Payment::whereIn('customer_id', $customerIds)->sum('amount');
         $totalShipmentFees = Shipment::whereIn('customer_id', $customerIds)->sum('amount');
-        $newestCustomer = $request->user()
-            ->customers()
-            ->latest()
-            ->first(['id', 'name', 'created_at']);
+        $totalExpenses = (float) Expense::where('user_id', $request->user()->id)->sum('amount');
 
         $revenueByMonth = $this->revenueByMonth($customerIds);
 
@@ -43,7 +41,7 @@ class DashboardController extends Controller
         return Inertia::render('dashboard', [
             'totalPayments' => (float) $totalPayments - (float) $totalShipmentFees,
             'totalShipmentFees' => (float) $totalShipmentFees,
-            'newestCustomer' => $newestCustomer,
+            'totalExpenses' => $totalExpenses,
             'revenueByMonth' => $revenueByMonth,
             'cardsByStatus' => [
                 'backlog' => $cards->get('backlog', collect())->values(),
