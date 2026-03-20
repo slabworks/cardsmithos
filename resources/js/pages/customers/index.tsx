@@ -34,7 +34,11 @@ export default function CustomersIndex({
     const [search, setSearch] = useState('');
     const filtered = useMemo(() => {
         const q = search.toLowerCase();
-        if (!q) return customers;
+
+        if (!q) {
+            return customers;
+        }
+
         return customers.filter(
             (c) =>
                 c.name.toLowerCase().includes(q) ||
@@ -58,7 +62,7 @@ export default function CustomersIndex({
                 </div>
                 {customers.length > 0 && (
                     <div className="relative">
-                        <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                        <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
                         <Input
                             placeholder="Search customers..."
                             value={search}
