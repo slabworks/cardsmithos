@@ -49,11 +49,13 @@ export default function InvoicesCreate({
     const toggleCard = (id: number) => {
         setSelectedCardIds((prev) => {
             const next = new Set(prev);
+
             if (next.has(id)) {
                 next.delete(id);
             } else {
                 next.add(id);
             }
+
             return next;
         });
     };
@@ -65,6 +67,7 @@ export default function InvoicesCreate({
                 businessSettings.hourly_rate
             );
         }
+
         return businessSettings.default_fixed_rate;
     };
 
@@ -90,7 +93,10 @@ export default function InvoicesCreate({
         });
 
     const handleDownload = async () => {
-        if (selectedCardIds.size === 0) return;
+        if (selectedCardIds.size === 0) {
+            return;
+        }
+
         setDownloading(true);
 
         try {
@@ -114,8 +120,7 @@ export default function InvoicesCreate({
             a.download =
                 response.headers['content-disposition']
                     ?.split('filename=')[1]
-                    ?.replace(/"/g, '') ??
-                'invoice.pdf';
+                    ?.replace(/"/g, '') ?? 'invoice.pdf';
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);
@@ -265,9 +270,7 @@ export default function InvoicesCreate({
                                 </div>
                             )}
                             <div className="flex justify-between">
-                                <span>
-                                    Tax ({businessSettings.tax_rate}%)
-                                </span>
+                                <span>Tax ({businessSettings.tax_rate}%)</span>
                                 <span>${fmt(tax)}</span>
                             </div>
                             <div className="flex justify-between border-t pt-2 text-base font-semibold">
@@ -280,19 +283,13 @@ export default function InvoicesCreate({
                     <div className="flex gap-2">
                         <Button
                             onClick={handleDownload}
-                            disabled={
-                                selectedCardIds.size === 0 || downloading
-                            }
+                            disabled={selectedCardIds.size === 0 || downloading}
                         >
                             <FileDown className="mr-1 size-4" />
-                            {downloading
-                                ? 'Generating...'
-                                : 'Download invoice'}
+                            {downloading ? 'Generating...' : 'Download invoice'}
                         </Button>
                         <Button variant="outline" asChild>
-                            <Link
-                                href={CustomerController.show.url(customer)}
-                            >
+                            <Link href={CustomerController.show.url(customer)}>
                                 Cancel
                             </Link>
                         </Button>

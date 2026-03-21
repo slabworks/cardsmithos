@@ -8,7 +8,14 @@ import {
     Title,
     Tooltip,
 } from 'chart.js';
-import { DollarSign, Kanban, Package, Receipt, TrendingUp } from 'lucide-react';
+import {
+    DollarSign,
+    Kanban,
+    Package,
+    Receipt,
+    TrendingUp,
+    UserCheck,
+} from 'lucide-react';
 import { Bar } from 'react-chartjs-2';
 import CardController from '@/actions/App/Http/Controllers/CardController';
 import {
@@ -51,6 +58,8 @@ type DashboardProps = {
     totalPayments: number;
     totalShipmentFees: number;
     totalExpenses: number;
+    totalInquiries: number;
+    convertedInquiries: number;
     revenueByMonth: RevenueByMonth[];
     cardsByStatus: {
         backlog: KanbanCard[];
@@ -82,18 +91,39 @@ const columns: {
     color: string;
     dotColor: string;
 }[] = [
-    { key: 'backlog', label: 'Backlog', color: 'border-slate-400', dotColor: 'bg-slate-400' },
-    { key: 'pending', label: 'Pending', color: 'border-amber-400', dotColor: 'bg-amber-400' },
-    { key: 'in_progress', label: 'In Progress', color: 'border-blue-400', dotColor: 'bg-blue-400' },
+    {
+        key: 'backlog',
+        label: 'Backlog',
+        color: 'border-slate-400',
+        dotColor: 'bg-slate-400',
+    },
+    {
+        key: 'pending',
+        label: 'Pending',
+        color: 'border-amber-400',
+        dotColor: 'bg-amber-400',
+    },
+    {
+        key: 'in_progress',
+        label: 'In Progress',
+        color: 'border-blue-400',
+        dotColor: 'bg-blue-400',
+    },
 ];
 
 export default function Dashboard({
     totalPayments,
     totalShipmentFees,
     totalExpenses,
+    totalInquiries,
+    convertedInquiries,
     revenueByMonth,
     cardsByStatus,
 }: DashboardProps) {
+    const conversionRate =
+        totalInquiries > 0
+            ? Math.round((convertedInquiries / totalInquiries) * 100)
+            : 0;
     const hasRevenue = revenueByMonth.some((r) => r.total > 0);
     const chartData = {
         labels: revenueByMonth.map((r) => formatMonthLabel(r.month)),
@@ -149,27 +179,47 @@ export default function Dashboard({
                                 const cards = cardsByStatus[col.key];
 
                                 return (
-                                    <div key={col.key} className={`flex min-h-0 flex-col overflow-hidden rounded-lg border-t-2 ${col.color} bg-muted/40 p-3`}>
+                                    <div
+                                        key={col.key}
+                                        className={`flex min-h-0 flex-col overflow-hidden rounded-lg border-t-2 ${col.color} bg-muted/40 p-3`}
+                                    >
                                         <div className="mb-3 flex shrink-0 items-center gap-2">
-                                            <span className={`size-2 rounded-full ${col.dotColor}`} />
-                                            <span className="text-sm font-medium">{col.label}</span>
-                                            <span className="ml-auto text-xs text-muted-foreground">{cards.length}</span>
+                                            <span
+                                                className={`size-2 rounded-full ${col.dotColor}`}
+                                            />
+                                            <span className="text-sm font-medium">
+                                                {col.label}
+                                            </span>
+                                            <span className="ml-auto text-xs text-muted-foreground">
+                                                {cards.length}
+                                            </span>
                                         </div>
                                         {cards.length === 0 ? (
-                                            <p className="py-4 text-center text-xs text-muted-foreground">No cards</p>
+                                            <p className="py-4 text-center text-xs text-muted-foreground">
+                                                No cards
+                                            </p>
                                         ) : (
                                             <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto">
                                                 {cards.map((card) => (
                                                     <Link
                                                         key={card.id}
-                                                        href={CardController.edit.url({
-                                                            customer: card.customer.id,
-                                                            card: card.id,
-                                                        })}
+                                                        href={CardController.edit.url(
+                                                            {
+                                                                customer:
+                                                                    card
+                                                                        .customer
+                                                                        .id,
+                                                                card: card.id,
+                                                            },
+                                                        )}
                                                         className="rounded-md border border-sidebar-border bg-card p-3 shadow-sm transition-shadow hover:shadow-md"
                                                     >
-                                                        <p className="text-sm font-medium">{card.name}</p>
-                                                        <p className="mt-0.5 text-xs text-muted-foreground">{card.customer.name}</p>
+                                                        <p className="text-sm font-medium">
+                                                            {card.name}
+                                                        </p>
+                                                        <p className="mt-0.5 text-xs text-muted-foreground">
+                                                            {card.customer.name}
+                                                        </p>
                                                     </Link>
                                                 ))}
                                             </div>
@@ -180,7 +230,7 @@ export default function Dashboard({
                         </div>
                     </CardContent>
                 </Card>
-                <div className="grid auto-rows-min gap-4 md:grid-cols-3">
+                <div className="grid auto-rows-min gap-4 md:grid-cols-4">
                     <Card className="border-sidebar-border/70 dark:border-sidebar-border">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">
@@ -226,6 +276,23 @@ export default function Dashboard({
                             </div>
                             <p className="text-xs text-muted-foreground">
                                 Sum of all tracked expenses
+                            </p>
+                        </CardContent>
+                    </Card>
+                    <Card className="border-sidebar-border/70 dark:border-sidebar-border">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                Lead conversion
+                            </CardTitle>
+                            <UserCheck className="size-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">
+                                {conversionRate}%
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                                {convertedInquiries} of {totalInquiries}{' '}
+                                inquiries converted
                             </p>
                         </CardContent>
                     </Card>

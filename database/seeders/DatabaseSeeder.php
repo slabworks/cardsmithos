@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Card;
 use App\Models\CardActivity;
 use App\Models\Customer;
+use App\Models\Inquiry;
 use App\Models\Payment;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -21,7 +22,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'test@example.com',
         ]);
 
-        Customer::factory()
+        $customers = Customer::factory()
             ->count(5)
             ->for($user)
             ->create()
@@ -41,5 +42,18 @@ class DatabaseSeeder extends Seeder
                     ->for($customer)
                     ->create();
             });
+
+        // Create inquiries — some linked to customers, some not, some converted
+        Inquiry::factory()
+            ->count(5)
+            ->for($user)
+            ->create();
+
+        $customers->take(3)->each(function (Customer $customer) use ($user): void {
+            Inquiry::factory()
+                ->for($user)
+                ->for($customer)
+                ->create(['converted' => true]);
+        });
     }
 }

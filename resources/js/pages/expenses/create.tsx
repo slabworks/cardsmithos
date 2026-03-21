@@ -81,7 +81,9 @@ export default function ExpensesCreate({
                                     id="occurred_at"
                                     name="occurred_at"
                                     type="date"
-                                    defaultValue={new Date().toISOString().slice(0, 10)}
+                                    defaultValue={new Date()
+                                        .toISOString()
+                                        .slice(0, 10)}
                                     required
                                 />
                                 <InputError message={errors.occurred_at} />

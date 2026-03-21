@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\CardStatus;
 use App\Models\Card;
 use App\Models\Expense;
+use App\Models\Inquiry;
 use App\Models\Payment;
 use App\Models\Shipment;
 use Carbon\Carbon;
@@ -27,6 +28,9 @@ class DashboardController extends Controller
         $totalShipmentFees = Shipment::whereIn('customer_id', $customerIds)->sum('amount');
         $totalExpenses = (float) Expense::where('user_id', $request->user()->id)->sum('amount');
 
+        $totalInquiries = Inquiry::where('user_id', $request->user()->id)->count();
+        $convertedInquiries = Inquiry::where('user_id', $request->user()->id)->where('converted', true)->count();
+
         $revenueByMonth = $this->revenueByMonth($customerIds);
 
         $kanbanValues = collect(CardStatus::kanbanStatuses())->map(fn (CardStatus $s) => $s->value);
@@ -42,6 +46,8 @@ class DashboardController extends Controller
             'totalPayments' => (float) $totalPayments - (float) $totalShipmentFees,
             'totalShipmentFees' => (float) $totalShipmentFees,
             'totalExpenses' => $totalExpenses,
+            'totalInquiries' => $totalInquiries,
+            'convertedInquiries' => $convertedInquiries,
             'revenueByMonth' => $revenueByMonth,
             'cardsByStatus' => [
                 'backlog' => $cards->get('backlog', collect())->values(),
