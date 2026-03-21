@@ -65,15 +65,26 @@ export default function InquiriesCreate({
                     {({ errors, processing }) => (
                         <>
                             <div className="grid gap-2">
-                                <Label htmlFor="contact_username">
-                                    Contact username *
+                                <Label htmlFor="inquiry_name">
+                                    Inquiry name *
                                 </Label>
                                 <Input
-                                    id="contact_username"
-                                    name="contact_username"
+                                    id="inquiry_name"
+                                    name="inquiry_name"
                                     required
                                 />
-                                <InputError message={errors.contact_username} />
+                                <InputError message={errors.inquiry_name} />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="contact_detail">
+                                    Contact detail *
+                                </Label>
+                                <Input
+                                    id="contact_detail"
+                                    name="contact_detail"
+                                    required
+                                />
+                                <InputError message={errors.contact_detail} />
                             </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="communication_method">

@@ -22,7 +22,8 @@ class InquiryFactory extends Factory
         return [
             'user_id' => User::factory(),
             'customer_id' => null,
-            'contact_username' => fake()->userName(),
+            'inquiry_name' => fake()->name(),
+            'contact_detail' => fake()->userName(),
             'communication_method' => fake()->randomElement(CommunicationMethod::cases()),
             'inquired_at' => fake()->dateTimeBetween('-1 year', 'now')->format('Y-m-d'),
             'converted' => fake()->boolean(25),

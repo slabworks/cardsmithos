@@ -42,7 +42,8 @@ test('inquiry can be created', function () {
     $customer = Customer::factory()->for($user)->create();
 
     $response = $this->actingAs($user)->post(route('inquiries.store'), [
-        'contact_username' => 'john_doe',
+        'inquiry_name' => 'John Doe Inquiry',
+        'contact_detail' => 'john_doe',
         'communication_method' => 'discord',
         'inquired_at' => '2026-03-15',
         'converted' => '1',
@@ -54,7 +55,8 @@ test('inquiry can be created', function () {
     $this->assertDatabaseHas('inquiries', [
         'user_id' => $user->id,
         'customer_id' => $customer->id,
-        'contact_username' => 'john_doe',
+        'inquiry_name' => 'John Doe Inquiry',
+        'contact_detail' => 'john_doe',
         'communication_method' => 'discord',
         'converted' => true,
         'notes' => 'Interested in card grading',
@@ -65,7 +67,8 @@ test('inquiry can be created without customer', function () {
     $user = User::factory()->create();
 
     $response = $this->actingAs($user)->post(route('inquiries.store'), [
-        'contact_username' => 'jane_doe',
+        'inquiry_name' => 'Jane Doe Inquiry',
+        'contact_detail' => 'jane_doe',
         'communication_method' => 'email',
         'inquired_at' => '2026-03-15',
     ]);
@@ -74,7 +77,7 @@ test('inquiry can be created without customer', function () {
     $this->assertDatabaseHas('inquiries', [
         'user_id' => $user->id,
         'customer_id' => null,
-        'contact_username' => 'jane_doe',
+        'contact_detail' => 'jane_doe',
         'converted' => false,
     ]);
 });
@@ -84,14 +87,15 @@ test('inquiry creation validates required fields', function () {
 
     $response = $this->actingAs($user)->post(route('inquiries.store'), []);
 
-    $response->assertInvalid(['contact_username', 'inquired_at']);
+    $response->assertInvalid(['inquiry_name', 'contact_detail', 'inquired_at']);
 });
 
 test('inquiry creation validates communication method enum', function () {
     $user = User::factory()->create();
 
     $response = $this->actingAs($user)->post(route('inquiries.store'), [
-        'contact_username' => 'test_user',
+        'inquiry_name' => 'Test Inquiry',
+        'contact_detail' => 'test_user',
         'inquired_at' => '2026-03-15',
         'communication_method' => 'invalid_method',
     ]);
@@ -104,7 +108,8 @@ test('inquiry creation validates customer belongs to user', function () {
     $otherCustomer = Customer::factory()->create(); // belongs to another user
 
     $response = $this->actingAs($user)->post(route('inquiries.store'), [
-        'contact_username' => 'test_user',
+        'inquiry_name' => 'Test Inquiry',
+        'contact_detail' => 'test_user',
         'inquired_at' => '2026-03-15',
         'customer_id' => $otherCustomer->id,
     ]);
@@ -114,14 +119,14 @@ test('inquiry creation validates customer belongs to user', function () {
 
 test('inquiry show displays own inquiry', function () {
     $user = User::factory()->create();
-    $inquiry = Inquiry::factory()->for($user)->create(['contact_username' => 'display_user']);
+    $inquiry = Inquiry::factory()->for($user)->create(['contact_detail' => 'display_user']);
 
     $response = $this->actingAs($user)->get(route('inquiries.show', $inquiry));
 
     $response->assertSuccessful();
     $response->assertInertia(fn (Assert $page) => $page
         ->component('inquiries/show')
-        ->where('inquiry.contact_username', 'display_user'));
+        ->where('inquiry.contact_detail', 'display_user'));
 });
 
 test('inquiry show forbidden for other user', function () {
@@ -161,7 +166,8 @@ test('inquiry can be updated', function () {
     $inquiry = Inquiry::factory()->for($user)->create();
 
     $response = $this->actingAs($user)->put(route('inquiries.update', $inquiry), [
-        'contact_username' => 'updated_user',
+        'inquiry_name' => 'Updated Inquiry',
+        'contact_detail' => 'updated_user',
         'communication_method' => 'phone',
         'inquired_at' => '2026-03-10',
         'converted' => '1',
@@ -169,7 +175,7 @@ test('inquiry can be updated', function () {
 
     $response->assertRedirect(route('inquiries.show', $inquiry));
     $inquiry->refresh();
-    expect($inquiry->contact_username)->toBe('updated_user');
+    expect($inquiry->contact_detail)->toBe('updated_user');
     expect($inquiry->communication_method)->toBe(CommunicationMethod::Phone);
     expect($inquiry->converted)->toBeTrue();
 });
@@ -179,7 +185,8 @@ test('inquiry update forbidden for other user', function () {
     $inquiry = Inquiry::factory()->create();
 
     $response = $this->actingAs($user)->put(route('inquiries.update', $inquiry), [
-        'contact_username' => 'hacked',
+        'inquiry_name' => 'Hacked',
+        'contact_detail' => 'hacked',
         'inquired_at' => '2026-03-10',
     ]);
 

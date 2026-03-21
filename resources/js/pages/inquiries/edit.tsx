@@ -29,7 +29,8 @@ export default function InquiriesEdit({
 }: {
     inquiry: {
         id: number;
-        contact_username: string;
+        inquiry_name: string;
+        contact_detail: string;
         communication_method: string;
         inquired_at: string;
         converted: boolean;
@@ -66,7 +67,7 @@ export default function InquiriesEdit({
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Inquiries', href: index() },
         {
-            title: inquiry.contact_username,
+            title: inquiry.inquiry_name,
             href: InquiryController.show.url(inquiry),
         },
         {
@@ -77,7 +78,7 @@ export default function InquiriesEdit({
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title={`Edit ${inquiry.contact_username}`} />
+            <Head title={`Edit ${inquiry.inquiry_name}`} />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <Heading
                     title="Edit inquiry"
@@ -91,16 +92,28 @@ export default function InquiriesEdit({
                     {({ errors, processing }) => (
                         <>
                             <div className="grid gap-2">
-                                <Label htmlFor="contact_username">
-                                    Contact username *
+                                <Label htmlFor="inquiry_name">
+                                    Inquiry name *
                                 </Label>
                                 <Input
-                                    id="contact_username"
-                                    name="contact_username"
-                                    defaultValue={inquiry.contact_username}
+                                    id="inquiry_name"
+                                    name="inquiry_name"
+                                    defaultValue={inquiry.inquiry_name}
                                     required
                                 />
-                                <InputError message={errors.contact_username} />
+                                <InputError message={errors.inquiry_name} />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="contact_detail">
+                                    Contact detail *
+                                </Label>
+                                <Input
+                                    id="contact_detail"
+                                    name="contact_detail"
+                                    defaultValue={inquiry.contact_detail}
+                                    required
+                                />
+                                <InputError message={errors.contact_detail} />
                             </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="communication_method">
