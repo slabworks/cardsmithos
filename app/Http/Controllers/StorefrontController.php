@@ -13,7 +13,9 @@ class StorefrontController extends Controller
     {
         $columns = ['id', 'company_name', 'store_slug', 'bio', 'country', 'location_name', 'hourly_rate', 'default_fixed_rate', 'currency'];
 
-        $query = BusinessSettings::whereNotNull('store_slug')->select($columns);
+        $query = BusinessSettings::whereNotNull('store_slug')
+            ->where('is_listed_in_directory', true)
+            ->select($columns);
 
         if ($search = $request->query('search')) {
             $query->where(function ($q) use ($search) {
@@ -40,6 +42,7 @@ class StorefrontController extends Controller
 
         // Separate query for all available countries (unfiltered)
         $availableCountries = BusinessSettings::whereNotNull('store_slug')
+            ->where('is_listed_in_directory', true)
             ->whereNotNull('country')
             ->where('country', '!=', 'OT')
             ->distinct()
@@ -49,7 +52,7 @@ class StorefrontController extends Controller
 
         return Inertia::render('storefront/index', [
             'storefronts' => $query->paginate(12)->withQueryString(),
-            'totalStorefronts' => BusinessSettings::whereNotNull('store_slug')->count(),
+            'totalStorefronts' => BusinessSettings::whereNotNull('store_slug')->where('is_listed_in_directory', true)->count(),
             'availableCountries' => $availableCountries,
             'filters' => [
                 'search' => $request->query('search', ''),

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
     Dialog,
     DialogContent,
@@ -51,10 +52,14 @@ export default function Business({
         tiktok_handle: string | null;
         country: string | null;
         location_name: string | null;
+        is_listed_in_directory: boolean;
     };
     waiverAgreementText: string;
 }) {
     const [country, setCountry] = useState(businessSettings.country ?? '');
+    const [isListedInDirectory, setIsListedInDirectory] = useState(
+        businessSettings.is_listed_in_directory,
+    );
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -307,6 +312,29 @@ export default function Business({
                                         />
                                     </div>
                                 )}
+
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="hidden"
+                                        name="is_listed_in_directory"
+                                        value={isListedInDirectory ? '1' : '0'}
+                                    />
+                                    <Checkbox
+                                        id="is_listed_in_directory"
+                                        checked={isListedInDirectory}
+                                        onCheckedChange={(checked) => {
+                                            setIsListedInDirectory(
+                                                checked === true,
+                                            );
+                                        }}
+                                    />
+                                    <Label
+                                        htmlFor="is_listed_in_directory"
+                                        className="cursor-pointer"
+                                    >
+                                        List my shop in the public directory
+                                    </Label>
+                                </div>
 
                                 <div className="grid gap-2">
                                     <Label htmlFor="tax_rate">

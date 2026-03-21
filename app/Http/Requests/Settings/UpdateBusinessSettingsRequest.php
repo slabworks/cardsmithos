@@ -39,6 +39,7 @@ class UpdateBusinessSettingsRequest extends FormRequest
             'tiktok_handle' => ['nullable', 'string', 'max:24', 'regex:/^[a-zA-Z0-9._]+$/'],
             'country' => ['nullable', 'string', 'size:2'],
             'location_name' => ['nullable', 'string', 'max:100'],
+            'is_listed_in_directory' => ['boolean'],
         ];
     }
 }

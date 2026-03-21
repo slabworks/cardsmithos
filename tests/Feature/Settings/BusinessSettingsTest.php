@@ -50,3 +50,51 @@ test('business settings can be updated', function () {
     expect($user->businessSettings->instagram_handle)->toBe('acmecards');
     expect($user->businessSettings->tiktok_handle)->toBe('acmecards');
 });
+
+test('business settings can update country and location name', function () {
+    $user = User::factory()->create();
+    $user->businessSettings()->create([
+        'hourly_rate' => 100,
+        'currency' => 'USD',
+    ]);
+
+    $response = $this->actingAs($user)->patch(route('business.update'), [
+        'country' => 'OT',
+        'location_name' => 'Singapore',
+    ]);
+
+    $response->assertSessionHasNoErrors()->assertRedirect(route('business.edit'));
+
+    $user->businessSettings->refresh();
+    expect($user->businessSettings->country)->toBe('OT');
+    expect($user->businessSettings->location_name)->toBe('Singapore');
+});
+
+test('business settings can update is_listed_in_directory', function () {
+    $user = User::factory()->create();
+    $user->businessSettings()->create([
+        'hourly_rate' => 100,
+        'currency' => 'USD',
+        'store_slug' => 'test-shop',
+        'is_listed_in_directory' => true,
+    ]);
+
+    $response = $this->actingAs($user)->patch(route('business.update'), [
+        'is_listed_in_directory' => false,
+    ]);
+
+    $response->assertSessionHasNoErrors()->assertRedirect(route('business.edit'));
+
+    $user->businessSettings->refresh();
+    expect($user->businessSettings->is_listed_in_directory)->toBeFalse();
+});
+
+test('is_listed_in_directory defaults to true for new settings', function () {
+    $user = User::factory()->create();
+    $user->businessSettings()->create([
+        'hourly_rate' => 100,
+        'currency' => 'USD',
+    ]);
+
+    expect($user->businessSettings->is_listed_in_directory)->toBeTrue();
+});

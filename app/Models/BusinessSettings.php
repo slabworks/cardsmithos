@@ -25,6 +25,7 @@ class BusinessSettings extends Model
         'tiktok_handle',
         'country',
         'location_name',
+        'is_listed_in_directory',
     ];
 
     /**
@@ -36,6 +37,7 @@ class BusinessSettings extends Model
             'hourly_rate' => 'decimal:2',
             'default_fixed_rate' => 'decimal:2',
             'tax_rate' => 'decimal:2',
+            'is_listed_in_directory' => 'boolean',
         ];
     }
 
