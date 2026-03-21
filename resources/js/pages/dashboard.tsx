@@ -163,73 +163,6 @@ export default function Dashboard({
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-                <Card className="flex max-h-[80vh] flex-col border-sidebar-border/70 dark:border-sidebar-border">
-                    <CardHeader className="shrink-0">
-                        <CardTitle className="flex items-center gap-2">
-                            <Kanban className="size-5" />
-                            Work board
-                        </CardTitle>
-                        <CardDescription>
-                            All cards across customers by status
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="flex min-h-0 flex-1 flex-col overflow-hidden">
-                        <div className="grid min-h-0 min-w-[640px] flex-1 grid-cols-3 gap-4">
-                            {columns.map((col) => {
-                                const cards = cardsByStatus[col.key];
-
-                                return (
-                                    <div
-                                        key={col.key}
-                                        className={`flex min-h-0 flex-col overflow-hidden rounded-lg border-t-2 ${col.color} bg-muted/40 p-3`}
-                                    >
-                                        <div className="mb-3 flex shrink-0 items-center gap-2">
-                                            <span
-                                                className={`size-2 rounded-full ${col.dotColor}`}
-                                            />
-                                            <span className="text-sm font-medium">
-                                                {col.label}
-                                            </span>
-                                            <span className="ml-auto text-xs text-muted-foreground">
-                                                {cards.length}
-                                            </span>
-                                        </div>
-                                        {cards.length === 0 ? (
-                                            <p className="py-4 text-center text-xs text-muted-foreground">
-                                                No cards
-                                            </p>
-                                        ) : (
-                                            <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto">
-                                                {cards.map((card) => (
-                                                    <Link
-                                                        key={card.id}
-                                                        href={CardController.edit.url(
-                                                            {
-                                                                customer:
-                                                                    card
-                                                                        .customer
-                                                                        .id,
-                                                                card: card.id,
-                                                            },
-                                                        )}
-                                                        className="rounded-md border border-sidebar-border bg-card p-3 shadow-sm transition-shadow hover:shadow-md"
-                                                    >
-                                                        <p className="text-sm font-medium">
-                                                            {card.name}
-                                                        </p>
-                                                        <p className="mt-0.5 text-xs text-muted-foreground">
-                                                            {card.customer.name}
-                                                        </p>
-                                                    </Link>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </CardContent>
-                </Card>
                 <div className="grid auto-rows-min gap-4 md:grid-cols-4">
                     <Card className="border-sidebar-border/70 dark:border-sidebar-border">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -297,6 +230,73 @@ export default function Dashboard({
                         </CardContent>
                     </Card>
                 </div>
+                <Card className="flex max-h-[80vh] flex-col border-sidebar-border/70 dark:border-sidebar-border">
+                    <CardHeader className="shrink-0">
+                        <CardTitle className="flex items-center gap-2">
+                            <Kanban className="size-5" />
+                            Work board
+                        </CardTitle>
+                        <CardDescription>
+                            All cards across customers by status
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex min-h-0 flex-1 flex-col overflow-hidden">
+                        <div className="grid min-h-0 min-w-[640px] flex-1 grid-cols-3 gap-4">
+                            {columns.map((col) => {
+                                const cards = cardsByStatus[col.key];
+
+                                return (
+                                    <div
+                                        key={col.key}
+                                        className={`flex min-h-0 flex-col overflow-hidden rounded-lg border-t-2 ${col.color} bg-muted/40 p-3`}
+                                    >
+                                        <div className="mb-3 flex shrink-0 items-center gap-2">
+                                            <span
+                                                className={`size-2 rounded-full ${col.dotColor}`}
+                                            />
+                                            <span className="text-sm font-medium">
+                                                {col.label}
+                                            </span>
+                                            <span className="ml-auto text-xs text-muted-foreground">
+                                                {cards.length}
+                                            </span>
+                                        </div>
+                                        {cards.length === 0 ? (
+                                            <p className="py-4 text-center text-xs text-muted-foreground">
+                                                No cards
+                                            </p>
+                                        ) : (
+                                            <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto">
+                                                {cards.map((card) => (
+                                                    <Link
+                                                        key={card.id}
+                                                        href={CardController.edit.url(
+                                                            {
+                                                                customer:
+                                                                    card
+                                                                        .customer
+                                                                        .id,
+                                                                card: card.id,
+                                                            },
+                                                        )}
+                                                        className="rounded-md border border-sidebar-border bg-card p-3 shadow-sm transition-shadow hover:shadow-md"
+                                                    >
+                                                        <p className="text-sm font-medium">
+                                                            {card.name}
+                                                        </p>
+                                                        <p className="mt-0.5 text-xs text-muted-foreground">
+                                                            {card.customer.name}
+                                                        </p>
+                                                    </Link>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </CardContent>
+                </Card>
                 <Card className="flex-1 border-sidebar-border/70 dark:border-sidebar-border">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
