@@ -20,7 +20,8 @@ class StoreInquiryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'contact_username' => ['required', 'string', 'max:255'],
+            'inquiry_name' => ['required', 'string', 'max:255'],
+            'contact_detail' => ['required', 'string', 'max:255'],
             'communication_method' => ['nullable', Rule::enum(CommunicationMethod::class)],
             'inquired_at' => ['required', 'date'],
             'converted' => ['nullable', 'boolean'],

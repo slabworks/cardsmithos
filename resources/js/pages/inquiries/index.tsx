@@ -19,7 +19,8 @@ const breadcrumbs: BreadcrumbItem[] = [{ title: 'Inquiries', href: index() }];
 
 type InquiryItem = {
     id: number;
-    contact_username: string;
+    inquiry_name: string;
+    contact_detail: string;
     communication_method: string;
     inquired_at: string;
     converted: boolean;
@@ -41,7 +42,8 @@ export default function InquiriesIndex({
 
         return inquiries.filter(
             (i) =>
-                i.contact_username.toLowerCase().includes(q) ||
+                i.inquiry_name.toLowerCase().includes(q) ||
+                i.contact_detail.toLowerCase().includes(q) ||
                 i.communication_method
                     ?.replace('_', ' ')
                     .toLowerCase()
@@ -113,7 +115,10 @@ export default function InquiriesIndex({
                                     >
                                         <div className="flex flex-col gap-0.5">
                                             <span className="font-medium">
-                                                {inquiry.contact_username}
+                                                {inquiry.inquiry_name}
+                                            </span>
+                                            <span className="text-sm text-muted-foreground">
+                                                {inquiry.contact_detail}
                                             </span>
                                             <span className="text-sm text-muted-foreground">
                                                 {new Date(

@@ -13,7 +13,8 @@ export default function InquiriesShow({
 }: {
     inquiry: {
         id: number;
-        contact_username: string;
+        inquiry_name: string;
+        contact_detail: string;
         communication_method: string;
         inquired_at: string;
         converted: boolean;
@@ -24,20 +25,23 @@ export default function InquiriesShow({
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Inquiries', href: index() },
         {
-            title: inquiry.contact_username,
+            title: inquiry.inquiry_name,
             href: InquiryController.show.url(inquiry),
         },
     ];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title={inquiry.contact_username} />
+            <Head title={inquiry.inquiry_name} />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-xl font-semibold">
-                            {inquiry.contact_username}
+                            {inquiry.inquiry_name}
                         </h1>
+                        <p className="text-sm text-muted-foreground">
+                            {inquiry.contact_detail}
+                        </p>
                         <p className="text-sm text-muted-foreground">
                             {new Date(inquiry.inquired_at).toLocaleDateString(
                                 undefined,
