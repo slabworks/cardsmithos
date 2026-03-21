@@ -131,7 +131,9 @@ export default function StorefrontShow({
                             <h2 className="mb-6 text-center text-xl font-medium text-[#1b1b18]">
                                 Pricing
                             </h2>
-                            <div className="grid gap-6 sm:grid-cols-2">
+                            <div
+                                className={`grid gap-6 ${hourlyRate !== null && fixedRate !== null ? 'sm:grid-cols-2' : 'mx-auto max-w-sm'}`}
+                            >
                                 {hourlyRate !== null && (
                                     <div className="rounded-lg border border-[#e8e8e6] bg-[#fafaf9] p-6 text-center">
                                         <p className="mb-1 text-sm font-medium text-[#575754]">

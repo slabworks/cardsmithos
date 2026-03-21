@@ -157,7 +157,9 @@ export default function Business({
                                             <>
                                                 Your public storefront:{' '}
                                                 <a
-                                                    href={storefrontShow.url(businessSettings.store_slug)}
+                                                    href={storefrontShow.url(
+                                                        businessSettings.store_slug,
+                                                    )}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     className="underline underline-offset-4 hover:no-underline"
