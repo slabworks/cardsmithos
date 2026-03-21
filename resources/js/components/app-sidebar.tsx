@@ -1,5 +1,13 @@
 import { Link } from '@inertiajs/react';
-import { Github, Heart, LayoutGrid, MessageCircle, Receipt, Users } from 'lucide-react';
+import {
+    Github,
+    Heart,
+    LayoutGrid,
+    MessageCircle,
+    MessageSquare,
+    Receipt,
+    Users,
+} from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -16,6 +24,7 @@ import {
 import { dashboard } from '@/routes';
 import { index as customersIndex } from '@/routes/customers';
 import { index as expensesIndex } from '@/routes/expenses';
+import { index as inquiriesIndex } from '@/routes/inquiries';
 import type { NavItem } from '@/types';
 
 const mainNavItems: NavItem[] = [
@@ -28,6 +37,11 @@ const mainNavItems: NavItem[] = [
         title: 'Customers',
         href: customersIndex(),
         icon: Users,
+    },
+    {
+        title: 'Inquiries',
+        href: inquiriesIndex(),
+        icon: MessageSquare,
     },
     {
         title: 'Expenses',

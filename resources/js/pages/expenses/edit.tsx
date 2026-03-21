@@ -109,7 +109,10 @@ export default function ExpensesEdit({
                                     id="occurred_at"
                                     name="occurred_at"
                                     type="date"
-                                    defaultValue={expense.occurred_at.slice(0, 10)}
+                                    defaultValue={expense.occurred_at.slice(
+                                        0,
+                                        10,
+                                    )}
                                     required
                                 />
                                 <InputError message={errors.occurred_at} />
@@ -160,9 +163,7 @@ export default function ExpensesEdit({
                                 </Button>
                             </DialogTrigger>
                             <DialogContent>
-                                <DialogTitle>
-                                    Delete this expense?
-                                </DialogTitle>
+                                <DialogTitle>Delete this expense?</DialogTitle>
                                 <DialogDescription>
                                     This will permanently delete this expense.
                                     This cannot be undone.

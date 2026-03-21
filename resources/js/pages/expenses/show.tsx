@@ -7,15 +7,17 @@ import AppLayout from '@/layouts/app-layout';
 import { index } from '@/routes/expenses';
 import type { BreadcrumbItem } from '@/types';
 
-const categoryBadgeVariant: Record<string, 'default' | 'secondary' | 'outline'> =
-    {
-        supplies: 'default',
-        shipping: 'secondary',
-        equipment: 'default',
-        software: 'secondary',
-        marketing: 'secondary',
-        other: 'outline',
-    };
+const categoryBadgeVariant: Record<
+    string,
+    'default' | 'secondary' | 'outline'
+> = {
+    supplies: 'default',
+    shipping: 'secondary',
+    equipment: 'default',
+    software: 'secondary',
+    marketing: 'secondary',
+    other: 'outline',
+};
 
 export default function ExpensesShow({
     expense,
@@ -69,8 +71,7 @@ export default function ExpensesShow({
                                     Amount
                                 </dt>
                                 <dd className="text-lg font-semibold tabular-nums">
-                                    $
-                                    {parseFloat(expense.amount).toFixed(2)}
+                                    ${parseFloat(expense.amount).toFixed(2)}
                                 </dd>
                             </div>
                             <div>
@@ -94,7 +95,7 @@ export default function ExpensesShow({
                                     <dt className="text-sm font-medium text-muted-foreground">
                                         Notes
                                     </dt>
-                                    <dd className="whitespace-pre-wrap text-sm">
+                                    <dd className="text-sm whitespace-pre-wrap">
                                         {expense.notes}
                                     </dd>
                                 </div>

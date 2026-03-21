@@ -1,84 +1,81 @@
 import { Head, Link } from '@inertiajs/react';
-import { Plus, Receipt, Search } from 'lucide-react';
+import {
+    CheckCircle,
+    MessageSquare,
+    Plus,
+    Search,
+    XCircle,
+} from 'lucide-react';
 import { useMemo, useState } from 'react';
-import ExpenseController from '@/actions/App/Http/Controllers/ExpenseController';
+import InquiryController from '@/actions/App/Http/Controllers/InquiryController';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import AppLayout from '@/layouts/app-layout';
-import { create, index } from '@/routes/expenses';
+import { create, index } from '@/routes/inquiries';
 import type { BreadcrumbItem } from '@/types';
 
-const breadcrumbs: BreadcrumbItem[] = [{ title: 'Expenses', href: index() }];
+const breadcrumbs: BreadcrumbItem[] = [{ title: 'Inquiries', href: index() }];
 
-const categoryBadgeVariant: Record<
-    string,
-    'default' | 'secondary' | 'outline'
-> = {
-    supplies: 'default',
-    shipping: 'secondary',
-    equipment: 'default',
-    software: 'secondary',
-    marketing: 'secondary',
-    other: 'outline',
+type InquiryItem = {
+    id: number;
+    contact_username: string;
+    communication_method: string;
+    inquired_at: string;
+    converted: boolean;
+    customer: { id: number; name: string } | null;
 };
 
-export default function ExpensesIndex({
-    expenses,
+export default function InquiriesIndex({
+    inquiries,
 }: {
-    expenses: Array<{
-        id: number;
-        description: string;
-        amount: string;
-        category: string;
-        occurred_at: string;
-    }>;
+    inquiries: InquiryItem[];
 }) {
     const [search, setSearch] = useState('');
     const filtered = useMemo(() => {
         const q = search.toLowerCase();
 
         if (!q) {
-            return expenses;
+            return inquiries;
         }
 
-        return expenses.filter(
-            (e) =>
-                e.description.toLowerCase().includes(q) ||
-                e.category?.replace('_', ' ').toLowerCase().includes(q),
+        return inquiries.filter(
+            (i) =>
+                i.contact_username.toLowerCase().includes(q) ||
+                i.communication_method
+                    ?.replace('_', ' ')
+                    .toLowerCase()
+                    .includes(q) ||
+                i.customer?.name.toLowerCase().includes(q),
         );
-    }, [expenses, search]);
-
-    const total = useMemo(
-        () => filtered.reduce((sum, e) => sum + parseFloat(e.amount), 0),
-        [filtered],
-    );
+    }, [inquiries, search]);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Expenses" />
+            <Head title="Inquiries" />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-xl font-semibold">Expenses</h1>
-                        {expenses.length > 0 && (
+                        <h1 className="text-xl font-semibold">Inquiries</h1>
+                        {inquiries.length > 0 && (
                             <p className="text-sm text-muted-foreground">
-                                Total: ${total.toFixed(2)}
+                                {inquiries.filter((i) => i.converted).length} of{' '}
+                                {inquiries.length} converted
                             </p>
                         )}
                     </div>
                     <Button asChild>
                         <Link href={create()}>
                             <Plus className="mr-2 size-4" />
-                            Add expense
+                            Add inquiry
                         </Link>
                     </Button>
                 </div>
-                {expenses.length > 0 && (
+                {inquiries.length > 0 && (
                     <div className="relative">
                         <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
                         <Input
-                            placeholder="Search expenses..."
+                            placeholder="Search inquiries..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             className="pl-9"
@@ -86,68 +83,68 @@ export default function ExpensesIndex({
                     </div>
                 )}
                 <div className="rounded-lg border border-sidebar-border bg-card">
-                    {expenses.length === 0 ? (
+                    {inquiries.length === 0 ? (
                         <div className="flex flex-col items-center justify-center gap-2 py-12 text-center">
-                            <Receipt className="size-10 text-muted-foreground" />
+                            <MessageSquare className="size-10 text-muted-foreground" />
                             <p className="text-sm text-muted-foreground">
-                                No expenses yet
+                                No inquiries yet
                             </p>
                             <Button asChild variant="outline">
                                 <Link href={create()}>
-                                    Add your first expense
+                                    Add your first inquiry
                                 </Link>
                             </Button>
                         </div>
                     ) : filtered.length === 0 ? (
                         <div className="flex flex-col items-center justify-center gap-2 py-12 text-center">
                             <p className="text-sm text-muted-foreground">
-                                No expenses match your search
+                                No inquiries match your search
                             </p>
                         </div>
                     ) : (
                         <ul className="divide-y divide-sidebar-border">
-                            {filtered.map((expense) => (
-                                <li key={expense.id}>
+                            {filtered.map((inquiry) => (
+                                <li key={inquiry.id}>
                                     <Link
-                                        href={ExpenseController.show.url(
-                                            expense,
+                                        href={InquiryController.show.url(
+                                            inquiry,
                                         )}
                                         className="flex items-center justify-between px-4 py-3 hover:bg-muted/50"
                                     >
                                         <div className="flex flex-col gap-0.5">
                                             <span className="font-medium">
-                                                {expense.description}
+                                                {inquiry.contact_username}
                                             </span>
                                             <span className="text-sm text-muted-foreground">
                                                 {new Date(
-                                                    expense.occurred_at,
+                                                    inquiry.inquired_at,
                                                 ).toLocaleDateString(
                                                     undefined,
                                                     {
                                                         dateStyle: 'medium',
                                                     },
                                                 )}
+                                                {inquiry.customer && (
+                                                    <>
+                                                        {' '}
+                                                        &middot;{' '}
+                                                        {inquiry.customer.name}
+                                                    </>
+                                                )}
                                             </span>
                                         </div>
                                         <div className="flex items-center gap-3">
-                                            <Badge
-                                                variant={
-                                                    categoryBadgeVariant[
-                                                        expense.category
-                                                    ] ?? 'outline'
-                                                }
-                                            >
-                                                {expense.category.replace(
+                                            <Badge variant="secondary">
+                                                {inquiry.communication_method.replace(
                                                     '_',
                                                     ' ',
                                                 )}
                                             </Badge>
-                                            <span className="font-medium tabular-nums">
-                                                $
-                                                {parseFloat(
-                                                    expense.amount,
-                                                ).toFixed(2)}
-                                            </span>
+                                            {inquiry.converted ? (
+                                                <CheckCircle className="size-4 text-emerald-500" />
+                                            ) : (
+                                                <XCircle className="size-4 text-muted-foreground" />
+                                            )}
                                         </div>
                                     </Link>
                                 </li>
