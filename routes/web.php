@@ -10,6 +10,7 @@ use App\Http\Controllers\InquiryController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ShipmentController;
+use App\Http\Controllers\StorefrontController;
 use App\Http\Controllers\WaiverController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
@@ -29,6 +30,10 @@ Route::get('/sitemap.xml', function () {
         'Content-Type' => 'application/xml',
     ]);
 })->name('sitemap');
+
+Route::get('/c/{slug}', [StorefrontController::class, 'show'])
+    ->name('storefront.show')
+    ->where('slug', '[a-z0-9](?:[a-z0-9-]*[a-z0-9])?');
 
 Route::inertia('/', 'welcome', [
     'canRegister' => Features::enabled(Features::registration()),
