@@ -1,8 +1,10 @@
 import { Transition } from '@headlessui/react';
 import { Form, Head } from '@inertiajs/react';
+import { useState } from 'react';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
     Dialog,
     DialogContent,
@@ -13,8 +15,16 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
+import { COUNTRIES, countryToFlag } from '@/lib/countries';
 import { edit, update } from '@/routes/business';
 import { show as storefrontShow } from '@/routes/storefront';
 import type { BreadcrumbItem } from '@/types';
@@ -40,9 +50,17 @@ export default function Business({
         bio: string | null;
         instagram_handle: string | null;
         tiktok_handle: string | null;
+        country: string | null;
+        location_name: string | null;
+        is_listed_in_directory: boolean;
     };
     waiverAgreementText: string;
 }) {
+    const [country, setCountry] = useState(businessSettings.country ?? '');
+    const [isListedInDirectory, setIsListedInDirectory] = useState(
+        businessSettings.is_listed_in_directory,
+    );
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Business settings" />
@@ -235,6 +253,87 @@ export default function Business({
                                     <InputError
                                         message={errors.tiktok_handle}
                                     />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="country">Location</Label>
+                                    <input
+                                        type="hidden"
+                                        name="country"
+                                        value={country}
+                                    />
+                                    <Select
+                                        value={country}
+                                        onValueChange={(value) => {
+                                            setCountry(value);
+                                        }}
+                                    >
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Select a country" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {COUNTRIES.map((c) => (
+                                                <SelectItem
+                                                    key={c.code}
+                                                    value={c.code}
+                                                >
+                                                    {countryToFlag(c.code)}{' '}
+                                                    {c.name}
+                                                </SelectItem>
+                                            ))}
+                                            <SelectItem value="OT">
+                                                Other
+                                            </SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <p className="text-sm text-muted-foreground">
+                                        Shown on your public storefront.
+                                    </p>
+                                    <InputError message={errors.country} />
+                                </div>
+
+                                {country === 'OT' && (
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="location_name">
+                                            Location name
+                                        </Label>
+                                        <Input
+                                            id="location_name"
+                                            name="location_name"
+                                            maxLength={100}
+                                            placeholder="e.g. Singapore"
+                                            defaultValue={
+                                                businessSettings.location_name ??
+                                                ''
+                                            }
+                                        />
+                                        <InputError
+                                            message={errors.location_name}
+                                        />
+                                    </div>
+                                )}
+
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="hidden"
+                                        name="is_listed_in_directory"
+                                        value={isListedInDirectory ? '1' : '0'}
+                                    />
+                                    <Checkbox
+                                        id="is_listed_in_directory"
+                                        checked={isListedInDirectory}
+                                        onCheckedChange={(checked) => {
+                                            setIsListedInDirectory(
+                                                checked === true,
+                                            );
+                                        }}
+                                    />
+                                    <Label
+                                        htmlFor="is_listed_in_directory"
+                                        className="cursor-pointer"
+                                    >
+                                        List my shop in the public directory
+                                    </Label>
                                 </div>
 
                                 <div className="grid gap-2">

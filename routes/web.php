@@ -31,6 +31,9 @@ Route::get('/sitemap.xml', function () {
     ]);
 })->name('sitemap');
 
+Route::get('/directory', [StorefrontController::class, 'index'])
+    ->name('storefront.index');
+
 Route::get('/c/{slug}', [StorefrontController::class, 'show'])
     ->name('storefront.show')
     ->where('slug', '[a-z0-9](?:[a-z0-9-]*[a-z0-9])?');

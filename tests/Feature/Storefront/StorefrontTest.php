@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\BusinessSettings;
 use App\Models\User;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -55,5 +56,142 @@ test('storefront page handles null optional fields', function () {
         ->where('bio', null)
         ->where('instagramHandle', null)
         ->where('tiktokHandle', null)
+    );
+});
+
+test('storefront show page includes location data', function () {
+    $user = User::factory()->create();
+    $user->businessSettings()->create([
+        'store_slug' => 'located-shop',
+        'company_name' => 'Located Shop',
+        'country' => 'US',
+        'location_name' => null,
+    ]);
+
+    $response = $this->get('/c/located-shop');
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('storefront/show')
+        ->where('country', 'US')
+        ->where('locationName', null)
+    );
+});
+
+test('directory page loads successfully', function () {
+    $response = $this->get(route('storefront.index'));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('storefront/index')
+        ->has('storefronts')
+        ->has('totalStorefronts')
+        ->has('availableCountries')
+        ->has('filters')
+    );
+});
+
+test('directory page lists storefronts with slugs', function () {
+    BusinessSettings::factory()->count(3)->create();
+
+    $response = $this->get(route('storefront.index'));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('storefront/index')
+        ->where('totalStorefronts', 3)
+        ->has('storefronts.data', 3)
+    );
+});
+
+test('directory page excludes storefronts without slugs', function () {
+    BusinessSettings::factory()->count(2)->create();
+    BusinessSettings::factory()->withoutSlug()->create();
+
+    $response = $this->get(route('storefront.index'));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->where('totalStorefronts', 2)
+        ->has('storefronts.data', 2)
+    );
+});
+
+test('directory page excludes de-listed storefronts', function () {
+    BusinessSettings::factory()->count(2)->create();
+    BusinessSettings::factory()->create([
+        'is_listed_in_directory' => false,
+    ]);
+
+    $response = $this->get(route('storefront.index'));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->where('totalStorefronts', 2)
+        ->has('storefronts.data', 2)
+    );
+});
+
+test('directory page filters by search term', function () {
+    BusinessSettings::factory()->create(['company_name' => 'Alpha Cards']);
+    BusinessSettings::factory()->create(['company_name' => 'Beta Repairs']);
+
+    $response = $this->get(route('storefront.index', ['search' => 'Alpha']));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->has('storefronts.data', 1)
+        ->where('storefronts.data.0.company_name', 'Alpha Cards')
+    );
+});
+
+test('directory page filters by country', function () {
+    BusinessSettings::factory()->create(['country' => 'US']);
+    BusinessSettings::factory()->create(['country' => 'JP']);
+    BusinessSettings::factory()->create(['country' => 'US']);
+
+    $response = $this->get(route('storefront.index', ['countries' => 'US']));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->has('storefronts.data', 2)
+    );
+});
+
+test('directory page returns available countries', function () {
+    BusinessSettings::factory()->create(['country' => 'US']);
+    BusinessSettings::factory()->create(['country' => 'JP']);
+    BusinessSettings::factory()->otherCountry()->create();
+
+    $response = $this->get(route('storefront.index'));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->where('availableCountries', ['JP', 'US'])
+    );
+});
+
+test('directory page sorts by name by default', function () {
+    BusinessSettings::factory()->create(['company_name' => 'Zebra Cards']);
+    BusinessSettings::factory()->create(['company_name' => 'Alpha Cards']);
+
+    $response = $this->get(route('storefront.index'));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->where('storefronts.data.0.company_name', 'Alpha Cards')
+        ->where('storefronts.data.1.company_name', 'Zebra Cards')
+    );
+});
+
+test('directory page de-listed shops are not counted in totalStorefronts', function () {
+    BusinessSettings::factory()->count(3)->create();
+    BusinessSettings::factory()->create(['is_listed_in_directory' => false]);
+
+    $response = $this->get(route('storefront.index'));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->where('totalStorefronts', 3)
     );
 });

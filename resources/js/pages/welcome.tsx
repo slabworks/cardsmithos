@@ -1,5 +1,6 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { dashboard, login, register } from '@/routes';
+import { index as storefrontIndex } from '@/routes/storefront';
 
 const GITHUB_URL = 'https://github.com/slabworks/cardsmithos';
 const GITHUB_CONTRIBUTING = `${GITHUB_URL}#contributing`;
@@ -167,6 +168,14 @@ export default function Welcome({
                                 </Link>
                             </p>
                         )}
+                        <p className="mt-4">
+                            <Link
+                                href={storefrontIndex.url()}
+                                className="inline-block rounded border border-[#e3e3e0] bg-white px-6 py-3 font-medium text-[#1b1b18] hover:bg-[#f5f5f4]"
+                            >
+                                Find a card repair shop near you
+                            </Link>
+                        </p>
                     </section>
 
                     <section className="mb-16">

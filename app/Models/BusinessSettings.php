@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class BusinessSettings extends Model
 {
+    use HasFactory;
+
     /**
      * @var list<string>
      */
@@ -20,6 +23,9 @@ class BusinessSettings extends Model
         'bio',
         'instagram_handle',
         'tiktok_handle',
+        'country',
+        'location_name',
+        'is_listed_in_directory',
     ];
 
     /**
@@ -31,6 +37,7 @@ class BusinessSettings extends Model
             'hourly_rate' => 'decimal:2',
             'default_fixed_rate' => 'decimal:2',
             'tax_rate' => 'decimal:2',
+            'is_listed_in_directory' => 'boolean',
         ];
     }
 

@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\BusinessSettings;
 use App\Models\Card;
 use App\Models\CardActivity;
 use App\Models\Customer;
@@ -55,5 +56,12 @@ class DatabaseSeeder extends Seeder
                 ->for($customer)
                 ->create(['converted' => true]);
         });
+
+        // Seed directory storefronts
+        BusinessSettings::factory()->count(20)->create();
+
+        // Add a couple with "Other" country
+        BusinessSettings::factory()->otherCountry('Singapore')->create();
+        BusinessSettings::factory()->otherCountry('Philippines')->create();
     }
 }

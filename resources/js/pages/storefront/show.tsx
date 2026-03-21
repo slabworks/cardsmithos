@@ -1,4 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
+import { MapPin } from 'lucide-react';
+import { COUNTRY_NAMES, countryToFlag } from '@/lib/countries';
 
 function formatCurrency(amount: string, currency: string): string {
     try {
@@ -45,6 +47,8 @@ export default function StorefrontShow({
     bio,
     instagramHandle,
     tiktokHandle,
+    country,
+    locationName,
 }: {
     companyName: string | null;
     hourlyRate: string | null;
@@ -53,10 +57,18 @@ export default function StorefrontShow({
     bio: string | null;
     instagramHandle: string | null;
     tiktokHandle: string | null;
+    country: string | null;
+    locationName: string | null;
 }) {
     const curr = currency ?? 'USD';
     const hasRates = hourlyRate !== null || fixedRate !== null;
     const hasSocials = instagramHandle || tiktokHandle;
+    const locationDisplay =
+        country && country !== 'OT'
+            ? `${countryToFlag(country)} ${COUNTRY_NAMES[country] ?? country}`
+            : country === 'OT' && locationName
+              ? locationName
+              : null;
 
     return (
         <>
@@ -93,6 +105,12 @@ export default function StorefrontShow({
                         <h1 className="mb-4 text-3xl font-semibold tracking-tight text-[#1b1b18] lg:text-4xl">
                             {companyName ?? 'Card Repair Shop'}
                         </h1>
+                        {locationDisplay && (
+                            <p className="mt-2 flex items-center justify-center gap-1.5 text-sm text-[#575754]">
+                                <MapPin className="h-4 w-4" />
+                                {locationDisplay}
+                            </p>
+                        )}
                         {bio && (
                             <p className="mx-auto max-w-2xl text-lg leading-relaxed whitespace-pre-line text-[#575754]">
                                 {bio}

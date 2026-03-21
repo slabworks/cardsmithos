@@ -37,6 +37,9 @@ class UpdateBusinessSettingsRequest extends FormRequest
             'bio' => ['nullable', 'string', 'max:1000'],
             'instagram_handle' => ['nullable', 'string', 'max:30', 'regex:/^[a-zA-Z0-9._]+$/'],
             'tiktok_handle' => ['nullable', 'string', 'max:24', 'regex:/^[a-zA-Z0-9._]+$/'],
+            'country' => ['nullable', 'string', 'size:2'],
+            'location_name' => ['nullable', 'string', 'max:100'],
+            'is_listed_in_directory' => ['boolean'],
         ];
     }
 }
