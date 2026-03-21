@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class BusinessSettings extends Model
 {
+    use HasFactory;
+
     /**
      * @var list<string>
      */
@@ -20,6 +23,8 @@ class BusinessSettings extends Model
         'bio',
         'instagram_handle',
         'tiktok_handle',
+        'country',
+        'location_name',
     ];
 
     /**
