@@ -77,6 +77,7 @@ test('inquiry can be created without customer', function () {
     $this->assertDatabaseHas('inquiries', [
         'user_id' => $user->id,
         'customer_id' => null,
+        'inquiry_name' => 'Jane Doe Inquiry',
         'contact_detail' => 'jane_doe',
         'converted' => false,
     ]);
@@ -119,13 +120,17 @@ test('inquiry creation validates customer belongs to user', function () {
 
 test('inquiry show displays own inquiry', function () {
     $user = User::factory()->create();
-    $inquiry = Inquiry::factory()->for($user)->create(['contact_detail' => 'display_user']);
+    $inquiry = Inquiry::factory()->for($user)->create([
+        'inquiry_name' => 'Display Inquiry',
+        'contact_detail' => 'display_user',
+    ]);
 
     $response = $this->actingAs($user)->get(route('inquiries.show', $inquiry));
 
     $response->assertSuccessful();
     $response->assertInertia(fn (Assert $page) => $page
         ->component('inquiries/show')
+        ->where('inquiry.inquiry_name', 'Display Inquiry')
         ->where('inquiry.contact_detail', 'display_user'));
 });
 
@@ -175,6 +180,7 @@ test('inquiry can be updated', function () {
 
     $response->assertRedirect(route('inquiries.show', $inquiry));
     $inquiry->refresh();
+    expect($inquiry->inquiry_name)->toBe('Updated Inquiry');
     expect($inquiry->contact_detail)->toBe('updated_user');
     expect($inquiry->communication_method)->toBe(CommunicationMethod::Phone);
     expect($inquiry->converted)->toBeTrue();
