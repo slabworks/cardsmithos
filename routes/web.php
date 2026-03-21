@@ -22,6 +22,14 @@ Route::middleware(['signed:relative'])->group(function (): void {
     Route::post('/waiver/{customer}', [WaiverController::class, 'sign'])->name('waiver.sign');
 });
 
+Route::get('/sitemap.xml', function () {
+    $url = config('app.url');
+
+    return response()->view('sitemap', ['url' => $url], 200, [
+        'Content-Type' => 'application/xml',
+    ]);
+})->name('sitemap');
+
 Route::inertia('/', 'welcome', [
     'canRegister' => Features::enabled(Features::registration()),
 ])->name('home');

@@ -3,7 +3,7 @@
 return [
     'name' => 'Cardsmith OS',
     'url' => 'https://cardsmithos.test',
-    'description' => 'Open-source CRM for trading card repair shops. Track submissions, manage jobs, and keep your shop organized—without lock-in or subscription fees.',
+    'description' => 'Trading card repair CRM and management software. Track submissions, manage repair jobs, and run your trading card repair shop—open-source, no lock-in or subscription fees.',
 
     'waiver' => [
         'expiration_days' => (int) env('WAIVER_EXPIRATION_DAYS', 30),

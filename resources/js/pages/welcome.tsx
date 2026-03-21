@@ -32,27 +32,31 @@ export default function Welcome({
 
     return (
         <>
-            <Head title="Cardsmith OS — Trading card repair shop CRM">
+            <Head title="Cardsmith OS — Trading Card Repair CRM & Management Software">
                 <meta
                     name="description"
-                    content="Open-source CRM for trading card repair shops. Track submissions, manage jobs, and keep your shop organized—without lock-in or subscription fees."
+                    content="Trading card repair CRM and management software. Track repair submissions, manage jobs, and run your trading card repair shop—open-source, no lock-in or subscription fees."
+                />
+                <meta
+                    name="keywords"
+                    content="trading card repair crm, trading card repair management, card repair shop software, trading card restoration, card grading preparation, card repair tracking"
                 />
                 <meta
                     property="og:title"
-                    content="Cardsmith OS — Trading card repair shop CRM"
+                    content="Cardsmith OS — Trading Card Repair CRM & Management Software"
                 />
                 <meta
                     property="og:description"
-                    content="Open-source CRM for trading card repair shops. Track submissions, manage jobs, and keep your shop organized—without lock-in or subscription fees."
+                    content="Trading card repair CRM and management software. Track repair submissions, manage jobs, and run your trading card repair shop—open-source, no lock-in or subscription fees."
                 />
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta
                     name="twitter:title"
-                    content="Cardsmith OS — Trading card repair shop CRM"
+                    content="Cardsmith OS — Trading Card Repair CRM & Management Software"
                 />
                 <meta
                     name="twitter:description"
-                    content="Open-source CRM for trading card repair shops. Track submissions, manage jobs, and keep your shop organized—without lock-in or subscription fees."
+                    content="Trading card repair CRM and management software. Track repair submissions, manage jobs, and run your trading card repair shop—open-source, no lock-in or subscription fees."
                 />
                 <link rel="preconnect" href="https://fonts.bunny.net" />
                 <link
@@ -130,12 +134,13 @@ export default function Welcome({
                 <main className="mx-auto max-w-4xl px-6 py-12 lg:px-8 lg:py-16">
                     <section className="mb-16 text-center">
                         <h1 className="mb-4 text-3xl font-semibold tracking-tight text-[#1b1b18] lg:text-4xl">
-                            Run your trading card repair shop in one place
+                            Trading Card Repair CRM & Management Software
                         </h1>
                         <p className="mx-auto max-w-2xl text-lg leading-relaxed text-[#575754]">
-                            Cardsmith OS is an open-source CRM for repair shops.
-                            Track submissions, manage jobs, and keep your shop
-                            organized—without lock-in or subscription fees.
+                            Cardsmith OS is an open-source trading card repair
+                            management platform. Track repair submissions,
+                            manage jobs, and run your card repair shop—without
+                            lock-in or subscription fees.
                         </p>
                         {auth.user ? (
                             <p className="mt-6">
@@ -166,29 +171,30 @@ export default function Welcome({
 
                     <section className="mb-16">
                         <h2 className="mb-8 text-center text-xl font-medium text-[#1b1b18]">
-                            What you get
+                            Everything you need for trading card repair
+                            management
                         </h2>
                         <div className="grid gap-6 sm:grid-cols-3">
                             <div className="rounded-lg border border-[#e8e8e6] bg-[#fafaf9] p-6">
                                 <h3 className="mb-2 font-medium text-[#1b1b18]">
-                                    Submissions
+                                    Repair submissions
                                 </h3>
                                 <p className="text-sm leading-relaxed text-[#575754]">
-                                    Accept and track customer submissions from
-                                    intake through completion. Keep notes,
-                                    photos, and status in one place. Estimate
-                                    fees from restoration hours and your hourly
-                                    rate.
+                                    Accept and track trading card repair
+                                    submissions from intake through completion.
+                                    Keep notes, photos, and status in one place.
+                                    Estimate fees from restoration hours and
+                                    your hourly rate.
                                 </p>
                             </div>
                             <div className="rounded-lg border border-[#e8e8e6] bg-[#fafaf9] p-6">
                                 <h3 className="mb-2 font-medium text-[#1b1b18]">
-                                    Job tracking
+                                    Repair job tracking
                                 </h3>
                                 <p className="text-sm leading-relaxed text-[#575754]">
-                                    Manage repair jobs with clear statuses and
-                                    workflows. See what’s in queue, in progress,
-                                    and repaired.
+                                    Manage trading card repair jobs with clear
+                                    statuses and workflows. See what’s in queue,
+                                    in progress, and completed at a glance.
                                 </p>
                             </div>
                             <div className="rounded-lg border border-[#e8e8e6] bg-[#fafaf9] p-6">
@@ -197,9 +203,9 @@ export default function Welcome({
                                 </h3>
                                 <p className="text-sm leading-relaxed text-[#575754]">
                                     Set your hourly rate, company details, and
-                                    tax. Built for repair shop operations.
-                                    Modern stack: Laravel, React, Tailwind.
-                                    Self-host or run it your way.
+                                    tax. A complete trading card repair CRM
+                                    built for shop operations. Self-host or run
+                                    it your way.
                                 </p>
                             </div>
                         </div>
