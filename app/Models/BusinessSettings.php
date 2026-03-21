@@ -16,6 +16,10 @@ class BusinessSettings extends Model
         'currency',
         'company_name',
         'tax_rate',
+        'store_slug',
+        'bio',
+        'instagram_handle',
+        'tiktok_handle',
     ];
 
     /**

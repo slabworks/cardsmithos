@@ -16,6 +16,7 @@ import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import { edit, update } from '@/routes/business';
+import { show as storefrontShow } from '@/routes/storefront';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -35,6 +36,10 @@ export default function Business({
         currency: string | null;
         company_name: string | null;
         tax_rate: string | null;
+        store_slug: string | null;
+        bio: string | null;
+        instagram_handle: string | null;
+        tiktok_handle: string | null;
     };
     waiverAgreementText: string;
 }) {
@@ -132,6 +137,102 @@ export default function Business({
                                         }
                                     />
                                     <InputError message={errors.company_name} />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="store_slug">
+                                        Store slug
+                                    </Label>
+                                    <Input
+                                        id="store_slug"
+                                        name="store_slug"
+                                        maxLength={63}
+                                        placeholder="my-card-shop"
+                                        defaultValue={
+                                            businessSettings.store_slug ?? ''
+                                        }
+                                    />
+                                    <p className="text-sm text-muted-foreground">
+                                        {businessSettings.store_slug ? (
+                                            <>
+                                                Your public storefront:{' '}
+                                                <a
+                                                    href={storefrontShow.url(businessSettings.store_slug)}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="underline underline-offset-4 hover:no-underline"
+                                                >
+                                                    {`${window.location.origin}${storefrontShow.url(businessSettings.store_slug)}`}
+                                                </a>
+                                            </>
+                                        ) : (
+                                            'Lowercase letters, numbers, and hyphens only. Sets up a public storefront page.'
+                                        )}
+                                    </p>
+                                    <InputError message={errors.store_slug} />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="bio">Bio</Label>
+                                    <textarea
+                                        id="bio"
+                                        name="bio"
+                                        maxLength={1000}
+                                        rows={4}
+                                        placeholder="Tell customers about your shop and services..."
+                                        defaultValue={
+                                            businessSettings.bio ?? ''
+                                        }
+                                        className="flex w-full min-w-0 rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 md:text-sm dark:aria-invalid:ring-destructive/40"
+                                    />
+                                    <p className="text-sm text-muted-foreground">
+                                        A short public biography shown on your
+                                        storefront. Max 1000 characters.
+                                    </p>
+                                    <InputError message={errors.bio} />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="instagram_handle">
+                                        Instagram
+                                    </Label>
+                                    <Input
+                                        id="instagram_handle"
+                                        name="instagram_handle"
+                                        maxLength={30}
+                                        placeholder="yourusername"
+                                        defaultValue={
+                                            businessSettings.instagram_handle ??
+                                            ''
+                                        }
+                                    />
+                                    <p className="text-sm text-muted-foreground">
+                                        Your Instagram username without the @.
+                                    </p>
+                                    <InputError
+                                        message={errors.instagram_handle}
+                                    />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="tiktok_handle">
+                                        TikTok
+                                    </Label>
+                                    <Input
+                                        id="tiktok_handle"
+                                        name="tiktok_handle"
+                                        maxLength={24}
+                                        placeholder="yourusername"
+                                        defaultValue={
+                                            businessSettings.tiktok_handle ?? ''
+                                        }
+                                    />
+                                    <p className="text-sm text-muted-foreground">
+                                        Your TikTok username without the @.
+                                    </p>
+                                    <InputError
+                                        message={errors.tiktok_handle}
+                                    />
                                 </div>
 
                                 <div className="grid gap-2">

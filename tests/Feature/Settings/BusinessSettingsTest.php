@@ -32,6 +32,10 @@ test('business settings can be updated', function () {
         'currency' => 'USD',
         'company_name' => 'Acme Restorations',
         'tax_rate' => 8.5,
+        'store_slug' => 'acme-cards',
+        'bio' => 'We restore cards.',
+        'instagram_handle' => 'acmecards',
+        'tiktok_handle' => 'acmecards',
     ]);
 
     $response->assertSessionHasNoErrors()->assertRedirect(route('business.edit'));
@@ -41,4 +45,8 @@ test('business settings can be updated', function () {
     expect((float) $user->businessSettings->default_fixed_rate)->toBe(50.0);
     expect($user->businessSettings->company_name)->toBe('Acme Restorations');
     expect((float) $user->businessSettings->tax_rate)->toBe(8.5);
+    expect($user->businessSettings->store_slug)->toBe('acme-cards');
+    expect($user->businessSettings->bio)->toBe('We restore cards.');
+    expect($user->businessSettings->instagram_handle)->toBe('acmecards');
+    expect($user->businessSettings->tiktok_handle)->toBe('acmecards');
 });
