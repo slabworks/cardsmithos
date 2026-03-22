@@ -58,10 +58,9 @@ class WaiverController extends Controller
             'agreement_text' => $agreementText,
         ]);
 
-        $customer->update([
-            'waiver_agreed' => true,
-            'waiver_agreed_at' => now(),
-        ]);
+        $customer->waiver_agreed = true;
+        $customer->waiver_agreed_at = now();
+        $customer->save();
 
         return redirect()->back()->with('success', 'Thank you. Your waiver has been recorded.');
     }

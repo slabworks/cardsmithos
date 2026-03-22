@@ -110,6 +110,22 @@ test('customer update forbidden for other user', function () {
     $response->assertForbidden();
 });
 
+test('customer creation ignores waiver fields', function () {
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)->post(route('customers.store'), [
+        'name' => 'Jane Doe',
+        'email' => 'jane@example.com',
+        'waiver_agreed' => true,
+        'waiver_agreed_at' => '2025-01-01 00:00:00',
+    ]);
+
+    $response->assertRedirect(route('customers.index'));
+    $customer = Customer::where('email', 'jane@example.com')->first();
+    expect($customer->waiver_agreed)->toBeNull();
+    expect($customer->waiver_agreed_at)->toBeNull();
+});
+
 test('customer can be deleted', function () {
     $user = User::factory()->create();
     $customer = Customer::factory()->for($user)->create();
