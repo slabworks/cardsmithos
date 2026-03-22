@@ -45,7 +45,7 @@ export default function InquiriesShow({
                         <p className="text-sm text-muted-foreground">
                             {new Date(inquiry.inquired_at).toLocaleDateString(
                                 undefined,
-                                { dateStyle: 'long' },
+                                { dateStyle: 'long', timeZone: 'UTC' },
                             )}
                         </p>
                     </div>

@@ -127,6 +127,7 @@ export default function InquiriesIndex({
                                                     undefined,
                                                     {
                                                         dateStyle: 'medium',
+                                                        timeZone: 'UTC',
                                                     },
                                                 )}
                                                 {inquiry.customer && (
