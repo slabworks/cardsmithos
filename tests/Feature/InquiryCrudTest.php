@@ -91,6 +91,68 @@ test('inquiry creation validates required fields', function () {
     $response->assertInvalid(['inquiry_name', 'contact_detail', 'inquired_at']);
 });
 
+test('inquiry creation with create_customer creates customer and service waiver', function () {
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)->post(route('inquiries.store'), [
+        'inquiry_name' => 'New Lead Inquiry',
+        'contact_detail' => 'new_lead',
+        'communication_method' => 'email',
+        'inquired_at' => '2026-03-15',
+        'create_customer' => '1',
+    ]);
+
+    $response->assertRedirect(route('inquiries.index'));
+
+    $customer = Customer::where('user_id', $user->id)->where('name', 'New Lead Inquiry')->first();
+    expect($customer)->not->toBeNull();
+
+    $this->assertDatabaseHas('inquiries', [
+        'user_id' => $user->id,
+        'customer_id' => $customer->id,
+        'inquiry_name' => 'New Lead Inquiry',
+        'converted' => true,
+    ]);
+
+    $this->assertDatabaseHas('service_waivers', [
+        'customer_id' => $customer->id,
+    ]);
+});
+
+test('inquiry creation with create_customer passes email to customer', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)->post(route('inquiries.store'), [
+        'inquiry_name' => 'Email Lead',
+        'contact_detail' => 'lead@example.com',
+        'inquired_at' => '2026-03-15',
+        'create_customer' => '1',
+    ]);
+
+    $this->assertDatabaseHas('customers', [
+        'user_id' => $user->id,
+        'name' => 'Email Lead',
+        'email' => 'lead@example.com',
+    ]);
+});
+
+test('inquiry creation with create_customer does not set email for non-email contact', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)->post(route('inquiries.store'), [
+        'inquiry_name' => 'Discord Lead',
+        'contact_detail' => 'discord_user#1234',
+        'inquired_at' => '2026-03-15',
+        'create_customer' => '1',
+    ]);
+
+    $this->assertDatabaseHas('customers', [
+        'user_id' => $user->id,
+        'name' => 'Discord Lead',
+        'email' => null,
+    ]);
+});
+
 test('inquiry creation validates communication method enum', function () {
     $user = User::factory()->create();
 

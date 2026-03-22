@@ -27,6 +27,7 @@ class StoreInquiryRequest extends FormRequest
             'converted' => ['nullable', 'boolean'],
             'notes' => ['nullable', 'string'],
             'customer_id' => ['nullable', Rule::exists('customers', 'id')->where('user_id', $this->user()->id)],
+            'create_customer' => ['nullable', 'boolean'],
         ];
     }
 }
