@@ -34,6 +34,7 @@ export default function InquiriesCreate({
         '',
     );
     const [showDropdown, setShowDropdown] = useState(false);
+    const [createCustomer, setCreateCustomer] = useState(false);
 
     const filteredCustomers = useMemo(() => {
         if (!customerSearch) {
@@ -121,83 +122,126 @@ export default function InquiriesCreate({
                                 />
                                 <InputError message={errors.inquired_at} />
                             </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="customer_search">
-                                    Customer
-                                </Label>
-                                <input
-                                    type="hidden"
-                                    name="customer_id"
-                                    value={selectedCustomerId}
-                                />
-                                <div className="relative">
-                                    <Input
-                                        id="customer_search"
-                                        value={
-                                            selectedCustomer
-                                                ? selectedCustomer.name
-                                                : customerSearch
-                                        }
-                                        onChange={(e) => {
-                                            setCustomerSearch(e.target.value);
-                                            setSelectedCustomerId('');
-                                            setShowDropdown(true);
-                                        }}
-                                        onFocus={() => setShowDropdown(true)}
-                                        onBlur={() =>
-                                            setTimeout(
-                                                () => setShowDropdown(false),
-                                                200,
-                                            )
-                                        }
-                                        placeholder="Search customers..."
-                                        autoComplete="off"
+                            {!createCustomer && (
+                                <div className="grid gap-2">
+                                    <Label htmlFor="customer_search">
+                                        Customer
+                                    </Label>
+                                    <input
+                                        type="hidden"
+                                        name="customer_id"
+                                        value={selectedCustomerId}
                                     />
-                                    {showDropdown &&
-                                        filteredCustomers.length > 0 &&
-                                        !selectedCustomer && (
-                                            <ul className="absolute z-10 mt-1 max-h-48 w-full overflow-auto rounded-md border border-input bg-popover shadow-md">
-                                                {filteredCustomers.map((c) => (
-                                                    <li key={c.id}>
-                                                        <button
-                                                            type="button"
-                                                            className="w-full px-3 py-2 text-left text-sm hover:bg-muted"
-                                                            onMouseDown={(
-                                                                e,
-                                                            ) => {
-                                                                e.preventDefault();
-                                                                setSelectedCustomerId(
-                                                                    c.id,
-                                                                );
-                                                                setCustomerSearch(
-                                                                    '',
-                                                                );
-                                                                setShowDropdown(
-                                                                    false,
-                                                                );
-                                                            }}
-                                                        >
-                                                            {c.name}
-                                                        </button>
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        )}
+                                    <div className="relative">
+                                        <Input
+                                            id="customer_search"
+                                            value={
+                                                selectedCustomer
+                                                    ? selectedCustomer.name
+                                                    : customerSearch
+                                            }
+                                            onChange={(e) => {
+                                                setCustomerSearch(
+                                                    e.target.value,
+                                                );
+                                                setSelectedCustomerId('');
+                                                setShowDropdown(true);
+                                            }}
+                                            onFocus={() =>
+                                                setShowDropdown(true)
+                                            }
+                                            onBlur={() =>
+                                                setTimeout(
+                                                    () =>
+                                                        setShowDropdown(false),
+                                                    200,
+                                                )
+                                            }
+                                            placeholder="Search customers..."
+                                            autoComplete="off"
+                                        />
+                                        {showDropdown &&
+                                            filteredCustomers.length > 0 &&
+                                            !selectedCustomer && (
+                                                <ul className="absolute z-10 mt-1 max-h-48 w-full overflow-auto rounded-md border border-input bg-popover shadow-md">
+                                                    {filteredCustomers.map(
+                                                        (c) => (
+                                                            <li key={c.id}>
+                                                                <button
+                                                                    type="button"
+                                                                    className="w-full px-3 py-2 text-left text-sm hover:bg-muted"
+                                                                    onMouseDown={(
+                                                                        e,
+                                                                    ) => {
+                                                                        e.preventDefault();
+                                                                        setSelectedCustomerId(
+                                                                            c.id,
+                                                                        );
+                                                                        setCustomerSearch(
+                                                                            '',
+                                                                        );
+                                                                        setShowDropdown(
+                                                                            false,
+                                                                        );
+                                                                    }}
+                                                                >
+                                                                    {c.name}
+                                                                </button>
+                                                            </li>
+                                                        ),
+                                                    )}
+                                                </ul>
+                                            )}
+                                    </div>
+                                    {selectedCustomer && (
+                                        <button
+                                            type="button"
+                                            className="text-xs text-muted-foreground hover:text-foreground"
+                                            onClick={() => {
+                                                setSelectedCustomerId('');
+                                                setCustomerSearch('');
+                                            }}
+                                        >
+                                            Clear selection
+                                        </button>
+                                    )}
+                                    <InputError
+                                        message={errors.customer_id}
+                                    />
                                 </div>
-                                {selectedCustomer && (
-                                    <button
-                                        type="button"
-                                        className="text-xs text-muted-foreground hover:text-foreground"
-                                        onClick={() => {
-                                            setSelectedCustomerId('');
-                                            setCustomerSearch('');
+                            )}
+                            {!selectedCustomer && (
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="hidden"
+                                        name="create_customer"
+                                        value="0"
+                                    />
+                                    <input
+                                        id="create_customer"
+                                        name="create_customer"
+                                        type="checkbox"
+                                        value="1"
+                                        checked={createCustomer}
+                                        onChange={(e) => {
+                                            setCreateCustomer(
+                                                e.target.checked,
+                                            );
+                                            if (e.target.checked) {
+                                                setSelectedCustomerId('');
+                                                setCustomerSearch('');
+                                            }
                                         }}
-                                    >
-                                        Clear selection
-                                    </button>
-                                )}
-                                <InputError message={errors.customer_id} />
-                            </div>
+                                        className="size-4 rounded border-input"
+                                    />
+                                    <Label htmlFor="create_customer">
+                                        Create customer automatically
+                                    </Label>
+                                    <InputError
+                                        message={errors.create_customer}
+                                    />
+                                </div>
+                            )}
                             <div className="flex items-center gap-2">
                                 <input
                                     id="converted"

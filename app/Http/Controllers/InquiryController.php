@@ -53,7 +53,27 @@ class InquiryController extends Controller
     public function store(StoreInquiryRequest $request): RedirectResponse
     {
         $data = $request->validated();
+        $createCustomer = filter_var($data['create_customer'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        unset($data['create_customer']);
+
         $data['converted'] = filter_var($data['converted'] ?? false, FILTER_VALIDATE_BOOLEAN);
+
+        if ($createCustomer) {
+            $customerData = ['name' => $data['inquiry_name']];
+
+            if (filter_var($data['contact_detail'], FILTER_VALIDATE_EMAIL)) {
+                $customerData['email'] = $data['contact_detail'];
+            }
+
+            $customer = $request->user()->customers()->create($customerData);
+
+            $customer->serviceWaiver()->create([
+                'expires_at' => now()->addDays(config('cardsmithos.waiver.expiration_days', 30)),
+            ]);
+
+            $data['customer_id'] = $customer->id;
+            $data['converted'] = true;
+        }
 
         $request->user()->inquiries()->create($data);
 
