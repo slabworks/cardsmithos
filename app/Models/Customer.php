@@ -27,8 +27,6 @@ class Customer extends Model
         'address',
         'notes',
         'referral_source',
-        'waiver_agreed',
-        'waiver_agreed_at',
     ];
 
     /**

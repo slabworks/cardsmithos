@@ -31,7 +31,6 @@ test('waiver sign records signature and updates customer', function () {
     $customer = Customer::factory()->for($user)->create([
         'name' => 'Jane',
         'email' => 'jane@example.com',
-        'waiver_agreed' => false,
     ]);
     $waiver = $customer->serviceWaiver()->create([
         'expires_at' => now()->addDays(30),
