@@ -1,4 +1,4 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePoll } from '@inertiajs/react';
 import { MessageSquare, Plus, Search } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
@@ -62,6 +62,8 @@ export default function ConversationsIndex({
     conversations: ConversationItem[];
     statusOptions: StatusOption[];
 }) {
+    usePoll(15000);
+
     const [search, setSearch] = useState('');
 
     const filtered = useMemo(() => {
