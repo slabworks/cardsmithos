@@ -11,6 +11,7 @@ enum CommunicationMethod: string
     case Facebook = 'facebook';
     case Twitter = 'twitter';
     case InPerson = 'in_person';
+    case Messaging = 'messaging';
     case Other = 'other';
 
     public function label(): string
@@ -23,6 +24,7 @@ enum CommunicationMethod: string
             self::Facebook => 'Facebook',
             self::Twitter => 'Twitter',
             self::InPerson => 'In Person',
+            self::Messaging => 'Messaging',
             self::Other => 'Other',
         };
     }
@@ -37,6 +39,7 @@ enum CommunicationMethod: string
             self::Facebook => 'sky',
             self::Twitter => 'cyan',
             self::InPerson => 'amber',
+            self::Messaging => 'indigo',
             self::Other => 'slate',
         };
     }

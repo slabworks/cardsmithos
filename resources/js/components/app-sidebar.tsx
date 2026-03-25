@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
 import { index as customersIndex } from '@/routes/customers';
+import { index as conversationsIndex } from '@/routes/conversations';
 import { index as expensesIndex } from '@/routes/expenses';
 import { index as inquiriesIndex } from '@/routes/inquiries';
 import type { NavItem } from '@/types';
@@ -42,6 +43,11 @@ const mainNavItems: NavItem[] = [
         title: 'Inquiries',
         href: inquiriesIndex(),
         icon: MessageSquare,
+    },
+    {
+        title: 'Messages',
+        href: conversationsIndex(),
+        icon: MessageCircle,
     },
     {
         title: 'Expenses',

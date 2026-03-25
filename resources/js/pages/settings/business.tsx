@@ -53,12 +53,16 @@ export default function Business({
         country: string | null;
         location_name: string | null;
         is_listed_in_directory: boolean;
+        messaging_enabled: boolean;
     };
     waiverAgreementText: string;
 }) {
     const [country, setCountry] = useState(businessSettings.country ?? '');
     const [isListedInDirectory, setIsListedInDirectory] = useState(
         businessSettings.is_listed_in_directory,
+    );
+    const [messagingEnabled, setMessagingEnabled] = useState(
+        businessSettings.messaging_enabled,
     );
 
     return (
@@ -333,6 +337,29 @@ export default function Business({
                                         className="cursor-pointer"
                                     >
                                         List my shop in the public directory
+                                    </Label>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="hidden"
+                                        name="messaging_enabled"
+                                        value={messagingEnabled ? '1' : '0'}
+                                    />
+                                    <Checkbox
+                                        id="messaging_enabled"
+                                        checked={messagingEnabled}
+                                        onCheckedChange={(checked) => {
+                                            setMessagingEnabled(
+                                                checked === true,
+                                            );
+                                        }}
+                                    />
+                                    <Label
+                                        htmlFor="messaging_enabled"
+                                        className="cursor-pointer"
+                                    >
+                                        Enable customer messaging on storefront
                                     </Label>
                                 </div>
 

@@ -71,6 +71,14 @@ class Customer extends Model
     }
 
     /**
+     * @return HasMany<Conversation>
+     */
+    public function conversations(): HasMany
+    {
+        return $this->hasMany(Conversation::class);
+    }
+
+    /**
      * @return HasOne<ServiceWaiver>
      */
     public function serviceWaiver(): HasOne

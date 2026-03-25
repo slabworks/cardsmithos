@@ -68,6 +68,7 @@ class StorefrontController extends Controller
         $settings = BusinessSettings::where('store_slug', $slug)->firstOrFail();
 
         return Inertia::render('storefront/show', [
+            'slug' => $slug,
             'companyName' => $settings->company_name,
             'hourlyRate' => $settings->hourly_rate,
             'fixedRate' => $settings->default_fixed_rate,
@@ -77,6 +78,7 @@ class StorefrontController extends Controller
             'tiktokHandle' => $settings->tiktok_handle,
             'country' => $settings->country,
             'locationName' => $settings->location_name,
+            'messagingEnabled' => (bool) $settings->messaging_enabled,
         ]);
     }
 }

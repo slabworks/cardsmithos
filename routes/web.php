@@ -3,6 +3,8 @@
 use App\Http\Controllers\CardActivityController;
 use App\Http\Controllers\CardController;
 use App\Http\Controllers\CardTimelineController;
+use App\Http\Controllers\ConversationController;
+use App\Http\Controllers\ConversationMessageController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExpenseController;
@@ -10,6 +12,7 @@ use App\Http\Controllers\InquiryController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PricingCalculatorController;
+use App\Http\Controllers\PublicConversationController;
 use App\Http\Controllers\ShipmentController;
 use App\Http\Controllers\StorefrontController;
 use App\Http\Controllers\WaiverController;
@@ -39,6 +42,18 @@ Route::get('/c/{slug}', [StorefrontController::class, 'show'])
     ->name('storefront.show')
     ->where('slug', '[a-z0-9](?:[a-z0-9-]*[a-z0-9])?');
 
+// Public messaging routes
+Route::get('/c/{slug}/messages/new', [PublicConversationController::class, 'create'])
+    ->name('public.conversation.create');
+Route::post('/c/{slug}/messages', [PublicConversationController::class, 'store'])
+    ->name('public.conversation.store')
+    ->middleware('throttle:10,1');
+Route::get('/c/{slug}/messages/{accessToken}', [PublicConversationController::class, 'show'])
+    ->name('public.conversation.show');
+Route::post('/c/{slug}/messages/{accessToken}', [PublicConversationController::class, 'storeMessage'])
+    ->name('public.conversation.message')
+    ->middleware('throttle:30,1');
+
 Route::inertia('/', 'welcome', [
     'canRegister' => Features::enabled(Features::registration()),
 ])->name('home');
@@ -57,6 +72,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('customers/{customer}/invoices/create', [InvoiceController::class, 'create'])->name('customers.invoices.create');
     Route::post('customers/{customer}/invoices/download', [InvoiceController::class, 'download'])->name('customers.invoices.download')->middleware('signed:relative');
     Route::post('customers/{customer}/shipments', [ShipmentController::class, 'store'])->name('customers.shipments.store');
+
+    Route::resource('conversations', ConversationController::class);
+    Route::post('conversations/{conversation}/messages', [ConversationMessageController::class, 'store'])
+        ->name('conversations.messages.store');
+    Route::post('conversations/{conversation}/link-customer', [ConversationController::class, 'linkCustomer'])
+        ->name('conversations.link-customer');
 });
 
 require __DIR__.'/settings.php';

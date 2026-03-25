@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import { MapPin } from 'lucide-react';
+import { MapPin, MessageCircle } from 'lucide-react';
 import { COUNTRY_NAMES, countryToFlag } from '@/lib/countries';
 
 function formatCurrency(amount: string, currency: string): string {
@@ -40,6 +40,7 @@ function TiktokIcon({ className }: { className?: string }) {
 }
 
 export default function StorefrontShow({
+    slug,
     companyName,
     hourlyRate,
     fixedRate,
@@ -49,7 +50,9 @@ export default function StorefrontShow({
     tiktokHandle,
     country,
     locationName,
+    messagingEnabled,
 }: {
+    slug: string;
     companyName: string | null;
     hourlyRate: string | null;
     fixedRate: string | null;
@@ -59,6 +62,7 @@ export default function StorefrontShow({
     tiktokHandle: string | null;
     country: string | null;
     locationName: string | null;
+    messagingEnabled: boolean;
 }) {
     const curr = currency ?? 'USD';
     const hasRates = hourlyRate !== null || fixedRate !== null;
@@ -143,6 +147,18 @@ export default function StorefrontShow({
                             </div>
                         )}
                     </section>
+
+                    {messagingEnabled && (
+                        <section className="mb-12 text-center">
+                            <Link
+                                href={`/c/${slug}/messages/new`}
+                                className="inline-flex items-center gap-2 rounded-lg border border-[#e8e8e6] bg-[#fafaf9] px-6 py-3 text-sm font-medium text-[#1b1b18] transition-colors hover:bg-[#f0f0ee]"
+                            >
+                                <MessageCircle className="h-4 w-4" />
+                                Send us a message
+                            </Link>
+                        </section>
+                    )}
 
                     {hasRates && (
                         <section className="mb-12">
