@@ -205,9 +205,7 @@ export default function InquiriesCreate({
                                             Clear selection
                                         </button>
                                     )}
-                                    <InputError
-                                        message={errors.customer_id}
-                                    />
+                                    <InputError message={errors.customer_id} />
                                 </div>
                             )}
                             {!selectedCustomer && (
@@ -224,9 +222,8 @@ export default function InquiriesCreate({
                                         value="1"
                                         checked={createCustomer}
                                         onChange={(e) => {
-                                            setCreateCustomer(
-                                                e.target.checked,
-                                            );
+                                            setCreateCustomer(e.target.checked);
+
                                             if (e.target.checked) {
                                                 setSelectedCustomerId('');
                                                 setCustomerSearch('');

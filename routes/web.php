@@ -9,6 +9,7 @@ use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\InquiryController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PricingCalculatorController;
 use App\Http\Controllers\ShipmentController;
 use App\Http\Controllers\StorefrontController;
 use App\Http\Controllers\WaiverController;
@@ -44,6 +45,7 @@ Route::inertia('/', 'welcome', [
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', DashboardController::class)->name('dashboard');
+    Route::get('pricing-calculator', PricingCalculatorController::class)->name('pricing-calculator.index');
     Route::resource('expenses', ExpenseController::class);
     Route::resource('inquiries', InquiryController::class);
     Route::resource('customers', CustomerController::class);
