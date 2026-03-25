@@ -68,7 +68,9 @@ export default function ConversationsShow({
     ];
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const bodyRef = useRef<HTMLTextAreaElement>(null);
     const [messages, setMessages] = useState<Message[]>(conversation.messages);
+    const [bodyError, setBodyError] = useState<string | null>(null);
     const [showLinkCustomer, setShowLinkCustomer] = useState(false);
     const [customerSearch, setCustomerSearch] = useState('');
     const [selectedCustomerId, setSelectedCustomerId] = useState<number | ''>('');
@@ -103,7 +105,7 @@ export default function ConversationsShow({
         channel.listen('.App\\Events\\MessageSent', (event: Message) => {
             setMessages((prev) => {
                 if (prev.some((m) => m.id === event.id)) return prev;
-                return [...prev, event];
+                return [...prev.filter((m) => m.id > 0), event];
             });
         });
 
@@ -379,30 +381,50 @@ export default function ConversationsShow({
 
                 {/* Message input */}
                 <div className="border-t border-sidebar-border p-4">
-                    <Form
-                        action={storeMessage.url(conversation)}
-                        method="post"
+                    <form
                         className="mx-auto flex max-w-3xl items-start gap-2"
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            const body = bodyRef.current?.value.trim();
+                            if (!body) return;
+                            setBodyError(null);
+                            setMessages((prev) => [
+                                ...prev,
+                                {
+                                    id: -Date.now(),
+                                    sender_type: 'user',
+                                    body,
+                                    created_at: new Date().toISOString(),
+                                    read_at: null,
+                                },
+                            ]);
+                            if (bodyRef.current) bodyRef.current.value = '';
+                            router.post(storeMessage.url(conversation), { body }, {
+                                preserveState: true,
+                                preserveScroll: true,
+                                onError: (errors) => {
+                                    setMessages((prev) => prev.filter((m) => m.id > 0));
+                                    setBodyError(errors.body ?? null);
+                                    if (bodyRef.current) bodyRef.current.value = body;
+                                },
+                            });
+                        }}
                     >
-                        {({ errors, processing }) => (
-                            <>
-                                <div className="flex-1">
-                                    <textarea
-                                        name="body"
-                                        rows={2}
-                                        required
-                                        placeholder="Type your message..."
-                                        className="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
-                                    />
-                                    <InputError message={errors.body} />
-                                </div>
-                                <Button type="submit" disabled={processing}>
-                                    <Send className="mr-2 size-4" />
-                                    Send
-                                </Button>
-                            </>
-                        )}
-                    </Form>
+                        <div className="flex-1">
+                            <textarea
+                                ref={bodyRef}
+                                name="body"
+                                rows={2}
+                                placeholder="Type your message..."
+                                className="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
+                            />
+                            <InputError message={bodyError ?? undefined} />
+                        </div>
+                        <Button type="submit">
+                            <Send className="mr-2 size-4" />
+                            Send
+                        </Button>
+                    </form>
                 </div>
             </div>
         </AppLayout>

@@ -38,8 +38,8 @@ return [
             'options' => [
                 'host' => '127.0.0.1',
                 'port' => 8080,
-                'scheme' => 'https',
-                'useTLS' => true,
+                'scheme' => 'http',
+                'useTLS' => false,
             ],
             'client_options' => [
                 'verify' => false,

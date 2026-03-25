@@ -1,10 +1,9 @@
-import { Form, Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { ArrowLeft, Lock, Send } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import echo from '@/echo';
 import { Button } from '@/components/ui/button';
 import InputError from '@/components/input-error';
-import { Spinner } from '@/components/ui/spinner';
 
 type Message = {
     id: number;
@@ -56,7 +55,13 @@ export default function ShowPublicMessage({
         conversation.messages,
     );
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const bodyRef = useRef<HTMLTextAreaElement>(null);
+    const [bodyError, setBodyError] = useState<string | null>(null);
     const isOpen = conversation.status === 'open';
+
+    useEffect(() => {
+        setMessages(conversation.messages);
+    }, [conversation.messages]);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -68,10 +73,8 @@ export default function ShowPublicMessage({
             '.App\\Events\\MessageSent',
             (data: Message) => {
                 setMessages((prev) => {
-                    if (prev.some((m) => m.id === data.id)) {
-                        return prev;
-                    }
-                    return [...prev, data];
+                    if (prev.some((m) => m.id === data.id)) return prev;
+                    return [...prev.filter((m) => m.id > 0), data];
                 });
             },
         );
@@ -150,64 +153,56 @@ export default function ShowPublicMessage({
                 {isOpen ? (
                     <footer className="border-t border-[#e8e8e6] bg-white px-4 py-3">
                         <div className="mx-auto max-w-2xl">
-                            <Form
-                                action={`/c/${slug}/messages/${accessToken}`}
-                                method="post"
-                                onSuccess={() => {
-                                    const textarea =
-                                        document.getElementById(
-                                            'body',
-                                        ) as HTMLTextAreaElement | null;
-                                    if (textarea) {
-                                        textarea.value = '';
-                                    }
-                                }}
+                            <form
                                 className="flex items-end gap-2"
+                                onSubmit={(e) => {
+                                    e.preventDefault();
+                                    const body = bodyRef.current?.value.trim();
+                                    if (!body) return;
+                                    setBodyError(null);
+                                    setMessages((prev) => [
+                                        ...prev,
+                                        {
+                                            id: -Date.now(),
+                                            sender_type: 'customer',
+                                            body,
+                                            created_at: new Date().toISOString(),
+                                            read_at: null,
+                                        },
+                                    ]);
+                                    if (bodyRef.current) bodyRef.current.value = '';
+                                    router.post(`/c/${slug}/messages/${accessToken}`, { body }, {
+                                        preserveState: true,
+                                        preserveScroll: true,
+                                        onError: (errors) => {
+                                            setMessages((prev) => prev.filter((m) => m.id > 0));
+                                            setBodyError(errors.body ?? null);
+                                            if (bodyRef.current) bodyRef.current.value = body;
+                                        },
+                                    });
+                                }}
                             >
-                                {({ processing, errors }) => (
-                                    <>
-                                        <div className="flex-1">
-                                            <textarea
-                                                id="body"
-                                                name="body"
-                                                rows={1}
-                                                required
-                                                placeholder="Type a message..."
-                                                className="flex w-full resize-none rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
-                                                onKeyDown={(e) => {
-                                                    if (
-                                                        e.key === 'Enter' &&
-                                                        !e.shiftKey
-                                                    ) {
-                                                        e.preventDefault();
-                                                        const form =
-                                                            e.currentTarget.closest(
-                                                                'form',
-                                                            );
-                                                        if (form) {
-                                                            form.requestSubmit();
-                                                        }
-                                                    }
-                                                }}
-                                            />
-                                            <InputError
-                                                message={errors.body}
-                                            />
-                                        </div>
-                                        <Button
-                                            type="submit"
-                                            size="icon"
-                                            disabled={processing}
-                                        >
-                                            {processing ? (
-                                                <Spinner />
-                                            ) : (
-                                                <Send className="h-4 w-4" />
-                                            )}
-                                        </Button>
-                                    </>
-                                )}
-                            </Form>
+                                <div className="flex-1">
+                                    <textarea
+                                        ref={bodyRef}
+                                        id="body"
+                                        name="body"
+                                        rows={1}
+                                        placeholder="Type a message..."
+                                        className="flex w-full resize-none rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter' && !e.shiftKey) {
+                                                e.preventDefault();
+                                                e.currentTarget.closest('form')?.requestSubmit();
+                                            }
+                                        }}
+                                    />
+                                    <InputError message={bodyError ?? undefined} />
+                                </div>
+                                <Button type="submit" size="icon">
+                                    <Send className="h-4 w-4" />
+                                </Button>
+                            </form>
                         </div>
                     </footer>
                 ) : (
