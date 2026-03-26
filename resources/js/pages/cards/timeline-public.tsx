@@ -72,7 +72,8 @@ export default function CardsTimelinePublic({
                             </div>
                         )}
                         <div className="px-4 py-4 md:px-6">
-                            {card.activities.length === 0 && photos.length === 0 ? (
+                            {card.activities.length === 0 &&
+                            photos.length === 0 ? (
                                 <p className="py-8 text-center text-sm text-muted-foreground">
                                     No timeline entries yet.
                                 </p>

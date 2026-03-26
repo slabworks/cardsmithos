@@ -14,6 +14,7 @@ import {
 import { useRef, useState } from 'react';
 import CardActivityController from '@/actions/App/Http/Controllers/CardActivityController';
 import CardController from '@/actions/App/Http/Controllers/CardController';
+import CardPhotoController from '@/actions/App/Http/Controllers/CardPhotoController';
 import CardTimelineController from '@/actions/App/Http/Controllers/CardTimelineController';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
@@ -115,7 +116,7 @@ export default function CardsEdit({
         Array.from(files).forEach((file) => formData.append('photos[]', file));
 
         router.post(
-            `/customers/${customer.id}/cards/${card.id}/photos`,
+            CardPhotoController.store({ customer, card }),
             formData as never,
             {
                 forceFormData: true,
@@ -133,7 +134,11 @@ export default function CardsEdit({
 
     const handleToggleTimeline = (mediaId: number) => {
         router.post(
-            `/customers/${customer.id}/cards/${card.id}/photos/${mediaId}/toggle-timeline`,
+            CardPhotoController.toggleTimeline({
+                customer,
+                card,
+                media: mediaId,
+            }),
             {},
             { preserveScroll: true },
         );
@@ -141,7 +146,7 @@ export default function CardsEdit({
 
     const handlePhotoDelete = (mediaId: number) => {
         router.delete(
-            `/customers/${customer.id}/cards/${card.id}/photos/${mediaId}`,
+            CardPhotoController.destroy({ customer, card, media: mediaId }),
         );
     };
 
@@ -402,7 +407,7 @@ export default function CardsEdit({
                                             </button>
                                         </div>
                                         {photo.show_on_timeline && (
-                                            <div className="absolute bottom-0 left-0 right-0 bg-black/50 px-2 py-1">
+                                            <div className="absolute right-0 bottom-0 left-0 bg-black/50 px-2 py-1">
                                                 <span className="text-xs text-white">
                                                     On timeline
                                                 </span>

@@ -2,23 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreCardPhotoRequest;
 use App\Models\Card;
 use App\Models\Customer;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class CardPhotoController extends Controller
 {
-    public function store(Request $request, Customer $customer, Card $card): RedirectResponse
+    public function store(StoreCardPhotoRequest $request, Customer $customer, Card $card): RedirectResponse
     {
-        $this->authorize('update', $card);
-
-        $request->validate([
-            'photos' => ['required', 'array', 'min:1', 'max:10'],
-            'photos.*' => ['required', 'image', 'max:10240'],
-        ]);
-
         foreach ($request->file('photos') as $file) {
             $card->addMedia($file)->toMediaCollection('photos');
         }
