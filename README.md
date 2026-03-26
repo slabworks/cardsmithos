@@ -134,6 +134,6 @@ This project is open source and licensed under the [MIT License](LICENSE).
 
 ## Contributors
 
-Thanks to all our contributors!  
+Thanks to all our awesome contributors!  
 
 [![](https://contrib.rocks/image?repo=slabworks/cardsmithos)](https://github.com/slabworks/cardsmithos/graphs/contributors)
