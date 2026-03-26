@@ -59,9 +59,21 @@ class CardController extends Controller
         $timelineShareToken = $card->ensureTimelineShareToken();
         $timelineShareUrl = URL::route('card.timeline.show', ['card' => $card, 'token' => $timelineShareToken]);
 
+        $photos = $card->getMedia('photos')->map(fn ($media) => [
+            'id' => $media->id,
+            'url' => route('customers.cards.photos.show', [
+                'customer' => $customer,
+                'card' => $card,
+                'media' => $media->id,
+            ]),
+            'name' => $media->file_name,
+            'show_on_timeline' => (bool) $media->getCustomProperty('show_on_timeline', false),
+        ])->values()->all();
+
         return Inertia::render('cards/edit', [
             'customer' => $customer,
             'card' => $card,
+            'photos' => $photos,
             'hourlyRate' => $hourlyRate !== null ? (float) $hourlyRate : null,
             'taxRate' => $taxRate !== null ? (float) $taxRate : null,
             'timelineShareUrl' => $timelineShareUrl,
