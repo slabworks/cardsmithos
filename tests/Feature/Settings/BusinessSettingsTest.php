@@ -89,6 +89,34 @@ test('business settings can update is_listed_in_directory', function () {
     expect($user->businessSettings->is_listed_in_directory)->toBeFalse();
 });
 
+test('business settings can update hide_pricing', function () {
+    $user = User::factory()->create();
+    $user->businessSettings()->create([
+        'hourly_rate' => 100,
+        'currency' => 'USD',
+        'hide_pricing' => false,
+    ]);
+
+    $response = $this->actingAs($user)->patch(route('business.update'), [
+        'hide_pricing' => true,
+    ]);
+
+    $response->assertSessionHasNoErrors()->assertRedirect(route('business.edit'));
+
+    $user->businessSettings->refresh();
+    expect($user->businessSettings->hide_pricing)->toBeTrue();
+});
+
+test('hide_pricing defaults to false for new settings', function () {
+    $user = User::factory()->create();
+    $user->businessSettings()->create([
+        'hourly_rate' => 100,
+        'currency' => 'USD',
+    ]);
+
+    expect($user->businessSettings->hide_pricing)->toBeFalse();
+});
+
 test('is_listed_in_directory defaults to true for new settings', function () {
     $user = User::factory()->create();
     $user->businessSettings()->create([

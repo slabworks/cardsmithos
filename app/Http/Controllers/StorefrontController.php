@@ -11,7 +11,7 @@ class StorefrontController extends Controller
 {
     public function index(Request $request): Response
     {
-        $columns = ['id', 'company_name', 'store_slug', 'bio', 'country', 'location_name', 'hourly_rate', 'default_fixed_rate', 'currency'];
+        $columns = ['id', 'company_name', 'store_slug', 'bio', 'country', 'location_name', 'hourly_rate', 'default_fixed_rate', 'currency', 'hide_pricing'];
 
         $query = BusinessSettings::whereNotNull('store_slug')
             ->where('is_listed_in_directory', true)
@@ -65,7 +65,7 @@ class StorefrontController extends Controller
 
     public function show(string $slug): Response
     {
-        $settings = BusinessSettings::where('store_slug', $slug)->firstOrFail();
+        $settings = BusinessSettings::where('store_slug', $slug)->with('user:id,email')->firstOrFail();
 
         return Inertia::render('storefront/show', [
             'companyName' => $settings->company_name,
@@ -77,6 +77,8 @@ class StorefrontController extends Controller
             'tiktokHandle' => $settings->tiktok_handle,
             'country' => $settings->country,
             'locationName' => $settings->location_name,
+            'hidePricing' => (bool) $settings->hide_pricing,
+            'contactEmail' => $settings->hide_pricing ? $settings->user->email : null,
         ]);
     }
 }

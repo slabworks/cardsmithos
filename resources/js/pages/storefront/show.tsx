@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import { MapPin } from 'lucide-react';
+import { Mail, MapPin } from 'lucide-react';
 import { COUNTRY_NAMES, countryToFlag } from '@/lib/countries';
 
 function formatCurrency(amount: string, currency: string): string {
@@ -49,6 +49,8 @@ export default function StorefrontShow({
     tiktokHandle,
     country,
     locationName,
+    hidePricing,
+    contactEmail,
 }: {
     companyName: string | null;
     hourlyRate: string | null;
@@ -59,6 +61,8 @@ export default function StorefrontShow({
     tiktokHandle: string | null;
     country: string | null;
     locationName: string | null;
+    hidePricing: boolean;
+    contactEmail: string | null;
 }) {
     const curr = currency ?? 'USD';
     const hasRates = hourlyRate !== null || fixedRate !== null;
@@ -77,7 +81,7 @@ export default function StorefrontShow({
             >
                 <meta
                     name="description"
-                    content={`${companyName ?? 'Card repair shop'} — trading card repair services${hourlyRate ? `, starting at ${formatCurrency(hourlyRate, curr)}/hr` : ''}.`}
+                    content={`${companyName ?? 'Card repair shop'} — trading card repair services${!hidePricing && hourlyRate ? `, starting at ${formatCurrency(hourlyRate, curr)}/hr` : ''}.`}
                 />
                 <link rel="preconnect" href="https://fonts.bunny.net" />
                 <link
@@ -149,36 +153,53 @@ export default function StorefrontShow({
                             <h2 className="mb-6 text-center text-xl font-medium text-[#1b1b18]">
                                 Pricing
                             </h2>
-                            <div
-                                className={`grid gap-6 ${hourlyRate !== null && fixedRate !== null ? 'sm:grid-cols-2' : 'mx-auto max-w-sm'}`}
-                            >
-                                {hourlyRate !== null && (
-                                    <div className="rounded-lg border border-[#e8e8e6] bg-[#fafaf9] p-6 text-center">
-                                        <p className="mb-1 text-sm font-medium text-[#575754]">
-                                            Hourly rate
-                                        </p>
-                                        <p className="text-3xl font-semibold text-[#1b1b18]">
-                                            {formatCurrency(hourlyRate, curr)}
-                                        </p>
-                                        <p className="mt-1 text-sm text-[#575754]">
-                                            per hour
-                                        </p>
-                                    </div>
-                                )}
-                                {fixedRate !== null && (
-                                    <div className="rounded-lg border border-[#e8e8e6] bg-[#fafaf9] p-6 text-center">
-                                        <p className="mb-1 text-sm font-medium text-[#575754]">
-                                            Fixed rate
-                                        </p>
-                                        <p className="text-3xl font-semibold text-[#1b1b18]">
-                                            {formatCurrency(fixedRate, curr)}
-                                        </p>
-                                        <p className="mt-1 text-sm text-[#575754]">
-                                            per card
-                                        </p>
-                                    </div>
-                                )}
-                            </div>
+                            {hidePricing ? (
+                                <div className="mx-auto max-w-sm rounded-lg border border-[#e8e8e6] bg-[#fafaf9] p-6 text-center">
+                                    <p className="text-lg font-medium text-[#1b1b18]">
+                                        Contact for pricing
+                                    </p>
+                                    {contactEmail && (
+                                        <a
+                                            href={`mailto:${contactEmail}?subject=${encodeURIComponent('Restoration Quote Request — CardsmithOS')}&body=${encodeURIComponent("Hi,\n\nI'd like to request a quote for card restoration services.\n\nHere are the details of my order:\n- Cards: \n- Condition: \n- Services needed: \n\nThank you!")}`}
+                                            className="mt-4 inline-flex items-center gap-2 rounded-md bg-[#1b1b18] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#2c2c28]"
+                                        >
+                                            <Mail className="h-4 w-4" />
+                                            Request a quote
+                                        </a>
+                                    )}
+                                </div>
+                            ) : (
+                                <div
+                                    className={`grid gap-6 ${hourlyRate !== null && fixedRate !== null ? 'sm:grid-cols-2' : 'mx-auto max-w-sm'}`}
+                                >
+                                    {hourlyRate !== null && (
+                                        <div className="rounded-lg border border-[#e8e8e6] bg-[#fafaf9] p-6 text-center">
+                                            <p className="mb-1 text-sm font-medium text-[#575754]">
+                                                Hourly rate
+                                            </p>
+                                            <p className="text-3xl font-semibold text-[#1b1b18]">
+                                                {formatCurrency(hourlyRate, curr)}
+                                            </p>
+                                            <p className="mt-1 text-sm text-[#575754]">
+                                                per hour
+                                            </p>
+                                        </div>
+                                    )}
+                                    {fixedRate !== null && (
+                                        <div className="rounded-lg border border-[#e8e8e6] bg-[#fafaf9] p-6 text-center">
+                                            <p className="mb-1 text-sm font-medium text-[#575754]">
+                                                Fixed rate
+                                            </p>
+                                            <p className="text-3xl font-semibold text-[#1b1b18]">
+                                                {formatCurrency(fixedRate, curr)}
+                                            </p>
+                                            <p className="mt-1 text-sm text-[#575754]">
+                                                per card
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </section>
                     )}
                 </main>

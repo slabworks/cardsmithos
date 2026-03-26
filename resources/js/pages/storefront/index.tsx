@@ -34,6 +34,7 @@ type Storefront = {
     hourly_rate: string | null;
     default_fixed_rate: string | null;
     currency: string | null;
+    hide_pricing: boolean;
 };
 
 type PaginatedData<T> = {
@@ -289,24 +290,32 @@ export default function StorefrontIndex({
                                                 s.default_fixed_rate !==
                                                     null) && (
                                                 <div className="flex flex-wrap gap-2 text-xs text-[#575754]">
-                                                    {s.hourly_rate !== null && (
+                                                    {s.hide_pricing ? (
                                                         <span className="rounded-full border border-[#e8e8e6] px-2 py-0.5">
-                                                            {formatCurrency(
-                                                                s.hourly_rate,
-                                                                curr,
-                                                            )}
-                                                            /hr
+                                                            Contact for pricing
                                                         </span>
-                                                    )}
-                                                    {s.default_fixed_rate !==
-                                                        null && (
-                                                        <span className="rounded-full border border-[#e8e8e6] px-2 py-0.5">
-                                                            {formatCurrency(
-                                                                s.default_fixed_rate,
-                                                                curr,
+                                                    ) : (
+                                                        <>
+                                                            {s.hourly_rate !== null && (
+                                                                <span className="rounded-full border border-[#e8e8e6] px-2 py-0.5">
+                                                                    {formatCurrency(
+                                                                        s.hourly_rate,
+                                                                        curr,
+                                                                    )}
+                                                                    /hr
+                                                                </span>
                                                             )}
-                                                            /card
-                                                        </span>
+                                                            {s.default_fixed_rate !==
+                                                                null && (
+                                                                <span className="rounded-full border border-[#e8e8e6] px-2 py-0.5">
+                                                                    {formatCurrency(
+                                                                        s.default_fixed_rate,
+                                                                        curr,
+                                                                    )}
+                                                                    /card
+                                                                </span>
+                                                            )}
+                                                        </>
                                                     )}
                                                 </div>
                                             )}

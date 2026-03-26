@@ -41,17 +41,18 @@ export default function Business({
     waiverAgreementText,
 }: {
     businessSettings: {
+        company_name: string | null;
+        bio: string | null;
+        store_slug: string | null;
+        country: string | null;
+        location_name: string | null;
+        instagram_handle: string | null;
+        tiktok_handle: string | null;
         hourly_rate: string | null;
         default_fixed_rate: string | null;
         currency: string | null;
-        company_name: string | null;
         tax_rate: string | null;
-        store_slug: string | null;
-        bio: string | null;
-        instagram_handle: string | null;
-        tiktok_handle: string | null;
-        country: string | null;
-        location_name: string | null;
+        hide_pricing: boolean;
         is_listed_in_directory: boolean;
     };
     waiverAgreementText: string;
@@ -59,6 +60,9 @@ export default function Business({
     const [country, setCountry] = useState(businessSettings.country ?? '');
     const [isListedInDirectory, setIsListedInDirectory] = useState(
         businessSettings.is_listed_in_directory,
+    );
+    const [hidePricing, setHidePricing] = useState(
+        businessSettings.hide_pricing,
     );
 
     return (
@@ -85,64 +89,6 @@ export default function Business({
                         {({ processing, recentlySuccessful, errors }) => (
                             <>
                                 <div className="grid gap-2">
-                                    <Label htmlFor="hourly_rate">
-                                        Hourly rate
-                                    </Label>
-                                    <Input
-                                        id="hourly_rate"
-                                        name="hourly_rate"
-                                        type="number"
-                                        step="0.01"
-                                        min="0"
-                                        placeholder="e.g. 100"
-                                        defaultValue={
-                                            businessSettings.hourly_rate ?? ''
-                                        }
-                                    />
-                                    <p className="text-sm text-muted-foreground">
-                                        Used to estimate card fees from
-                                        restoration hours. Leave empty to use
-                                        app default.
-                                    </p>
-                                    <InputError message={errors.hourly_rate} />
-                                </div>
-
-                                <div className="grid gap-2">
-                                    <Label htmlFor="default_fixed_rate">
-                                        Default fixed rate
-                                    </Label>
-                                    <Input
-                                        id="default_fixed_rate"
-                                        name="default_fixed_rate"
-                                        type="number"
-                                        step="0.01"
-                                        min="0"
-                                        placeholder="e.g. 50"
-                                        defaultValue={
-                                            businessSettings.default_fixed_rate ??
-                                            ''
-                                        }
-                                    />
-                                    <InputError
-                                        message={errors.default_fixed_rate}
-                                    />
-                                </div>
-
-                                <div className="grid gap-2">
-                                    <Label htmlFor="currency">Currency</Label>
-                                    <Input
-                                        id="currency"
-                                        name="currency"
-                                        maxLength={3}
-                                        placeholder="USD"
-                                        defaultValue={
-                                            businessSettings.currency ?? 'USD'
-                                        }
-                                    />
-                                    <InputError message={errors.currency} />
-                                </div>
-
-                                <div className="grid gap-2">
                                     <Label htmlFor="company_name">
                                         Company name
                                     </Label>
@@ -155,6 +101,26 @@ export default function Business({
                                         }
                                     />
                                     <InputError message={errors.company_name} />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="bio">Bio</Label>
+                                    <textarea
+                                        id="bio"
+                                        name="bio"
+                                        maxLength={1000}
+                                        rows={4}
+                                        placeholder="Tell customers about your shop and services..."
+                                        defaultValue={
+                                            businessSettings.bio ?? ''
+                                        }
+                                        className="flex w-full min-w-0 rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 md:text-sm dark:aria-invalid:ring-destructive/40"
+                                    />
+                                    <p className="text-sm text-muted-foreground">
+                                        A short public biography shown on your
+                                        storefront. Max 1000 characters.
+                                    </p>
+                                    <InputError message={errors.bio} />
                                 </div>
 
                                 <div className="grid gap-2">
@@ -190,69 +156,6 @@ export default function Business({
                                         )}
                                     </p>
                                     <InputError message={errors.store_slug} />
-                                </div>
-
-                                <div className="grid gap-2">
-                                    <Label htmlFor="bio">Bio</Label>
-                                    <textarea
-                                        id="bio"
-                                        name="bio"
-                                        maxLength={1000}
-                                        rows={4}
-                                        placeholder="Tell customers about your shop and services..."
-                                        defaultValue={
-                                            businessSettings.bio ?? ''
-                                        }
-                                        className="flex w-full min-w-0 rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 md:text-sm dark:aria-invalid:ring-destructive/40"
-                                    />
-                                    <p className="text-sm text-muted-foreground">
-                                        A short public biography shown on your
-                                        storefront. Max 1000 characters.
-                                    </p>
-                                    <InputError message={errors.bio} />
-                                </div>
-
-                                <div className="grid gap-2">
-                                    <Label htmlFor="instagram_handle">
-                                        Instagram
-                                    </Label>
-                                    <Input
-                                        id="instagram_handle"
-                                        name="instagram_handle"
-                                        maxLength={30}
-                                        placeholder="yourusername"
-                                        defaultValue={
-                                            businessSettings.instagram_handle ??
-                                            ''
-                                        }
-                                    />
-                                    <p className="text-sm text-muted-foreground">
-                                        Your Instagram username without the @.
-                                    </p>
-                                    <InputError
-                                        message={errors.instagram_handle}
-                                    />
-                                </div>
-
-                                <div className="grid gap-2">
-                                    <Label htmlFor="tiktok_handle">
-                                        TikTok
-                                    </Label>
-                                    <Input
-                                        id="tiktok_handle"
-                                        name="tiktok_handle"
-                                        maxLength={24}
-                                        placeholder="yourusername"
-                                        defaultValue={
-                                            businessSettings.tiktok_handle ?? ''
-                                        }
-                                    />
-                                    <p className="text-sm text-muted-foreground">
-                                        Your TikTok username without the @.
-                                    </p>
-                                    <InputError
-                                        message={errors.tiktok_handle}
-                                    />
                                 </div>
 
                                 <div className="grid gap-2">
@@ -313,6 +216,149 @@ export default function Business({
                                     </div>
                                 )}
 
+                                <div className="grid gap-2">
+                                    <Label htmlFor="instagram_handle">
+                                        Instagram
+                                    </Label>
+                                    <Input
+                                        id="instagram_handle"
+                                        name="instagram_handle"
+                                        maxLength={30}
+                                        placeholder="yourusername"
+                                        defaultValue={
+                                            businessSettings.instagram_handle ??
+                                            ''
+                                        }
+                                    />
+                                    <p className="text-sm text-muted-foreground">
+                                        Your Instagram username without the @.
+                                    </p>
+                                    <InputError
+                                        message={errors.instagram_handle}
+                                    />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="tiktok_handle">
+                                        TikTok
+                                    </Label>
+                                    <Input
+                                        id="tiktok_handle"
+                                        name="tiktok_handle"
+                                        maxLength={24}
+                                        placeholder="yourusername"
+                                        defaultValue={
+                                            businessSettings.tiktok_handle ?? ''
+                                        }
+                                    />
+                                    <p className="text-sm text-muted-foreground">
+                                        Your TikTok username without the @.
+                                    </p>
+                                    <InputError
+                                        message={errors.tiktok_handle}
+                                    />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="hourly_rate">
+                                        Hourly rate
+                                    </Label>
+                                    <Input
+                                        id="hourly_rate"
+                                        name="hourly_rate"
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        placeholder="e.g. 100"
+                                        defaultValue={
+                                            businessSettings.hourly_rate ?? ''
+                                        }
+                                    />
+                                    <p className="text-sm text-muted-foreground">
+                                        Used to estimate card fees from
+                                        restoration hours. Leave empty to use
+                                        app default.
+                                    </p>
+                                    <InputError message={errors.hourly_rate} />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="default_fixed_rate">
+                                        Default fixed rate
+                                    </Label>
+                                    <Input
+                                        id="default_fixed_rate"
+                                        name="default_fixed_rate"
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        placeholder="e.g. 50"
+                                        defaultValue={
+                                            businessSettings.default_fixed_rate ??
+                                            ''
+                                        }
+                                    />
+                                    <InputError
+                                        message={errors.default_fixed_rate}
+                                    />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="currency">Currency</Label>
+                                    <Input
+                                        id="currency"
+                                        name="currency"
+                                        maxLength={3}
+                                        placeholder="USD"
+                                        defaultValue={
+                                            businessSettings.currency ?? 'USD'
+                                        }
+                                    />
+                                    <InputError message={errors.currency} />
+                                </div>
+
+                                <div className="grid gap-2">
+                                    <Label htmlFor="tax_rate">
+                                        Tax rate (%)
+                                    </Label>
+                                    <Input
+                                        id="tax_rate"
+                                        name="tax_rate"
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        max="100"
+                                        placeholder="e.g. 8.5"
+                                        defaultValue={
+                                            businessSettings.tax_rate ?? ''
+                                        }
+                                    />
+                                    <InputError message={errors.tax_rate} />
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="hidden"
+                                        name="hide_pricing"
+                                        value={hidePricing ? '1' : '0'}
+                                    />
+                                    <Checkbox
+                                        id="hide_pricing"
+                                        checked={hidePricing}
+                                        onCheckedChange={(checked) => {
+                                            setHidePricing(
+                                                checked === true,
+                                            );
+                                        }}
+                                    />
+                                    <Label
+                                        htmlFor="hide_pricing"
+                                        className="cursor-pointer"
+                                    >
+                                        Hide pricing on storefront
+                                    </Label>
+                                </div>
+
                                 <div className="flex items-center gap-2">
                                     <input
                                         type="hidden"
@@ -334,25 +380,6 @@ export default function Business({
                                     >
                                         List my shop in the public directory
                                     </Label>
-                                </div>
-
-                                <div className="grid gap-2">
-                                    <Label htmlFor="tax_rate">
-                                        Tax rate (%)
-                                    </Label>
-                                    <Input
-                                        id="tax_rate"
-                                        name="tax_rate"
-                                        type="number"
-                                        step="0.01"
-                                        min="0"
-                                        max="100"
-                                        placeholder="e.g. 8.5"
-                                        defaultValue={
-                                            businessSettings.tax_rate ?? ''
-                                        }
-                                    />
-                                    <InputError message={errors.tax_rate} />
                                 </div>
 
                                 <div className="flex items-center gap-4">
