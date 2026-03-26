@@ -67,6 +67,7 @@ class CardController extends Controller
                 'media' => $media->id,
             ]),
             'name' => $media->file_name,
+            'show_on_timeline' => (bool) $media->getCustomProperty('show_on_timeline', false),
         ])->values()->all();
 
         return Inertia::render('cards/edit', [

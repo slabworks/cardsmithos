@@ -2,6 +2,8 @@ import { Head, Link, router } from '@inertiajs/react';
 import { Form } from '@inertiajs/react';
 import {
     Copy,
+    Eye,
+    EyeOff,
     ImagePlus,
     Pencil,
     Plus,
@@ -43,6 +45,7 @@ type Photo = {
     id: number;
     url: string;
     name: string;
+    show_on_timeline: boolean;
 };
 
 export default function CardsEdit({
@@ -125,6 +128,14 @@ export default function CardsEdit({
                     }
                 },
             },
+        );
+    };
+
+    const handleToggleTimeline = (mediaId: number) => {
+        router.post(
+            `/customers/${customer.id}/cards/${card.id}/photos/${mediaId}/toggle-timeline`,
+            {},
+            { preserveScroll: true },
         );
     };
 
@@ -359,15 +370,44 @@ export default function CardsEdit({
                                             alt={photo.name}
                                             className="aspect-square w-full object-cover"
                                         />
-                                        <button
-                                            type="button"
-                                            onClick={() =>
-                                                handlePhotoDelete(photo.id)
-                                            }
-                                            className="absolute top-1 right-1 rounded-full bg-black/60 p-1 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-black/80"
-                                        >
-                                            <X className="size-3" />
-                                        </button>
+                                        <div className="absolute top-1 right-1 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    handleToggleTimeline(
+                                                        photo.id,
+                                                    )
+                                                }
+                                                className="rounded-full bg-black/60 p-1 text-white hover:bg-black/80"
+                                                title={
+                                                    photo.show_on_timeline
+                                                        ? 'Hide from timeline'
+                                                        : 'Show on timeline'
+                                                }
+                                            >
+                                                {photo.show_on_timeline ? (
+                                                    <Eye className="size-3" />
+                                                ) : (
+                                                    <EyeOff className="size-3" />
+                                                )}
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    handlePhotoDelete(photo.id)
+                                                }
+                                                className="rounded-full bg-black/60 p-1 text-white hover:bg-black/80"
+                                            >
+                                                <X className="size-3" />
+                                            </button>
+                                        </div>
+                                        {photo.show_on_timeline && (
+                                            <div className="absolute bottom-0 left-0 right-0 bg-black/50 px-2 py-1">
+                                                <span className="text-xs text-white">
+                                                    On timeline
+                                                </span>
+                                            </div>
+                                        )}
                                     </div>
                                 ))}
                             </div>

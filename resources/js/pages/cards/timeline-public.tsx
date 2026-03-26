@@ -8,8 +8,15 @@ type Activity = {
     occurred_at: string;
 };
 
+type Photo = {
+    id: number;
+    url: string;
+    name: string;
+};
+
 export default function CardsTimelinePublic({
     card,
+    photos = [],
 }: {
     card: {
         id: number;
@@ -17,6 +24,7 @@ export default function CardsTimelinePublic({
         customer: { id: number; name: string };
         activities: Activity[];
     };
+    photos?: Photo[];
 }) {
     const formatOccurredAt = (iso: string) => {
         const d = new Date(iso);
@@ -46,8 +54,25 @@ export default function CardsTimelinePublic({
                                 </p>
                             )}
                         </div>
+                        {photos.length > 0 && (
+                            <div className="border-b border-sidebar-border px-4 py-4 md:px-6">
+                                <h2 className="mb-3 text-sm font-medium text-muted-foreground">
+                                    Photos
+                                </h2>
+                                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                                    {photos.map((photo) => (
+                                        <img
+                                            key={photo.id}
+                                            src={photo.url}
+                                            alt={photo.name}
+                                            className="aspect-square w-full rounded-lg object-cover"
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                         <div className="px-4 py-4 md:px-6">
-                            {card.activities.length === 0 ? (
+                            {card.activities.length === 0 && photos.length === 0 ? (
                                 <p className="py-8 text-center text-sm text-muted-foreground">
                                     No timeline entries yet.
                                 </p>

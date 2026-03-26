@@ -19,6 +19,8 @@ use Laravel\Fortify\Features;
 
 Route::get('/cards/{card}/timeline/{token}', [CardTimelineController::class, 'show'])
     ->name('card.timeline.show');
+Route::get('/cards/{card}/timeline/{token}/photos/{media}', [CardTimelineController::class, 'photo'])
+    ->name('card.timeline.photo');
 
 Route::middleware(['signed:relative'])->group(function (): void {
     Route::get('/waiver/{customer}', [WaiverController::class, 'show'])->name('waiver.show');
@@ -56,6 +58,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('customers.cards.activities', CardActivityController::class)->only(['store', 'update', 'destroy'])->scoped();
     Route::post('customers/{customer}/cards/{card}/photos', [CardPhotoController::class, 'store'])->name('customers.cards.photos.store');
     Route::get('customers/{customer}/cards/{card}/photos/{media}', [CardPhotoController::class, 'show'])->name('customers.cards.photos.show');
+    Route::post('customers/{customer}/cards/{card}/photos/{media}/toggle-timeline', [CardPhotoController::class, 'toggleTimeline'])->name('customers.cards.photos.toggle-timeline');
     Route::delete('customers/{customer}/cards/{card}/photos/{media}', [CardPhotoController::class, 'destroy'])->name('customers.cards.photos.destroy');
     Route::resource('customers.payments', PaymentController::class)->except(['index', 'show'])->scoped();
     Route::get('customers/{customer}/invoices/create', [InvoiceController::class, 'create'])->name('customers.invoices.create');
