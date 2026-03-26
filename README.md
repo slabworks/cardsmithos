@@ -17,7 +17,7 @@ It is built with Laravel, Inertia, React, and Tailwind to support modern workflo
 
 ## Features
 
-- Laravel 12 backend with Fortify authentication
+- Laravel 13 backend with Fortify authentication
 - Inertia.js + React frontend with TypeScript
 - Tailwind CSS v4 based UI system
 - Wayfinder-based typed route helpers
@@ -28,7 +28,7 @@ It is built with Laravel, Inertia, React, and Tailwind to support modern workflo
 ### Backend
 
 - PHP 8.5+
-- Laravel 12
+- Laravel 13
 - Laravel Fortify
 - Inertia Laravel
 
