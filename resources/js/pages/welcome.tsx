@@ -133,15 +133,17 @@ export default function Welcome({
                 </header>
 
                 <main className="mx-auto max-w-4xl px-6 py-12 lg:px-8 lg:py-16">
+                    {/* Hero */}
                     <section className="mb-16 text-center">
                         <h1 className="mb-4 text-3xl font-semibold tracking-tight text-[#1b1b18] lg:text-4xl">
                             Trading Card Repair CRM & Management Software
                         </h1>
                         <p className="mx-auto max-w-2xl text-lg leading-relaxed text-[#575754]">
-                            Cardsmith OS is an open-source trading card repair
-                            management platform. Track repair submissions,
-                            manage jobs, and run your card repair shop—without
-                            lock-in or subscription fees.
+                            Cardsmith OS is an open-source platform built for
+                            trading card restoration shops. Manage every job
+                            from intake to shipment, track finances, and let
+                            customers follow their card’s progress in
+                            real time—all without lock-in or subscription fees.
                         </p>
                         {auth.user ? (
                             <p className="mt-6">
@@ -178,56 +180,220 @@ export default function Welcome({
                         </p>
                     </section>
 
+                    {/* Core features */}
                     <section className="mb-16">
                         <h2 className="mb-8 text-center text-xl font-medium text-[#1b1b18]">
-                            Everything you need for trading card repair
-                            management
+                            Everything you need to run a card repair shop
                         </h2>
                         <div className="grid gap-6 sm:grid-cols-3">
-                            <div className="rounded-lg border border-[#e8e8e6] bg-[#fafaf9] p-6">
-                                <h3 className="mb-2 font-medium text-[#1b1b18]">
-                                    Repair submissions
-                                </h3>
-                                <p className="text-sm leading-relaxed text-[#575754]">
-                                    Accept and track trading card repair
-                                    submissions from intake through completion.
-                                    Keep notes, photos, and status in one place.
-                                    Estimate fees from restoration hours and
-                                    your hourly rate.
-                                </p>
-                            </div>
                             <div className="rounded-lg border border-[#e8e8e6] bg-[#fafaf9] p-6">
                                 <h3 className="mb-2 font-medium text-[#1b1b18]">
                                     Repair job tracking
                                 </h3>
                                 <p className="text-sm leading-relaxed text-[#575754]">
-                                    Manage trading card repair jobs with clear
-                                    statuses and workflows. See what’s in queue,
-                                    in progress, and completed at a glance.
+                                    Create repair jobs for each card and move
+                                    them through Backlog, Pending, In Progress,
+                                    and Repaired stages on a kanban board.
+                                    Record before/after condition, restoration
+                                    hours, notes, and photos.
                                 </p>
                             </div>
                             <div className="rounded-lg border border-[#e8e8e6] bg-[#fafaf9] p-6">
                                 <h3 className="mb-2 font-medium text-[#1b1b18]">
-                                    Shop management
+                                    Customer management
                                 </h3>
                                 <p className="text-sm leading-relaxed text-[#575754]">
-                                    Set your hourly rate, company details, and
-                                    tax. A complete trading card repair CRM
-                                    built for shop operations. Self-host or run
-                                    it your way.
+                                    Keep a full profile for every customer with
+                                    contact info, lead status, referral source,
+                                    and lifetime value. See all their cards,
+                                    payments, and shipments in one place.
+                                </p>
+                            </div>
+                            <div className="rounded-lg border border-[#e8e8e6] bg-[#fafaf9] p-6">
+                                <h3 className="mb-2 font-medium text-[#1b1b18]">
+                                    Lead & inquiry tracking
+                                </h3>
+                                <p className="text-sm leading-relaxed text-[#575754]">
+                                    Log every incoming inquiry, track how
+                                    customers found you, and measure your
+                                    conversion rate. Turn leads into customers
+                                    with a single click.
+                                </p>
+                            </div>
+                            <div className="rounded-lg border border-[#e8e8e6] bg-[#fafaf9] p-6">
+                                <h3 className="mb-2 font-medium text-[#1b1b18]">
+                                    Pricing & invoicing
+                                </h3>
+                                <p className="text-sm leading-relaxed text-[#575754]">
+                                    Set your hourly rate and tax, then let fees
+                                    calculate automatically from restoration
+                                    hours. Use the built-in pricing calculator
+                                    for quick quotes, and generate PDF invoices
+                                    for customers.
+                                </p>
+                            </div>
+                            <div className="rounded-lg border border-[#e8e8e6] bg-[#fafaf9] p-6">
+                                <h3 className="mb-2 font-medium text-[#1b1b18]">
+                                    Payments & expenses
+                                </h3>
+                                <p className="text-sm leading-relaxed text-[#575754]">
+                                    Record payments by method (cash, card,
+                                    PayPal, and more) and track business
+                                    expenses across categories like supplies,
+                                    equipment, and shipping. See your revenue
+                                    and costs at a glance.
+                                </p>
+                            </div>
+                            <div className="rounded-lg border border-[#e8e8e6] bg-[#fafaf9] p-6">
+                                <h3 className="mb-2 font-medium text-[#1b1b18]">
+                                    Shipping & fulfillment
+                                </h3>
+                                <p className="text-sm leading-relaxed text-[#575754]">
+                                    Record shipments with carrier tracking
+                                    numbers and shipping costs. Know which cards
+                                    have been returned and how much you’ve spent
+                                    on postage.
                                 </p>
                             </div>
                         </div>
                     </section>
 
-                    <section className="rounded-lg border border-[#e8e8e6] bg-[#fafaf9] p-6 lg:p-8">
+                    {/* Customer-facing features */}
+                    <section className="mb-16">
+                        <h2 className="mb-8 text-center text-xl font-medium text-[#1b1b18]">
+                            Keep your customers in the loop
+                        </h2>
+                        <div className="grid gap-6 sm:grid-cols-2">
+                            <div className="rounded-lg border border-[#e8e8e6] bg-[#fafaf9] p-6">
+                                <h3 className="mb-2 font-medium text-[#1b1b18]">
+                                    Shareable progress timelines
+                                </h3>
+                                <p className="text-sm leading-relaxed text-[#575754]">
+                                    Each card gets a unique timeline link you
+                                    can share with the customer. They can see
+                                    milestones, activity updates, and photos of
+                                    their card’s restoration progress—no login
+                                    required.
+                                </p>
+                            </div>
+                            <div className="rounded-lg border border-[#e8e8e6] bg-[#fafaf9] p-6">
+                                <h3 className="mb-2 font-medium text-[#1b1b18]">
+                                    Digital service waivers
+                                </h3>
+                                <p className="text-sm leading-relaxed text-[#575754]">
+                                    Generate waiver links for customers to sign
+                                    digitally. Waivers are tracked with IP
+                                    address and expiration date, keeping your
+                                    shop legally protected without paper
+                                    hassle.
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Shop directory */}
+                    <section className="mb-16 rounded-lg border border-[#e8e8e6] bg-[#fafaf9] p-6 lg:p-8">
                         <h2 className="mb-2 text-lg font-medium text-[#1b1b18]">
-                            Open source
+                            Public shop directory
                         </h2>
                         <p className="mb-4 text-sm leading-relaxed text-[#575754]">
-                            Cardsmith OS is free and open source (MIT). You can
-                            contribute code, docs, or ideas—or support the
-                            project on Patreon to help keep development going.
+                            Opt in to list your shop in the Cardsmith OS
+                            directory. Collectors can search by name, location,
+                            or hourly rate to find a repair shop near them. Each
+                            listing shows your bio, rates, and social links—free
+                            exposure for your business.
+                        </p>
+                        <p>
+                            <Link
+                                href={storefrontIndex.url()}
+                                className="inline-flex items-center gap-1.5 text-sm font-medium text-[#1b1b18] underline underline-offset-4 hover:no-underline"
+                            >
+                                Browse the directory
+                            </Link>
+                        </p>
+                    </section>
+
+                    {/* Dashboard callout */}
+                    <section className="mb-16 rounded-lg border border-[#e8e8e6] bg-[#fafaf9] p-6 lg:p-8">
+                        <h2 className="mb-2 text-lg font-medium text-[#1b1b18]">
+                            Dashboard & analytics
+                        </h2>
+                        <p className="text-sm leading-relaxed text-[#575754]">
+                            See your shop’s health at a glance. The dashboard
+                            shows total revenue, shipping costs, expenses, and
+                            lead conversion rate alongside a 12-month revenue
+                            chart. A kanban board surfaces every card in your
+                            pipeline so nothing slips through the cracks.
+                        </p>
+                    </section>
+
+                    {/* How it works */}
+                    <section className="mb-16">
+                        <h2 className="mb-8 text-center text-xl font-medium text-[#1b1b18]">
+                            How it works
+                        </h2>
+                        <div className="grid gap-6 sm:grid-cols-4">
+                            <div className="text-center">
+                                <div className="mx-auto mb-3 flex h-8 w-8 items-center justify-center rounded-full bg-[#1b1b18] text-sm font-medium text-white">
+                                    1
+                                </div>
+                                <h3 className="mb-1 text-sm font-medium text-[#1b1b18]">
+                                    Receive inquiry
+                                </h3>
+                                <p className="text-xs leading-relaxed text-[#575754]">
+                                    Log the lead and how they found you.
+                                </p>
+                            </div>
+                            <div className="text-center">
+                                <div className="mx-auto mb-3 flex h-8 w-8 items-center justify-center rounded-full bg-[#1b1b18] text-sm font-medium text-white">
+                                    2
+                                </div>
+                                <h3 className="mb-1 text-sm font-medium text-[#1b1b18]">
+                                    Create job & waiver
+                                </h3>
+                                <p className="text-xs leading-relaxed text-[#575754]">
+                                    Add the customer, send a waiver, and create
+                                    repair cards.
+                                </p>
+                            </div>
+                            <div className="text-center">
+                                <div className="mx-auto mb-3 flex h-8 w-8 items-center justify-center rounded-full bg-[#1b1b18] text-sm font-medium text-white">
+                                    3
+                                </div>
+                                <h3 className="mb-1 text-sm font-medium text-[#1b1b18]">
+                                    Track & share progress
+                                </h3>
+                                <p className="text-xs leading-relaxed text-[#575754]">
+                                    Update statuses, upload photos, and share
+                                    the timeline link.
+                                </p>
+                            </div>
+                            <div className="text-center">
+                                <div className="mx-auto mb-3 flex h-8 w-8 items-center justify-center rounded-full bg-[#1b1b18] text-sm font-medium text-white">
+                                    4
+                                </div>
+                                <h3 className="mb-1 text-sm font-medium text-[#1b1b18]">
+                                    Invoice & ship
+                                </h3>
+                                <p className="text-xs leading-relaxed text-[#575754]">
+                                    Generate an invoice, record payment, and log
+                                    the shipment.
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Open source */}
+                    <section className="rounded-lg border border-[#e8e8e6] bg-[#fafaf9] p-6 lg:p-8">
+                        <h2 className="mb-2 text-lg font-medium text-[#1b1b18]">
+                            Free & open source
+                        </h2>
+                        <p className="mb-4 text-sm leading-relaxed text-[#575754]">
+                            Cardsmith OS is MIT-licensed. Self-host it on your
+                            own server, own your data, and pay nothing. No
+                            vendor lock-in, no monthly fees, no limits.
+                            Contribute code, docs, or ideas—or support the
+                            project on Patreon.
                         </p>
                         <p className="flex flex-wrap items-center gap-4 text-sm">
                             <a
