@@ -10,11 +10,15 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Card extends Model
+class Card extends Model implements HasMedia
 {
     /** @use HasFactory<CardFactory> */
     use HasFactory;
+
+    use InteractsWithMedia;
 
     /**
      * @var list<string>
@@ -28,7 +32,6 @@ class Card extends Model
         'condition_after',
         'restoration_hours',
         'estimated_fee',
-        'photos',
         'timeline_share_token',
     ];
 
@@ -43,7 +46,6 @@ class Card extends Model
             'condition_after' => CardCondition::class,
             'restoration_hours' => 'decimal:2',
             'estimated_fee' => 'decimal:2',
-            'photos' => 'array',
         ];
     }
 
@@ -57,6 +59,12 @@ class Card extends Model
                 $card->estimated_fee = null;
             }
         });
+    }
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('photos')
+            ->useDisk('s3');
     }
 
     public function customer(): BelongsTo

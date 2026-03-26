@@ -1,7 +1,15 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { Form } from '@inertiajs/react';
-import { Copy, Pencil, Plus, RefreshCw, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import {
+    Copy,
+    ImagePlus,
+    Pencil,
+    Plus,
+    RefreshCw,
+    Trash2,
+    X,
+} from 'lucide-react';
+import { useRef, useState } from 'react';
 import CardActivityController from '@/actions/App/Http/Controllers/CardActivityController';
 import CardController from '@/actions/App/Http/Controllers/CardController';
 import CardTimelineController from '@/actions/App/Http/Controllers/CardTimelineController';
@@ -31,11 +39,18 @@ type Activity = {
     occurred_at: string;
 };
 
+type Photo = {
+    id: number;
+    url: string;
+    name: string;
+};
+
 export default function CardsEdit({
     customer,
     card,
     hourlyRate,
     taxRate,
+    photos = [],
     timelineShareUrl = '',
     statusOptions,
     conditionOptions,
@@ -54,6 +69,7 @@ export default function CardsEdit({
     };
     hourlyRate: number | null;
     taxRate: number | null;
+    photos?: Photo[];
     timelineShareUrl?: string;
     statusOptions: Array<{ value: string; label: string; color: string }>;
     conditionOptions: Array<{ value: string; label: string; color: string }>;
@@ -64,6 +80,8 @@ export default function CardsEdit({
     const [editingActivityId, setEditingActivityId] = useState<number | null>(
         null,
     );
+    const [uploading, setUploading] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const activities = card.activities ?? [];
 
@@ -81,6 +99,39 @@ export default function CardsEdit({
             dateStyle: 'medium',
             timeStyle: 'short',
         });
+    };
+
+    const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+
+        if (!files || files.length === 0) {
+            return;
+        }
+
+        const formData = new FormData();
+        Array.from(files).forEach((file) => formData.append('photos[]', file));
+
+        router.post(
+            `/customers/${customer.id}/cards/${card.id}/photos`,
+            formData as never,
+            {
+                forceFormData: true,
+                onStart: () => setUploading(true),
+                onFinish: () => {
+                    setUploading(false);
+
+                    if (fileInputRef.current) {
+                        fileInputRef.current.value = '';
+                    }
+                },
+            },
+        );
+    };
+
+    const handlePhotoDelete = (mediaId: number) => {
+        router.delete(
+            `/customers/${customer.id}/cards/${card.id}/photos/${mediaId}`,
+        );
     };
 
     const hours = card.restoration_hours
@@ -264,6 +315,70 @@ export default function CardsEdit({
                         </>
                     )}
                 </Form>
+
+                <section className="max-w-xl space-y-4 border-t pt-8">
+                    <Heading
+                        variant="small"
+                        title="Photos"
+                        description="Upload photos of this card for documentation."
+                    />
+                    <div className="rounded-lg border border-sidebar-border bg-card p-4">
+                        <div className="flex items-center gap-2">
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/*"
+                                multiple
+                                onChange={handlePhotoUpload}
+                                className="hidden"
+                                id="photo-upload"
+                            />
+                            <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                disabled={uploading}
+                                onClick={() => fileInputRef.current?.click()}
+                            >
+                                <ImagePlus className="mr-1 size-4" />
+                                {uploading ? 'Uploading...' : 'Add photos'}
+                            </Button>
+                            <span className="text-xs text-muted-foreground">
+                                Max 10MB per image
+                            </span>
+                        </div>
+                        {photos.length > 0 && (
+                            <div className="mt-4 grid grid-cols-3 gap-3">
+                                {photos.map((photo) => (
+                                    <div
+                                        key={photo.id}
+                                        className="group relative overflow-hidden rounded-lg border"
+                                    >
+                                        <img
+                                            src={photo.url}
+                                            alt={photo.name}
+                                            className="aspect-square w-full object-cover"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                handlePhotoDelete(photo.id)
+                                            }
+                                            className="absolute top-1 right-1 rounded-full bg-black/60 p-1 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-black/80"
+                                        >
+                                            <X className="size-3" />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                        {photos.length === 0 && (
+                            <p className="mt-3 text-sm text-muted-foreground">
+                                No photos uploaded yet.
+                            </p>
+                        )}
+                    </div>
+                </section>
 
                 <section className="max-w-xl space-y-4 border-t pt-8">
                     <Heading
