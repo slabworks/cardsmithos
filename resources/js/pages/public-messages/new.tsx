@@ -48,11 +48,15 @@ export default function NewPublicMessage({ slug, companyName }: Props) {
                                             autoFocus
                                             placeholder="Your name"
                                         />
-                                        <InputError message={errors.guest_name} />
+                                        <InputError
+                                            message={errors.guest_name}
+                                        />
                                     </div>
 
                                     <div className="grid gap-2">
-                                        <Label htmlFor="guest_email">Email</Label>
+                                        <Label htmlFor="guest_email">
+                                            Email
+                                        </Label>
                                         <Input
                                             id="guest_email"
                                             type="email"
@@ -60,7 +64,9 @@ export default function NewPublicMessage({ slug, companyName }: Props) {
                                             required
                                             placeholder="you@example.com"
                                         />
-                                        <InputError message={errors.guest_email} />
+                                        <InputError
+                                            message={errors.guest_email}
+                                        />
                                     </div>
 
                                     <div className="grid gap-2">

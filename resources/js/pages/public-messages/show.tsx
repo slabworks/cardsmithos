@@ -1,9 +1,9 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { ArrowLeft, Lock, Send } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
-import echo from '@/echo';
-import { Button } from '@/components/ui/button';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import InputError from '@/components/input-error';
+import { Button } from '@/components/ui/button';
+import echo from '@/echo';
 
 type Message = {
     id: number;
@@ -51,17 +51,19 @@ export default function ShowPublicMessage({
     companyName,
     conversation,
 }: Props) {
-    const [messages, setMessages] = useState<Message[]>(
-        conversation.messages,
-    );
+    const [localMessages, setLocalMessages] = useState<Message[]>([]);
+    const messages = useMemo(() => {
+        const serverIds = new Set(conversation.messages.map((m) => m.id));
+
+        return [
+            ...conversation.messages,
+            ...localMessages.filter((m) => !serverIds.has(m.id)),
+        ];
+    }, [conversation.messages, localMessages]);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const bodyRef = useRef<HTMLTextAreaElement>(null);
     const [bodyError, setBodyError] = useState<string | null>(null);
     const isOpen = conversation.status === 'open';
-
-    useEffect(() => {
-        setMessages(conversation.messages);
-    }, [conversation.messages]);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -69,15 +71,15 @@ export default function ShowPublicMessage({
 
     useEffect(() => {
         const channel = echo.channel(`conversation.${accessToken}`);
-        channel.listen(
-            '.App\\Events\\MessageSent',
-            (data: Message) => {
-                setMessages((prev) => {
-                    if (prev.some((m) => m.id === data.id)) return prev;
-                    return [...prev.filter((m) => m.id > 0), data];
-                });
-            },
-        );
+        channel.listen('.App\\Events\\MessageSent', (data: Message) => {
+            setLocalMessages((prev) => {
+                if (prev.some((m: Message) => m.id === data.id)) {
+                    return prev;
+                }
+
+                return [...prev.filter((m: Message) => m.id > 0), data];
+            });
+        });
 
         return () => {
             echo.leave(`conversation.${accessToken}`);
@@ -86,9 +88,7 @@ export default function ShowPublicMessage({
 
     return (
         <>
-            <Head
-                title={`Conversation with ${companyName}`}
-            />
+            <Head title={`Conversation with ${companyName}`} />
             <div className="flex h-screen flex-col bg-[#f5f5f4]">
                 <header className="border-b border-[#e8e8e6] bg-white px-4 py-3">
                     <div className="mx-auto flex max-w-2xl items-center gap-3">
@@ -116,6 +116,7 @@ export default function ShowPublicMessage({
                         {messages.map((message) => {
                             const isCustomer =
                                 message.sender_type === 'customer';
+
                             return (
                                 <div
                                     key={message.id}
@@ -128,7 +129,7 @@ export default function ShowPublicMessage({
                                                 : 'border border-[#e8e8e6] bg-white text-[#1b1b18]'
                                         }`}
                                     >
-                                        <p className="whitespace-pre-wrap text-sm">
+                                        <p className="text-sm whitespace-pre-wrap">
                                             {message.body}
                                         </p>
                                         <p
@@ -158,28 +159,52 @@ export default function ShowPublicMessage({
                                 onSubmit={(e) => {
                                     e.preventDefault();
                                     const body = bodyRef.current?.value.trim();
-                                    if (!body) return;
+
+                                    if (!body) {
+                                        return;
+                                    }
+
                                     setBodyError(null);
-                                    setMessages((prev) => [
+                                    setLocalMessages((prev) => [
                                         ...prev,
                                         {
                                             id: -Date.now(),
                                             sender_type: 'customer',
                                             body,
-                                            created_at: new Date().toISOString(),
+                                            created_at:
+                                                new Date().toISOString(),
                                             read_at: null,
                                         },
                                     ]);
-                                    if (bodyRef.current) bodyRef.current.value = '';
-                                    router.post(`/c/${slug}/messages/${accessToken}`, { body }, {
-                                        preserveState: true,
-                                        preserveScroll: true,
-                                        onError: (errors) => {
-                                            setMessages((prev) => prev.filter((m) => m.id > 0));
-                                            setBodyError(errors.body ?? null);
-                                            if (bodyRef.current) bodyRef.current.value = body;
+
+                                    if (bodyRef.current) {
+                                        bodyRef.current.value = '';
+                                    }
+
+                                    router.post(
+                                        `/c/${slug}/messages/${accessToken}`,
+                                        { body },
+                                        {
+                                            preserveState: true,
+                                            preserveScroll: true,
+                                            onError: (errors) => {
+                                                setLocalMessages((prev) =>
+                                                    prev.filter(
+                                                        (m: Message) =>
+                                                            m.id > 0,
+                                                    ),
+                                                );
+                                                setBodyError(
+                                                    errors.body ?? null,
+                                                );
+
+                                                if (bodyRef.current) {
+                                                    bodyRef.current.value =
+                                                        body;
+                                                }
+                                            },
                                         },
-                                    });
+                                    );
                                 }}
                             >
                                 <div className="flex-1">
@@ -191,13 +216,20 @@ export default function ShowPublicMessage({
                                         placeholder="Type a message..."
                                         className="flex w-full resize-none rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
                                         onKeyDown={(e) => {
-                                            if (e.key === 'Enter' && !e.shiftKey) {
+                                            if (
+                                                e.key === 'Enter' &&
+                                                !e.shiftKey
+                                            ) {
                                                 e.preventDefault();
-                                                e.currentTarget.closest('form')?.requestSubmit();
+                                                e.currentTarget
+                                                    .closest('form')
+                                                    ?.requestSubmit();
                                             }
                                         }}
                                     />
-                                    <InputError message={bodyError ?? undefined} />
+                                    <InputError
+                                        message={bodyError ?? undefined}
+                                    />
                                 </div>
                                 <Button type="submit" size="icon">
                                     <Send className="h-4 w-4" />

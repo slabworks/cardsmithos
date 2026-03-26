@@ -23,12 +23,18 @@ export default function ConversationsCreate({
     customerOptions: CustomerOption[];
 }) {
     const [customerSearch, setCustomerSearch] = useState('');
-    const [selectedCustomerId, setSelectedCustomerId] = useState<number | ''>('');
+    const [selectedCustomerId, setSelectedCustomerId] = useState<number | ''>(
+        '',
+    );
     const [showDropdown, setShowDropdown] = useState(false);
 
     const filteredCustomers = useMemo(() => {
-        if (!customerSearch) return customerOptions;
+        if (!customerSearch) {
+            return customerOptions;
+        }
+
         const q = customerSearch.toLowerCase();
+
         return customerOptions.filter(
             (c) =>
                 c.name.toLowerCase().includes(q) ||
@@ -48,10 +54,7 @@ export default function ConversationsCreate({
                     title="New conversation"
                     description="Start a conversation with a customer"
                 />
-                <Form
-                    {...store.form()}
-                    className="max-w-xl space-y-6"
-                >
+                <Form {...store.form()} className="max-w-xl space-y-6">
                     {({ errors, processing }) => (
                         <>
                             <div className="grid gap-2">
@@ -95,11 +98,19 @@ export default function ConversationsCreate({
                                                         <button
                                                             type="button"
                                                             className="w-full px-3 py-2 text-left text-sm hover:bg-muted"
-                                                            onMouseDown={(e) => {
+                                                            onMouseDown={(
+                                                                e,
+                                                            ) => {
                                                                 e.preventDefault();
-                                                                setSelectedCustomerId(c.id);
-                                                                setCustomerSearch('');
-                                                                setShowDropdown(false);
+                                                                setSelectedCustomerId(
+                                                                    c.id,
+                                                                );
+                                                                setCustomerSearch(
+                                                                    '',
+                                                                );
+                                                                setShowDropdown(
+                                                                    false,
+                                                                );
                                                             }}
                                                         >
                                                             <span className="font-medium">

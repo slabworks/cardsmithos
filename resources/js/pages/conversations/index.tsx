@@ -37,13 +37,28 @@ function timeAgo(dateString: string): string {
     const date = new Date(dateString);
     const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
-    if (seconds < 60) return 'just now';
+    if (seconds < 60) {
+        return 'just now';
+    }
+
     const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `${minutes}m ago`;
+
+    if (minutes < 60) {
+        return `${minutes}m ago`;
+    }
+
     const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours}h ago`;
+
+    if (hours < 24) {
+        return `${hours}h ago`;
+    }
+
     const days = Math.floor(hours / 24);
-    if (days < 30) return `${days}d ago`;
+
+    if (days < 30) {
+        return `${days}d ago`;
+    }
+
     return date.toLocaleDateString(undefined, { dateStyle: 'medium' });
 }
 
@@ -52,6 +67,7 @@ function statusBadgeVariant(
     statusOptions: StatusOption[],
 ): string {
     const option = statusOptions.find((o) => o.value === status);
+
     return option?.color ?? 'secondary';
 }
 
@@ -92,7 +108,11 @@ export default function ConversationsIndex({
                         <h1 className="text-xl font-semibold">Conversations</h1>
                         {conversations.length > 0 && (
                             <p className="text-sm text-muted-foreground">
-                                {conversations.filter((c) => c.unread_count > 0).length}{' '}
+                                {
+                                    conversations.filter(
+                                        (c) => c.unread_count > 0,
+                                    ).length
+                                }{' '}
                                 unread
                             </p>
                         )}
@@ -147,11 +167,19 @@ export default function ConversationsIndex({
                                                 <span
                                                     className={`font-medium ${conversation.unread_count > 0 ? 'text-foreground' : ''}`}
                                                 >
-                                                    {conversation.participant_name}
+                                                    {
+                                                        conversation.participant_name
+                                                    }
                                                 </span>
-                                                {conversation.unread_count > 0 && (
-                                                    <Badge variant="default" className="text-xs">
-                                                        {conversation.unread_count}
+                                                {conversation.unread_count >
+                                                    0 && (
+                                                    <Badge
+                                                        variant="default"
+                                                        className="text-xs"
+                                                    >
+                                                        {
+                                                            conversation.unread_count
+                                                        }
                                                     </Badge>
                                                 )}
                                             </div>
@@ -162,16 +190,24 @@ export default function ConversationsIndex({
                                             )}
                                             {conversation.latest_message && (
                                                 <span className="truncate text-sm text-muted-foreground">
-                                                    {conversation.latest_message.body.length > 80
-                                                        ? conversation.latest_message.body.slice(0, 80) + '...'
-                                                        : conversation.latest_message.body}
+                                                    {conversation.latest_message
+                                                        .body.length > 80
+                                                        ? conversation.latest_message.body.slice(
+                                                              0,
+                                                              80,
+                                                          ) + '...'
+                                                        : conversation
+                                                              .latest_message
+                                                              .body}
                                                 </span>
                                             )}
                                         </div>
                                         <div className="flex shrink-0 items-center gap-3">
                                             {conversation.last_message_at && (
                                                 <span className="text-xs text-muted-foreground">
-                                                    {timeAgo(conversation.last_message_at)}
+                                                    {timeAgo(
+                                                        conversation.last_message_at,
+                                                    )}
                                                 </span>
                                             )}
                                             <Badge
@@ -179,11 +215,17 @@ export default function ConversationsIndex({
                                                     statusBadgeVariant(
                                                         conversation.status,
                                                         statusOptions,
-                                                    ) as 'default' | 'secondary' | 'destructive' | 'outline'
+                                                    ) as
+                                                        | 'default'
+                                                        | 'secondary'
+                                                        | 'destructive'
+                                                        | 'outline'
                                                 }
                                             >
                                                 {statusOptions.find(
-                                                    (o) => o.value === conversation.status,
+                                                    (o) =>
+                                                        o.value ===
+                                                        conversation.status,
                                                 )?.label ?? conversation.status}
                                             </Badge>
                                         </div>

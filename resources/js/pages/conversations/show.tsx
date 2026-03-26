@@ -1,11 +1,6 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { Form } from '@inertiajs/react';
-import {
-    Lock,
-    MailOpen,
-    Send,
-    UserPlus,
-} from 'lucide-react';
+import { Lock, MailOpen, Send, UserPlus } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import InputError from '@/components/input-error';
 import { Badge } from '@/components/ui/badge';
@@ -44,6 +39,7 @@ type CustomerOption = { id: number; name: string; email: string };
 
 function formatTime(dateString: string): string {
     const date = new Date(dateString);
+
     return date.toLocaleString(undefined, {
         month: 'short',
         day: 'numeric',
@@ -69,17 +65,31 @@ export default function ConversationsShow({
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const bodyRef = useRef<HTMLTextAreaElement>(null);
-    const [messages, setMessages] = useState<Message[]>(conversation.messages);
+    const [localMessages, setLocalMessages] = useState<Message[]>([]);
+    const messages = useMemo(() => {
+        const serverIds = new Set(conversation.messages.map((m) => m.id));
+
+        return [
+            ...conversation.messages,
+            ...localMessages.filter((m) => !serverIds.has(m.id)),
+        ];
+    }, [conversation.messages, localMessages]);
     const [bodyError, setBodyError] = useState<string | null>(null);
     const [showLinkCustomer, setShowLinkCustomer] = useState(false);
     const [customerSearch, setCustomerSearch] = useState('');
-    const [selectedCustomerId, setSelectedCustomerId] = useState<number | ''>('');
+    const [selectedCustomerId, setSelectedCustomerId] = useState<number | ''>(
+        '',
+    );
     const [showDropdown, setShowDropdown] = useState(false);
     const [createCustomer, setCreateCustomer] = useState(false);
 
     const filteredCustomers = useMemo(() => {
-        if (!customerSearch) return customerOptions;
+        if (!customerSearch) {
+            return customerOptions;
+        }
+
         const q = customerSearch.toLowerCase();
+
         return customerOptions.filter(
             (c) =>
                 c.name.toLowerCase().includes(q) ||
@@ -92,10 +102,6 @@ export default function ConversationsShow({
     );
 
     useEffect(() => {
-        setMessages(conversation.messages);
-    }, [conversation.messages]);
-
-    useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
 
@@ -103,9 +109,12 @@ export default function ConversationsShow({
         const channel = echo.private(`conversation.${conversation.id}`);
 
         channel.listen('.App\\Events\\MessageSent', (event: Message) => {
-            setMessages((prev) => {
-                if (prev.some((m) => m.id === event.id)) return prev;
-                return [...prev.filter((m) => m.id > 0), event];
+            setLocalMessages((prev) => {
+                if (prev.some((m: Message) => m.id === event.id)) {
+                    return prev;
+                }
+
+                return [...prev.filter((m: Message) => m.id > 0), event];
             });
         });
 
@@ -121,9 +130,7 @@ export default function ConversationsShow({
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head
-                title={
-                    conversation.subject || conversation.participant_name
-                }
+                title={conversation.subject || conversation.participant_name}
             />
             <div className="flex h-full flex-1 flex-col overflow-hidden rounded-xl">
                 {/* Header */}
@@ -221,14 +228,27 @@ export default function ConversationsShow({
                                                                 : customerSearch
                                                         }
                                                         onChange={(e) => {
-                                                            setCustomerSearch(e.target.value);
-                                                            setSelectedCustomerId('');
-                                                            setShowDropdown(true);
+                                                            setCustomerSearch(
+                                                                e.target.value,
+                                                            );
+                                                            setSelectedCustomerId(
+                                                                '',
+                                                            );
+                                                            setShowDropdown(
+                                                                true,
+                                                            );
                                                         }}
-                                                        onFocus={() => setShowDropdown(true)}
+                                                        onFocus={() =>
+                                                            setShowDropdown(
+                                                                true,
+                                                            )
+                                                        }
                                                         onBlur={() =>
                                                             setTimeout(
-                                                                () => setShowDropdown(false),
+                                                                () =>
+                                                                    setShowDropdown(
+                                                                        false,
+                                                                    ),
                                                                 200,
                                                             )
                                                         }
@@ -236,30 +256,49 @@ export default function ConversationsShow({
                                                         autoComplete="off"
                                                     />
                                                     {showDropdown &&
-                                                        filteredCustomers.length > 0 &&
+                                                        filteredCustomers.length >
+                                                            0 &&
                                                         !selectedCustomer && (
                                                             <ul className="absolute z-10 mt-1 max-h-48 w-full overflow-auto rounded-md border border-input bg-popover shadow-md">
-                                                                {filteredCustomers.map((c) => (
-                                                                    <li key={c.id}>
-                                                                        <button
-                                                                            type="button"
-                                                                            className="w-full px-3 py-2 text-left text-sm hover:bg-muted"
-                                                                            onMouseDown={(e) => {
-                                                                                e.preventDefault();
-                                                                                setSelectedCustomerId(c.id);
-                                                                                setCustomerSearch('');
-                                                                                setShowDropdown(false);
-                                                                            }}
+                                                                {filteredCustomers.map(
+                                                                    (c) => (
+                                                                        <li
+                                                                            key={
+                                                                                c.id
+                                                                            }
                                                                         >
-                                                                            <span className="font-medium">
-                                                                                {c.name}
-                                                                            </span>
-                                                                            <span className="ml-2 text-muted-foreground">
-                                                                                {c.email}
-                                                                            </span>
-                                                                        </button>
-                                                                    </li>
-                                                                ))}
+                                                                            <button
+                                                                                type="button"
+                                                                                className="w-full px-3 py-2 text-left text-sm hover:bg-muted"
+                                                                                onMouseDown={(
+                                                                                    e,
+                                                                                ) => {
+                                                                                    e.preventDefault();
+                                                                                    setSelectedCustomerId(
+                                                                                        c.id,
+                                                                                    );
+                                                                                    setCustomerSearch(
+                                                                                        '',
+                                                                                    );
+                                                                                    setShowDropdown(
+                                                                                        false,
+                                                                                    );
+                                                                                }}
+                                                                            >
+                                                                                <span className="font-medium">
+                                                                                    {
+                                                                                        c.name
+                                                                                    }
+                                                                                </span>
+                                                                                <span className="ml-2 text-muted-foreground">
+                                                                                    {
+                                                                                        c.email
+                                                                                    }
+                                                                                </span>
+                                                                            </button>
+                                                                        </li>
+                                                                    ),
+                                                                )}
                                                             </ul>
                                                         )}
                                                 </div>
@@ -268,14 +307,20 @@ export default function ConversationsShow({
                                                         type="button"
                                                         className="text-xs text-muted-foreground hover:text-foreground"
                                                         onClick={() => {
-                                                            setSelectedCustomerId('');
-                                                            setCustomerSearch('');
+                                                            setSelectedCustomerId(
+                                                                '',
+                                                            );
+                                                            setCustomerSearch(
+                                                                '',
+                                                            );
                                                         }}
                                                     >
                                                         Clear selection
                                                     </button>
                                                 )}
-                                                <InputError message={errors.customer_id} />
+                                                <InputError
+                                                    message={errors.customer_id}
+                                                />
                                             </div>
                                         )}
                                         {!selectedCustomer && (
@@ -292,10 +337,17 @@ export default function ConversationsShow({
                                                     value="1"
                                                     checked={createCustomer}
                                                     onChange={(e) => {
-                                                        setCreateCustomer(e.target.checked);
+                                                        setCreateCustomer(
+                                                            e.target.checked,
+                                                        );
+
                                                         if (e.target.checked) {
-                                                            setSelectedCustomerId('');
-                                                            setCustomerSearch('');
+                                                            setSelectedCustomerId(
+                                                                '',
+                                                            );
+                                                            setCustomerSearch(
+                                                                '',
+                                                            );
                                                         }
                                                     }}
                                                     className="size-4 rounded border-input"
@@ -340,12 +392,14 @@ export default function ConversationsShow({
                         {messages.length === 0 ? (
                             <div className="flex flex-col items-center justify-center py-12 text-center">
                                 <p className="text-sm text-muted-foreground">
-                                    No messages yet. Send the first message below.
+                                    No messages yet. Send the first message
+                                    below.
                                 </p>
                             </div>
                         ) : (
                             messages.map((message) => {
                                 const isOwner = message.sender_type === 'user';
+
                                 return (
                                     <div
                                         key={message.id}
@@ -358,7 +412,7 @@ export default function ConversationsShow({
                                                     : 'bg-muted'
                                             }`}
                                         >
-                                            <p className="whitespace-pre-wrap text-sm">
+                                            <p className="text-sm whitespace-pre-wrap">
                                                 {message.body}
                                             </p>
                                             <p
@@ -386,9 +440,13 @@ export default function ConversationsShow({
                         onSubmit={(e) => {
                             e.preventDefault();
                             const body = bodyRef.current?.value.trim();
-                            if (!body) return;
+
+                            if (!body) {
+                                return;
+                            }
+
                             setBodyError(null);
-                            setMessages((prev) => [
+                            setLocalMessages((prev) => [
                                 ...prev,
                                 {
                                     id: -Date.now(),
@@ -398,16 +456,31 @@ export default function ConversationsShow({
                                     read_at: null,
                                 },
                             ]);
-                            if (bodyRef.current) bodyRef.current.value = '';
-                            router.post(storeMessage.url(conversation), { body }, {
-                                preserveState: true,
-                                preserveScroll: true,
-                                onError: (errors) => {
-                                    setMessages((prev) => prev.filter((m) => m.id > 0));
-                                    setBodyError(errors.body ?? null);
-                                    if (bodyRef.current) bodyRef.current.value = body;
+
+                            if (bodyRef.current) {
+                                bodyRef.current.value = '';
+                            }
+
+                            router.post(
+                                storeMessage.url(conversation),
+                                { body },
+                                {
+                                    preserveState: true,
+                                    preserveScroll: true,
+                                    onError: (errors) => {
+                                        setLocalMessages((prev) =>
+                                            prev.filter(
+                                                (m: Message) => m.id > 0,
+                                            ),
+                                        );
+                                        setBodyError(errors.body ?? null);
+
+                                        if (bodyRef.current) {
+                                            bodyRef.current.value = body;
+                                        }
+                                    },
                                 },
-                            });
+                            );
                         }}
                     >
                         <div className="flex-1">
