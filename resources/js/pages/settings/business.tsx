@@ -53,12 +53,16 @@ export default function Business({
         country: string | null;
         location_name: string | null;
         is_listed_in_directory: boolean;
+        hide_pricing: boolean;
     };
     waiverAgreementText: string;
 }) {
     const [country, setCountry] = useState(businessSettings.country ?? '');
     const [isListedInDirectory, setIsListedInDirectory] = useState(
         businessSettings.is_listed_in_directory,
+    );
+    const [hidePricing, setHidePricing] = useState(
+        businessSettings.hide_pricing,
     );
 
     return (
@@ -333,6 +337,29 @@ export default function Business({
                                         className="cursor-pointer"
                                     >
                                         List my shop in the public directory
+                                    </Label>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="hidden"
+                                        name="hide_pricing"
+                                        value={hidePricing ? '1' : '0'}
+                                    />
+                                    <Checkbox
+                                        id="hide_pricing"
+                                        checked={hidePricing}
+                                        onCheckedChange={(checked) => {
+                                            setHidePricing(
+                                                checked === true,
+                                            );
+                                        }}
+                                    />
+                                    <Label
+                                        htmlFor="hide_pricing"
+                                        className="cursor-pointer"
+                                    >
+                                        Hide pricing on storefront
                                     </Label>
                                 </div>
 

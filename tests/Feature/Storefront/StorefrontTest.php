@@ -78,6 +78,58 @@ test('storefront show page includes location data', function () {
     );
 });
 
+test('storefront show page passes hidePricing prop and contact email', function () {
+    $user = User::factory()->create(['email' => 'shop@example.com']);
+    $user->businessSettings()->create([
+        'store_slug' => 'hidden-pricing-shop',
+        'company_name' => 'Hidden Pricing Shop',
+        'hourly_rate' => 50,
+        'hide_pricing' => true,
+    ]);
+
+    $response = $this->get('/c/hidden-pricing-shop');
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('storefront/show')
+        ->where('hidePricing', true)
+        ->where('hourlyRate', '50.00')
+        ->where('contactEmail', 'shop@example.com')
+    );
+});
+
+test('storefront show page does not expose contact email when pricing is visible', function () {
+    $user = User::factory()->create(['email' => 'shop@example.com']);
+    $user->businessSettings()->create([
+        'store_slug' => 'visible-pricing-shop',
+        'company_name' => 'Visible Pricing Shop',
+        'hourly_rate' => 50,
+    ]);
+
+    $response = $this->get('/c/visible-pricing-shop');
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('storefront/show')
+        ->where('hidePricing', false)
+        ->where('contactEmail', null)
+    );
+});
+
+test('directory page includes hide_pricing in storefront data', function () {
+    BusinessSettings::factory()->create([
+        'hide_pricing' => true,
+    ]);
+
+    $response = $this->get(route('storefront.index'));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->has('storefronts.data', 1)
+        ->where('storefronts.data.0.hide_pricing', true)
+    );
+});
+
 test('directory page loads successfully', function () {
     $response = $this->get(route('storefront.index'));
 

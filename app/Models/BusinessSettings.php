@@ -26,6 +26,7 @@ class BusinessSettings extends Model
         'country',
         'location_name',
         'is_listed_in_directory',
+        'hide_pricing',
     ];
 
     /**
@@ -38,6 +39,7 @@ class BusinessSettings extends Model
             'default_fixed_rate' => 'decimal:2',
             'tax_rate' => 'decimal:2',
             'is_listed_in_directory' => 'boolean',
+            'hide_pricing' => 'boolean',
         ];
     }
 

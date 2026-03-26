@@ -76,6 +76,7 @@ class BusinessSettingsFactory extends Factory
             'tiktok_handle' => fake()->optional(0.4)->lexify('????cards'),
             'country' => $country,
             'location_name' => null,
+            'hide_pricing' => fake()->boolean(20),
         ];
     }
 

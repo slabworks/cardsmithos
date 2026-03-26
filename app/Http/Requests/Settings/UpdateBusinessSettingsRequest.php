@@ -40,6 +40,7 @@ class UpdateBusinessSettingsRequest extends FormRequest
             'country' => ['nullable', 'string', 'size:2'],
             'location_name' => ['nullable', 'string', 'max:100'],
             'is_listed_in_directory' => ['boolean'],
+            'hide_pricing' => ['boolean'],
         ];
     }
 }
