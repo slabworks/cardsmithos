@@ -25,7 +25,11 @@ class EmailSyncService
                     break;
                 }
 
-                $this->syncMessage($gmail, $account, $messageMeta['id']);
+                try {
+                    $this->syncMessage($gmail, $account, $messageMeta['id']);
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::warning("Skipping message {$messageMeta['id']}: {$e->getMessage()}");
+                }
                 $synced++;
             }
 

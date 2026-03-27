@@ -213,6 +213,7 @@ export default function EmailsIndex({
                                 </p>
                             </div>
                         ) : (
+                            <>
                             <ul className="divide-y">
                                 {emails.data.map((email) => {
                                     const isSelected =
@@ -275,6 +276,52 @@ export default function EmailsIndex({
                                     );
                                 })}
                             </ul>
+                            {emails.last_page > 1 && (
+                                <div className="flex items-center justify-between border-t px-4 py-2">
+                                    <span className="text-xs text-muted-foreground">
+                                        Page {emails.current_page} of {emails.last_page} ({emails.total} emails)
+                                    </span>
+                                    <div className="flex gap-1">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            disabled={emails.current_page <= 1}
+                                            onClick={() =>
+                                                router.get(
+                                                    index.url(),
+                                                    {
+                                                        search: filters.search,
+                                                        customer_id: filters.customer_id,
+                                                        page: emails.current_page - 1,
+                                                    },
+                                                    { preserveState: true, replace: true },
+                                                )
+                                            }
+                                        >
+                                            Prev
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            disabled={emails.current_page >= emails.last_page}
+                                            onClick={() =>
+                                                router.get(
+                                                    index.url(),
+                                                    {
+                                                        search: filters.search,
+                                                        customer_id: filters.customer_id,
+                                                        page: emails.current_page + 1,
+                                                    },
+                                                    { preserveState: true, replace: true },
+                                                )
+                                            }
+                                        >
+                                            Next
+                                        </Button>
+                                    </div>
+                                </div>
+                            )}
+                            </>
                         )}
                     </div>
 

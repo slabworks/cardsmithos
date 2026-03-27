@@ -44,6 +44,11 @@ class EmailController extends Controller
                 ->with('customer:id,name', 'attachments')
                 ->oldest('received_at')
                 ->get();
+
+            $request->user()->emailMessages()
+                ->where('gmail_thread_id', $request->query('thread_id'))
+                ->where('is_read', false)
+                ->update(['is_read' => true]);
         }
 
         $customerOptions = $request->user()
