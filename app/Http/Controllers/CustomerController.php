@@ -86,9 +86,16 @@ class CustomerController extends Controller
 
         $waiverUrl = self::waiverUrl($customer);
 
+        $recentEmails = $customer->emailMessages()
+            ->select('id', 'customer_id', 'gmail_thread_id', 'direction', 'from_address', 'from_name', 'subject', 'snippet', 'is_read', 'received_at')
+            ->latest('received_at')
+            ->limit(5)
+            ->get();
+
         return Inertia::render('customers/show', [
             'customer' => $customer,
             'waiverUrl' => $waiverUrl,
+            'recentEmails' => $recentEmails,
         ]);
     }
 
