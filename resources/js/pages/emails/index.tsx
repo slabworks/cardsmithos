@@ -1,6 +1,7 @@
 import { Head, router, useForm } from '@inertiajs/react';
 import {
     Link as LinkIcon,
+    Loader2,
     Mail,
     MessageSquarePlus,
     Pencil,
@@ -9,6 +10,7 @@ import {
     Send,
 } from 'lucide-react';
 import { useCallback, useRef, useState } from 'react';
+import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -85,6 +87,7 @@ export default function EmailsIndex({
     hasGmailAccount: boolean;
 }) {
     const [search, setSearch] = useState(filters.search);
+    const [syncing, setSyncing] = useState(false);
     const searchTimeout = useRef<ReturnType<typeof setTimeout>>(undefined);
 
     const handleSearch = useCallback(
@@ -125,7 +128,7 @@ export default function EmailsIndex({
                     customer_id: filters.customer_id,
                     thread_id: threadId,
                 },
-                { preserveState: true, replace: true },
+                { preserveState: false, replace: true },
             );
         },
         [filters.search, filters.customer_id],
@@ -191,10 +194,24 @@ export default function EmailsIndex({
                     <Button
                         variant="outline"
                         size="icon"
-                        onClick={() => router.post(sync.url())}
+                        disabled={syncing}
+                        onClick={() => {
+                            setSyncing(true);
+                            toast.info('Syncing emails, this may take a moment...');
+                            router.post(sync.url(), {}, {
+                                preserveState: true,
+                                onSuccess: () => toast.success('Emails synced'),
+                                onError: () => toast.error('Sync failed'),
+                                onFinish: () => setSyncing(false),
+                            });
+                        }}
                         title="Sync now"
                     >
-                        <RefreshCw className="size-4" />
+                        {syncing ? (
+                            <Loader2 className="size-4 animate-spin" />
+                        ) : (
+                            <RefreshCw className="size-4" />
+                        )}
                     </Button>
                     <ComposeDialog customerOptions={customerOptions} />
                 </div>
