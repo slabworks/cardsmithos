@@ -11,6 +11,7 @@ use App\Services\GmailService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response as HttpResponse;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -83,7 +84,7 @@ class EmailController extends Controller
             'subject' => 'required|string|max:255',
             'body' => 'required|string',
             'thread_id' => 'nullable|string',
-            'customer_id' => 'nullable|exists:customers,id',
+            'customer_id' => ['nullable', Rule::exists('customers', 'id')->where('user_id', $request->user()->id)],
         ]);
 
         SendGmailMessage::dispatch(
@@ -131,7 +132,7 @@ class EmailController extends Controller
         $this->authorize('update', $emailMessage);
 
         $validated = $request->validate([
-            'customer_id' => 'required|exists:customers,id',
+            'customer_id' => ['required', Rule::exists('customers', 'id')->where('user_id', $request->user()->id)],
         ]);
 
         // Associate all messages in the thread

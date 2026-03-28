@@ -95,6 +95,9 @@ class GmailService
     {
         $from = $this->account->email;
 
+        $to = str_replace(["\r", "\n"], '', $to);
+        $subject = str_replace(["\r", "\n"], '', $subject);
+
         $raw = "From: {$from}\r\n";
         $raw .= "To: {$to}\r\n";
         $raw .= "Subject: {$subject}\r\n";

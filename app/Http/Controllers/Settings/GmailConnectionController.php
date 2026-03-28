@@ -20,9 +20,13 @@ class GmailConnectionController extends Controller
         ]);
     }
 
-    public function connect(): RedirectResponse
+    public function connect(Request $request): RedirectResponse
     {
         $client = $this->getGoogleClient();
+
+        $state = bin2hex(random_bytes(16));
+        $request->session()->put('gmail_oauth_state', $state);
+        $client->setState($state);
 
         return redirect()->away($client->createAuthUrl());
     }
@@ -31,6 +35,11 @@ class GmailConnectionController extends Controller
     {
         if ($request->has('error')) {
             return to_route('gmail.edit')->with('error', 'Gmail connection was cancelled.');
+        }
+
+        $expectedState = $request->session()->pull('gmail_oauth_state');
+        if (! $expectedState || ! hash_equals($expectedState, $request->query('state', ''))) {
+            return to_route('gmail.edit')->with('error', 'Invalid OAuth state. Please try again.');
         }
 
         $client = $this->getGoogleClient();
@@ -44,13 +53,18 @@ class GmailConnectionController extends Controller
         $oauth2 = new \Google\Service\Oauth2($client);
         $googleUser = $oauth2->userinfo->get();
 
-        $gmailAccount = $request->user()->gmailAccount()->updateOrCreate([], [
+        $attributes = [
             'google_id' => $googleUser->id,
             'email' => $googleUser->email,
             'access_token' => $token['access_token'],
-            'refresh_token' => $token['refresh_token'] ?? '',
             'token_expires_at' => now()->addSeconds($token['expires_in']),
-        ]);
+        ];
+
+        if (! empty($token['refresh_token'])) {
+            $attributes['refresh_token'] = $token['refresh_token'];
+        }
+
+        $gmailAccount = $request->user()->gmailAccount()->updateOrCreate([], $attributes);
 
         SyncGmailMessages::dispatch($gmailAccount->id);
 
