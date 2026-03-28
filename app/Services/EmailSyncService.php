@@ -7,6 +7,7 @@ use App\Models\EmailMessage;
 use App\Models\GmailAccount;
 use App\Models\Inquiry;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class EmailSyncService
 {
@@ -28,7 +29,7 @@ class EmailSyncService
                 try {
                     $this->syncMessage($gmail, $account, $messageMeta['id']);
                 } catch (\Exception $e) {
-                    \Illuminate\Support\Facades\Log::warning("Skipping message {$messageMeta['id']}: {$e->getMessage()}");
+                    Log::warning("Skipping message {$messageMeta['id']}: {$e->getMessage()}");
                 }
                 $synced++;
             }
@@ -140,14 +141,27 @@ class EmailSyncService
             'received_at' => Carbon::createFromTimestampMs($data['internalDate']),
         ]);
 
-        // Store attachment metadata
+        // Store attachment metadata (cid: resolution happens at read time)
         foreach ($data['attachments'] as $attachment) {
-            $message->attachments()->create([
-                'gmail_attachment_id' => $attachment['id'],
-                'filename' => $attachment['filename'],
-                'mime_type' => $attachment['mimeType'],
-                'size' => $attachment['size'],
-            ]);
+            if ($attachment['id']) {
+                $message->attachments()->create([
+                    'gmail_attachment_id' => $attachment['id'],
+                    'content_id' => $attachment['contentId'] ?? null,
+                    'filename' => $attachment['filename'],
+                    'mime_type' => $attachment['mimeType'],
+                    'size' => $attachment['size'],
+                ]);
+            } elseif (($attachment['contentId'] ?? null) && ($attachment['inlineData'] ?? null)) {
+                // Inline image embedded directly in MIME — store as base64 data URI
+                $message->attachments()->create([
+                    'gmail_attachment_id' => null,
+                    'content_id' => $attachment['contentId'],
+                    'filename' => $attachment['filename'],
+                    'mime_type' => $attachment['mimeType'],
+                    'size' => $attachment['size'],
+                    'inline_data' => base64_encode($attachment['inlineData']),
+                ]);
+            }
         }
 
         // Auto-associate with customer

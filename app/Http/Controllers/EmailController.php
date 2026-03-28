@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Jobs\SendGmailMessage;
 use App\Jobs\SyncGmailMessages;
+use App\Models\EmailAttachment;
 use App\Models\EmailMessage;
 use App\Services\EmailSyncService;
+use App\Services\GmailService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response as HttpResponse;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -43,7 +46,8 @@ class EmailController extends Controller
                 ->where('gmail_thread_id', $request->query('thread_id'))
                 ->with('customer:id,name', 'attachments')
                 ->oldest('received_at')
-                ->get();
+                ->get()
+                ->each->append('resolved_body_html');
 
             $request->user()->emailMessages()
                 ->where('gmail_thread_id', $request->query('thread_id'))
@@ -146,6 +150,24 @@ class EmailController extends Controller
         $inquiry = $syncService->importAsInquiry($emailMessage);
 
         return to_route('inquiries.show', $inquiry);
+    }
+
+    public function attachment(Request $request, EmailMessage $emailMessage, EmailAttachment $emailAttachment): HttpResponse
+    {
+        $this->authorize('view', $emailMessage);
+
+        abort_unless($emailAttachment->email_message_id === $emailMessage->id, 404);
+
+        $gmailAccount = $request->user()->gmailAccount;
+        abort_unless($gmailAccount, 404);
+
+        $gmail = new GmailService($gmailAccount);
+        $data = $gmail->getAttachment($emailMessage->gmail_message_id, $emailAttachment->gmail_attachment_id);
+
+        return response($data, 200, [
+            'Content-Type' => $emailAttachment->mime_type,
+            'Cache-Control' => 'private, max-age=86400',
+        ]);
     }
 
     public function sync(Request $request): RedirectResponse

@@ -13,9 +13,11 @@ class EmailAttachment extends Model
     protected $fillable = [
         'email_message_id',
         'gmail_attachment_id',
+        'content_id',
         'filename',
         'mime_type',
         'size',
+        'inline_data',
     ];
 
     public function emailMessage(): BelongsTo

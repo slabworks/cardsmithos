@@ -59,6 +59,7 @@ type EmailItem = {
 
 type ThreadMessage = EmailItem & {
     body_html: string | null;
+    resolved_body_html: string | null;
     body_text: string | null;
     cc_addresses: string[] | null;
     attachments: { id: number; filename: string; mime_type: string; size: number }[];
@@ -510,9 +511,9 @@ function ThreadView({
                                 )}
                         </div>
                         <div className="mt-3 border-t pt-3">
-                            {msg.body_html ? (
+                            {(msg.resolved_body_html || msg.body_html) ? (
                                 <iframe
-                                    srcDoc={`<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{font-family:system-ui,sans-serif;font-size:14px;color:#333;margin:0;padding:0;}a{color:#2563eb;}img{max-width:100%;height:auto;}</style></head><body>${msg.body_html}</body></html>`}
+                                    srcDoc={`<!DOCTYPE html><html><head><base href="${window.location.origin}/"><meta charset="utf-8"><style>body{font-family:system-ui,sans-serif;font-size:14px;color:#333;margin:0;padding:0;}a{color:#2563eb;}img{max-width:100%;height:auto;}</style></head><body>${msg.resolved_body_html || msg.body_html}</body></html>`}
                                     className="w-full border-0"
                                     sandbox="allow-same-origin"
                                     title="Email content"

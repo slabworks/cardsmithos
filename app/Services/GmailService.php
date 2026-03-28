@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\GmailAccount;
 use Google\Client as GoogleClient;
+use Google\Service\Exception;
 use Google\Service\Gmail;
 use Google\Service\Gmail\Message;
 
@@ -139,7 +140,7 @@ class GmailService
 
             try {
                 $response = $this->gmail->users_history->listUsersHistory('me', $params);
-            } catch (\Google\Service\Exception $e) {
+            } catch (Exception $e) {
                 if ($e->getCode() === 404) {
                     // History ID too old, need full sync
                     return ['messages' => [], 'historyId' => $startHistoryId, 'fullSyncRequired' => true];
@@ -224,12 +225,32 @@ class GmailService
         $attachments = [];
 
         foreach ($payload->getParts() ?? [] as $part) {
-            if ($part->getFilename() && $part->getBody()->getAttachmentId()) {
+            $contentId = null;
+            foreach ($part->getHeaders() ?? [] as $header) {
+                if (strtolower($header->getName()) === 'content-id') {
+                    $contentId = trim($header->getValue(), '<>');
+                    break;
+                }
+            }
+
+            if ($part->getBody()->getAttachmentId()) {
                 $attachments[] = [
                     'id' => $part->getBody()->getAttachmentId(),
-                    'filename' => $part->getFilename(),
+                    'contentId' => $contentId,
+                    'filename' => $part->getFilename() ?: 'inline',
                     'mimeType' => $part->getMimeType(),
                     'size' => $part->getBody()->getSize(),
+                    'inlineData' => null,
+                ];
+            } elseif ($contentId && $part->getBody()->getData() && str_starts_with($part->getMimeType(), 'image/')) {
+                // Inline image embedded directly in MIME (no attachment ID)
+                $attachments[] = [
+                    'id' => null,
+                    'contentId' => $contentId,
+                    'filename' => $part->getFilename() ?: 'inline',
+                    'mimeType' => $part->getMimeType(),
+                    'size' => $part->getBody()->getSize(),
+                    'inlineData' => base64_decode(strtr($part->getBody()->getData(), '-_', '+/')),
                 ];
             }
 

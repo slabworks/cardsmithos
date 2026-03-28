@@ -55,6 +55,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('emails', [EmailController::class, 'store'])->name('emails.store');
     Route::post('emails/sync', [EmailController::class, 'sync'])->name('emails.sync');
     Route::post('emails/{emailMessage}/reply', [EmailController::class, 'reply'])->name('emails.reply');
+    Route::get('emails/{emailMessage}/attachments/{emailAttachment}', [EmailController::class, 'attachment'])->name('emails.attachment');
     Route::post('emails/{emailMessage}/associate', [EmailController::class, 'associate'])->name('emails.associate');
     Route::post('emails/{emailMessage}/create-inquiry', [EmailController::class, 'createInquiry'])->name('emails.create-inquiry');
     Route::resource('inquiries', InquiryController::class);

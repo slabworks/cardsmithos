@@ -11,7 +11,9 @@ return new class extends Migration
         Schema::create('email_attachments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('email_message_id')->constrained()->cascadeOnDelete();
-            $table->string('gmail_attachment_id');
+            $table->text('gmail_attachment_id')->nullable();
+            $table->string('content_id')->nullable();
+            $table->mediumText('inline_data')->nullable();
             $table->string('filename');
             $table->string('mime_type');
             $table->unsignedInteger('size');

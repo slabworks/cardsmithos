@@ -94,4 +94,28 @@ class EmailMessage extends Model
     {
         return $query->where('direction', 'outbound');
     }
+
+    /**
+     * Get body_html with cid: references resolved to attachment URLs.
+     */
+    public function getResolvedBodyHtmlAttribute(): ?string
+    {
+        if (! $this->body_html || ! str_contains($this->body_html, 'cid:')) {
+            return $this->body_html;
+        }
+
+        $html = $this->body_html;
+        $inlineAttachments = $this->attachments->where('content_id', '!=', null);
+
+        foreach ($inlineAttachments as $attachment) {
+            if ($attachment->inline_data) {
+                $url = "data:{$attachment->mime_type};base64,{$attachment->inline_data}";
+            } else {
+                $url = "/emails/{$this->id}/attachments/{$attachment->id}";
+            }
+            $html = str_replace("cid:{$attachment->content_id}", $url, $html);
+        }
+
+        return $html;
+    }
 }
