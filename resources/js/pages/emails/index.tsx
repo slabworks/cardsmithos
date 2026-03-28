@@ -62,7 +62,12 @@ type ThreadMessage = EmailItem & {
     resolved_body_html: string | null;
     body_text: string | null;
     cc_addresses: string[] | null;
-    attachments: { id: number; filename: string; mime_type: string; size: number }[];
+    attachments: {
+        id: number;
+        filename: string;
+        mime_type: string;
+        size: number;
+    }[];
 };
 
 type CustomerOption = { id: number; name: string };
@@ -183,10 +188,7 @@ export default function EmailsIndex({
                         <SelectContent>
                             <SelectItem value="all">All customers</SelectItem>
                             {customerOptions.map((c) => (
-                                <SelectItem
-                                    key={c.id}
-                                    value={c.id.toString()}
-                                >
+                                <SelectItem key={c.id} value={c.id.toString()}>
                                     {c.name}
                                 </SelectItem>
                             ))}
@@ -198,13 +200,20 @@ export default function EmailsIndex({
                         disabled={syncing}
                         onClick={() => {
                             setSyncing(true);
-                            toast.info('Syncing emails, this may take a moment...');
-                            router.post(sync.url(), {}, {
-                                preserveState: true,
-                                onSuccess: () => toast.success('Emails synced'),
-                                onError: () => toast.error('Sync failed'),
-                                onFinish: () => setSyncing(false),
-                            });
+                            toast.info(
+                                'Syncing emails, this may take a moment...',
+                            );
+                            router.post(
+                                sync.url(),
+                                {},
+                                {
+                                    preserveState: true,
+                                    onSuccess: () =>
+                                        toast.success('Emails synced'),
+                                    onError: () => toast.error('Sync failed'),
+                                    onFinish: () => setSyncing(false),
+                                },
+                            );
                         }}
                         title="Sync now"
                     >
@@ -232,113 +241,133 @@ export default function EmailsIndex({
                             </div>
                         ) : (
                             <>
-                            <ul className="divide-y">
-                                {emails.data.map((email) => {
-                                    const isSelected =
-                                        filters.thread_id ===
-                                        email.gmail_thread_id;
-                                    return (
-                                        <li key={email.id}>
-                                            <button
-                                                type="button"
+                                <ul className="divide-y">
+                                    {emails.data.map((email) => {
+                                        const isSelected =
+                                            filters.thread_id ===
+                                            email.gmail_thread_id;
+
+                                        return (
+                                            <li key={email.id}>
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        selectThread(
+                                                            email.gmail_thread_id,
+                                                        )
+                                                    }
+                                                    className={`w-full px-4 py-3 text-left hover:bg-muted/50 ${
+                                                        isSelected
+                                                            ? 'bg-muted'
+                                                            : ''
+                                                    } ${!email.is_read ? 'font-semibold' : ''}`}
+                                                >
+                                                    <div className="flex items-start justify-between gap-2">
+                                                        <div className="min-w-0 flex-1">
+                                                            <p className="truncate text-sm">
+                                                                {email.from_name ||
+                                                                    email.from_address}
+                                                            </p>
+                                                            <p className="truncate text-sm text-foreground">
+                                                                {email.subject ||
+                                                                    '(no subject)'}
+                                                            </p>
+                                                            <p className="truncate text-xs text-muted-foreground">
+                                                                {email.snippet}
+                                                            </p>
+                                                        </div>
+                                                        <div className="flex shrink-0 flex-col items-end gap-1">
+                                                            <span className="text-xs text-muted-foreground">
+                                                                {formatDate(
+                                                                    email.received_at,
+                                                                )}
+                                                            </span>
+                                                            {email.customer && (
+                                                                <Badge
+                                                                    variant="secondary"
+                                                                    className="text-xs"
+                                                                >
+                                                                    {
+                                                                        email
+                                                                            .customer
+                                                                            .name
+                                                                    }
+                                                                </Badge>
+                                                            )}
+                                                            {!email.is_read && (
+                                                                <div className="h-2 w-2 rounded-full bg-blue-500" />
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </button>
+                                            </li>
+                                        );
+                                    })}
+                                </ul>
+                                {emails.last_page > 1 && (
+                                    <div className="flex items-center justify-between border-t px-4 py-2">
+                                        <span className="text-xs text-muted-foreground">
+                                            Page {emails.current_page} of{' '}
+                                            {emails.last_page} ({emails.total}{' '}
+                                            emails)
+                                        </span>
+                                        <div className="flex gap-1">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                disabled={
+                                                    emails.current_page <= 1
+                                                }
                                                 onClick={() =>
-                                                    selectThread(
-                                                        email.gmail_thread_id,
+                                                    router.get(
+                                                        index.url(),
+                                                        {
+                                                            search: filters.search,
+                                                            customer_id:
+                                                                filters.customer_id,
+                                                            page:
+                                                                emails.current_page -
+                                                                1,
+                                                        },
+                                                        {
+                                                            preserveState: true,
+                                                            replace: true,
+                                                        },
                                                     )
                                                 }
-                                                className={`w-full px-4 py-3 text-left hover:bg-muted/50 ${
-                                                    isSelected
-                                                        ? 'bg-muted'
-                                                        : ''
-                                                } ${!email.is_read ? 'font-semibold' : ''}`}
                                             >
-                                                <div className="flex items-start justify-between gap-2">
-                                                    <div className="min-w-0 flex-1">
-                                                        <p className="truncate text-sm">
-                                                            {email.from_name ||
-                                                                email.from_address}
-                                                        </p>
-                                                        <p className="truncate text-sm text-foreground">
-                                                            {email.subject ||
-                                                                '(no subject)'}
-                                                        </p>
-                                                        <p className="truncate text-xs text-muted-foreground">
-                                                            {email.snippet}
-                                                        </p>
-                                                    </div>
-                                                    <div className="flex shrink-0 flex-col items-end gap-1">
-                                                        <span className="text-xs text-muted-foreground">
-                                                            {formatDate(
-                                                                email.received_at,
-                                                            )}
-                                                        </span>
-                                                        {email.customer && (
-                                                            <Badge
-                                                                variant="secondary"
-                                                                className="text-xs"
-                                                            >
-                                                                {
-                                                                    email
-                                                                        .customer
-                                                                        .name
-                                                                }
-                                                            </Badge>
-                                                        )}
-                                                        {!email.is_read && (
-                                                            <div className="h-2 w-2 rounded-full bg-blue-500" />
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </button>
-                                        </li>
-                                    );
-                                })}
-                            </ul>
-                            {emails.last_page > 1 && (
-                                <div className="flex items-center justify-between border-t px-4 py-2">
-                                    <span className="text-xs text-muted-foreground">
-                                        Page {emails.current_page} of {emails.last_page} ({emails.total} emails)
-                                    </span>
-                                    <div className="flex gap-1">
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            disabled={emails.current_page <= 1}
-                                            onClick={() =>
-                                                router.get(
-                                                    index.url(),
-                                                    {
-                                                        search: filters.search,
-                                                        customer_id: filters.customer_id,
-                                                        page: emails.current_page - 1,
-                                                    },
-                                                    { preserveState: true, replace: true },
-                                                )
-                                            }
-                                        >
-                                            Prev
-                                        </Button>
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            disabled={emails.current_page >= emails.last_page}
-                                            onClick={() =>
-                                                router.get(
-                                                    index.url(),
-                                                    {
-                                                        search: filters.search,
-                                                        customer_id: filters.customer_id,
-                                                        page: emails.current_page + 1,
-                                                    },
-                                                    { preserveState: true, replace: true },
-                                                )
-                                            }
-                                        >
-                                            Next
-                                        </Button>
+                                                Prev
+                                            </Button>
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                disabled={
+                                                    emails.current_page >=
+                                                    emails.last_page
+                                                }
+                                                onClick={() =>
+                                                    router.get(
+                                                        index.url(),
+                                                        {
+                                                            search: filters.search,
+                                                            customer_id:
+                                                                filters.customer_id,
+                                                            page:
+                                                                emails.current_page +
+                                                                1,
+                                                        },
+                                                        {
+                                                            preserveState: true,
+                                                            replace: true,
+                                                        },
+                                                    )
+                                                }
+                                            >
+                                                Next
+                                            </Button>
+                                        </div>
                                     </div>
-                                </div>
-                            )}
+                                )}
                             </>
                         )}
                     </div>
@@ -449,9 +478,7 @@ function ThreadView({
                             variant="outline"
                             size="sm"
                             onClick={() =>
-                                router.post(
-                                    createInquiry.url(firstMessage.id),
-                                )
+                                router.post(createInquiry.url(firstMessage.id))
                             }
                         >
                             <MessageSquarePlus className="mr-1 size-4" />
@@ -464,10 +491,7 @@ function ThreadView({
             {/* Messages */}
             <div className="flex-1 space-y-4 overflow-y-auto px-6 py-4">
                 {messages.map((msg) => (
-                    <div
-                        key={msg.id}
-                        className="rounded-lg border bg-card p-4"
-                    >
+                    <div key={msg.id} className="rounded-lg border bg-card p-4">
                         <div className="mb-3 flex items-center justify-between text-sm">
                             <div>
                                 <span className="font-medium">
@@ -492,26 +516,22 @@ function ThreadView({
                                         : 'Sent'}
                                 </Badge>
                                 <time className="text-muted-foreground">
-                                    {new Date(
-                                        msg.received_at,
-                                    ).toLocaleString()}
+                                    {new Date(msg.received_at).toLocaleString()}
                                 </time>
                             </div>
                         </div>
                         <div className="text-sm text-muted-foreground">
-                            To:{' '}
-                            {msg.to_addresses?.join(', ') || 'Unknown'}
+                            To: {msg.to_addresses?.join(', ') || 'Unknown'}
                             {msg.cc_addresses &&
                                 msg.cc_addresses.length > 0 && (
                                     <span>
                                         {' '}
-                                        | Cc:{' '}
-                                        {msg.cc_addresses.join(', ')}
+                                        | Cc: {msg.cc_addresses.join(', ')}
                                     </span>
                                 )}
                         </div>
                         <div className="mt-3 border-t pt-3">
-                            {(msg.resolved_body_html || msg.body_html) ? (
+                            {msg.resolved_body_html || msg.body_html ? (
                                 <iframe
                                     srcDoc={`<!DOCTYPE html><html><head><base href="${window.location.origin}/"><meta charset="utf-8"><style>body{font-family:system-ui,sans-serif;font-size:14px;color:#333;margin:0;padding:0;}a{color:#2563eb;}img{max-width:100%;height:auto;}</style></head><body>${msg.resolved_body_html || msg.body_html}</body></html>`}
                                     className="w-full border-0"
@@ -520,6 +540,7 @@ function ThreadView({
                                     onLoad={(e) => {
                                         const iframe =
                                             e.target as HTMLIFrameElement;
+
                                         if (iframe.contentDocument?.body) {
                                             iframe.style.height =
                                                 iframe.contentDocument.body
@@ -530,7 +551,7 @@ function ThreadView({
                                     }}
                                 />
                             ) : (
-                                <pre className="whitespace-pre-wrap text-sm">
+                                <pre className="text-sm whitespace-pre-wrap">
                                     {msg.body_text || '(empty)'}
                                 </pre>
                             )}
@@ -542,10 +563,7 @@ function ThreadView({
                                 </p>
                                 <div className="flex flex-wrap gap-2">
                                     {msg.attachments.map((att) => (
-                                        <Badge
-                                            key={att.id}
-                                            variant="outline"
-                                        >
+                                        <Badge key={att.id} variant="outline">
                                             {att.filename} (
                                             {formatBytes(att.size)})
                                         </Badge>
@@ -686,10 +704,7 @@ function ComposeDialog({
                         />
                     </div>
                     <div className="flex justify-end">
-                        <Button
-                            type="submit"
-                            disabled={form.processing}
-                        >
+                        <Button type="submit" disabled={form.processing}>
                             <Send className="mr-1 size-4" />
                             Send
                         </Button>
@@ -724,7 +739,13 @@ function formatDate(date: string): string {
 }
 
 function formatBytes(bytes: number): string {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    if (bytes < 1024) {
+        return `${bytes} B`;
+    }
+
+    if (bytes < 1024 * 1024) {
+        return `${(bytes / 1024).toFixed(1)} KB`;
+    }
+
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }

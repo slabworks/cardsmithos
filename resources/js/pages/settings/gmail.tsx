@@ -67,9 +67,7 @@ export default function Gmail({
                                 <Button
                                     variant="outline"
                                     size="sm"
-                                    onClick={() =>
-                                        router.post(sync.url())
-                                    }
+                                    onClick={() => router.post(sync.url())}
                                 >
                                     <RefreshCw className="mr-1 size-4" />
                                     Sync now

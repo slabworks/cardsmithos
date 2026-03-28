@@ -264,8 +264,7 @@ export default function CustomersShow({
                                 <Link
                                     href={emailsIndex.url({
                                         query: {
-                                            customer_id:
-                                                customer.id.toString(),
+                                            customer_id: customer.id.toString(),
                                         },
                                     })}
                                 >

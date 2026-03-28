@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
 use App\Jobs\SyncGmailMessages;
-use App\Models\GmailAccount;
 use Google\Client as GoogleClient;
+use Google\Service\Oauth2;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -50,7 +50,7 @@ class GmailConnectionController extends Controller
         }
 
         $client->setAccessToken($token);
-        $oauth2 = new \Google\Service\Oauth2($client);
+        $oauth2 = new Oauth2($client);
         $googleUser = $oauth2->userinfo->get();
 
         $attributes = [

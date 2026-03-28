@@ -7,7 +7,6 @@ use App\Models\GmailAccount;
 use App\Services\GmailService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 
 class SendGmailMessage implements ShouldQueue
