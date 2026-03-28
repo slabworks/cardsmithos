@@ -12,8 +12,8 @@ import {
 import { useCallback, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
     Dialog,
     DialogContent,
@@ -76,7 +76,12 @@ export default function EmailsIndex({
     emails: PaginatedEmails;
     selectedThread: ThreadMessage[] | null;
     customerOptions: CustomerOption[];
-    filters: { search: string; customer_id: string; thread_id: string; unread: string };
+    filters: {
+        search: string;
+        customer_id: string;
+        thread_id: string;
+        unread: string;
+    };
     hasGmailAccount: boolean;
 }) {
     const [search, setSearch] = useState(filters.search);
@@ -90,7 +95,11 @@ export default function EmailsIndex({
             searchTimeout.current = setTimeout(() => {
                 router.get(
                     index.url(),
-                    { search: value, customer_id: filters.customer_id, unread: filters.unread },
+                    {
+                        search: value,
+                        customer_id: filters.customer_id,
+                        unread: filters.unread,
+                    },
                     { preserveState: true, replace: true },
                 );
             }, 300);
@@ -204,7 +213,10 @@ export default function EmailsIndex({
                             checked={filters.unread === '1'}
                             onCheckedChange={handleFilterUnread}
                         />
-                        <Label htmlFor="unread-filter" className="text-sm font-normal whitespace-nowrap">
+                        <Label
+                            htmlFor="unread-filter"
+                            className="text-sm font-normal whitespace-nowrap"
+                        >
                             Unread only
                         </Label>
                     </div>

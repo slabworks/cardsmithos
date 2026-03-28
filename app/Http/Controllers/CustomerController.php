@@ -77,7 +77,7 @@ class CustomerController extends Controller
         return url($relativeUrl);
     }
 
-    public function show(Customer $customer): Response
+    public function show(Request $request, Customer $customer): Response
     {
         $this->authorize('view', $customer);
 
