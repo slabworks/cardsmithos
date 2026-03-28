@@ -1,4 +1,4 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import {
     Github,
     Heart,
@@ -9,6 +9,7 @@ import {
     Receipt,
     Users,
 } from 'lucide-react';
+import { useMemo } from 'react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -29,34 +30,6 @@ import { index as expensesIndex } from '@/routes/expenses';
 import { index as inquiriesIndex } from '@/routes/inquiries';
 import type { NavItem } from '@/types';
 
-const mainNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: dashboard(),
-        icon: LayoutGrid,
-    },
-    {
-        title: 'Customers',
-        href: customersIndex(),
-        icon: Users,
-    },
-    {
-        title: 'Email',
-        href: emailsIndex(),
-        icon: Mail,
-    },
-    {
-        title: 'Inquiries',
-        href: inquiriesIndex(),
-        icon: MessageSquare,
-    },
-    {
-        title: 'Expenses',
-        href: expensesIndex(),
-        icon: Receipt,
-    },
-];
-
 const footerNavItems: NavItem[] = [
     {
         title: 'GitHub',
@@ -76,6 +49,24 @@ const footerNavItems: NavItem[] = [
 ];
 
 export function AppSidebar() {
+    const { unreadEmailCount } = usePage<{ unreadEmailCount: number }>().props;
+
+    const mainNavItems: NavItem[] = useMemo(
+        () => [
+            { title: 'Dashboard', href: dashboard(), icon: LayoutGrid },
+            { title: 'Customers', href: customersIndex(), icon: Users },
+            {
+                title: 'Email',
+                href: emailsIndex(),
+                icon: Mail,
+                badge: unreadEmailCount,
+            },
+            { title: 'Inquiries', href: inquiriesIndex(), icon: MessageSquare },
+            { title: 'Expenses', href: expensesIndex(), icon: Receipt },
+        ],
+        [unreadEmailCount],
+    );
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>

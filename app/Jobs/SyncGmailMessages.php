@@ -6,6 +6,7 @@ use App\Models\GmailAccount;
 use App\Services\EmailSyncService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class SyncGmailMessages implements ShouldQueue
@@ -26,7 +27,11 @@ class SyncGmailMessages implements ShouldQueue
     {
         $accounts = $this->gmailAccountId
             ? GmailAccount::where('id', $this->gmailAccountId)->get()
-            : GmailAccount::all();
+            : GmailAccount::whereIn('user_id', function ($query) {
+                $query->select('user_id')
+                    ->from('sessions')
+                    ->where('last_activity', '>=', now()->subDay()->timestamp);
+            })->get();
 
         foreach ($accounts as $account) {
             try {
