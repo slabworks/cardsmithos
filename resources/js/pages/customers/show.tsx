@@ -22,7 +22,7 @@ import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import { index } from '@/routes/customers';
 import { index as emailsIndex } from '@/routes/emails';
-import type { BreadcrumbItem } from '@/types';
+import type { BreadcrumbItem, EmailItem } from '@/types';
 
 const statusBadgeVariant: Record<string, 'default' | 'secondary' | 'outline'> =
     {
@@ -33,18 +33,6 @@ const statusBadgeVariant: Record<string, 'default' | 'secondary' | 'outline'> =
         good_client: 'default',
         inactive: 'outline',
     };
-
-type EmailItem = {
-    id: number;
-    gmail_thread_id: string;
-    direction: 'inbound' | 'outbound';
-    from_address: string;
-    from_name: string | null;
-    subject: string | null;
-    snippet: string | null;
-    is_read: boolean;
-    received_at: string;
-};
 
 export default function CustomersShow({
     customer,

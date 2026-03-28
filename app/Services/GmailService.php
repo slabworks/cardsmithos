@@ -26,7 +26,7 @@ class GmailService
         $this->gmail = new Gmail($this->client);
     }
 
-    public function refreshTokenIfNeeded(): void
+    private function refreshTokenIfNeeded(): void
     {
         if (! $this->account->isTokenExpired()) {
             return;
@@ -76,7 +76,7 @@ class GmailService
 
         $headers = $this->parseHeaders($message->getPayload()->getHeaders());
         $body = $this->extractBody($message->getPayload());
-        $attachments = $this->extractAttachmentMeta($message->getPayload(), $messageId);
+        $attachments = $this->extractAttachmentMeta($message->getPayload());
 
         return [
             'id' => $message->getId(),
@@ -161,7 +161,6 @@ class GmailService
                 $response = $this->gmail->users_history->listUsersHistory('me', $params);
             } catch (Exception $e) {
                 if ($e->getCode() === 404) {
-                    // History ID too old, need full sync
                     return ['messages' => [], 'historyId' => $startHistoryId, 'fullSyncRequired' => true];
                 }
                 throw $e;
@@ -239,7 +238,7 @@ class GmailService
     /**
      * @return array<array{id: string, filename: string, mimeType: string, size: int}>
      */
-    private function extractAttachmentMeta($payload, string $messageId): array
+    private function extractAttachmentMeta($payload): array
     {
         $attachments = [];
 
@@ -262,7 +261,6 @@ class GmailService
                     'inlineData' => null,
                 ];
             } elseif ($contentId && $part->getBody()->getData() && str_starts_with($part->getMimeType(), 'image/')) {
-                // Inline image embedded directly in MIME (no attachment ID)
                 $attachments[] = [
                     'id' => null,
                     'contentId' => $contentId,
@@ -273,8 +271,7 @@ class GmailService
                 ];
             }
 
-            // Recurse into nested parts
-            $attachments = array_merge($attachments, $this->extractAttachmentMeta($part, $messageId));
+            $attachments = array_merge($attachments, $this->extractAttachmentMeta($part));
         }
 
         return $attachments;

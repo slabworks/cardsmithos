@@ -135,7 +135,6 @@ class EmailController extends Controller
             'customer_id' => ['required', Rule::exists('customers', 'id')->where('user_id', $request->user()->id)],
         ]);
 
-        // Associate all messages in the thread
         EmailMessage::where('user_id', $request->user()->id)
             ->where('gmail_thread_id', $emailMessage->gmail_thread_id)
             ->update(['customer_id' => $validated['customer_id']]);

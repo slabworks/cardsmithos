@@ -39,23 +39,9 @@ import {
     sync,
 } from '@/routes/emails';
 import { edit as editGmail } from '@/routes/gmail';
-import type { BreadcrumbItem } from '@/types';
+import type { BreadcrumbItem, EmailItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'Email', href: index() }];
-
-type EmailItem = {
-    id: number;
-    gmail_thread_id: string;
-    direction: 'inbound' | 'outbound';
-    from_address: string;
-    from_name: string | null;
-    to_addresses: string[];
-    subject: string | null;
-    snippet: string | null;
-    is_read: boolean;
-    received_at: string;
-    customer: { id: number; name: string } | null;
-};
 
 type ThreadMessage = EmailItem & {
     body_html: string | null;

@@ -95,7 +95,6 @@ class EmailSyncService
         if ($customer) {
             $message->update(['customer_id' => $customer->id]);
 
-            // Also associate other messages in the same thread
             EmailMessage::where('user_id', $message->user_id)
                 ->where('gmail_thread_id', $message->gmail_thread_id)
                 ->whereNull('customer_id')
@@ -105,7 +104,6 @@ class EmailSyncService
 
     private function syncMessage(GmailService $gmail, GmailAccount $account, string $messageId): void
     {
-        // Skip if already synced
         if (EmailMessage::where('user_id', $account->user_id)->where('gmail_message_id', $messageId)->exists()) {
             return;
         }
@@ -141,7 +139,6 @@ class EmailSyncService
             'received_at' => Carbon::createFromTimestampMs($data['internalDate']),
         ]);
 
-        // Store attachment metadata (cid: resolution happens at read time)
         foreach ($data['attachments'] as $attachment) {
             if ($attachment['id']) {
                 $message->attachments()->create([
@@ -152,7 +149,6 @@ class EmailSyncService
                     'size' => $attachment['size'],
                 ]);
             } elseif (($attachment['contentId'] ?? null) && ($attachment['inlineData'] ?? null)) {
-                // Inline image embedded directly in MIME — store as base64 data URI
                 $message->attachments()->create([
                     'gmail_attachment_id' => null,
                     'content_id' => $attachment['contentId'],
@@ -164,7 +160,6 @@ class EmailSyncService
             }
         }
 
-        // Auto-associate with customer
         $this->associateWithCustomer($message);
     }
 

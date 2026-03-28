@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Database\Factories\EmailMessageFactory;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -78,21 +77,6 @@ class EmailMessage extends Model
     public function attachments(): HasMany
     {
         return $this->hasMany(EmailAttachment::class);
-    }
-
-    public function scopeForCustomer(Builder $query, int $customerId): Builder
-    {
-        return $query->where('customer_id', $customerId);
-    }
-
-    public function scopeInbound(Builder $query): Builder
-    {
-        return $query->where('direction', 'inbound');
-    }
-
-    public function scopeOutbound(Builder $query): Builder
-    {
-        return $query->where('direction', 'outbound');
     }
 
     /**
