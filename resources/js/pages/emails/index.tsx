@@ -12,6 +12,7 @@ import {
 import { useCallback, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -75,7 +76,7 @@ export default function EmailsIndex({
     emails: PaginatedEmails;
     selectedThread: ThreadMessage[] | null;
     customerOptions: CustomerOption[];
-    filters: { search: string; customer_id: string; thread_id: string };
+    filters: { search: string; customer_id: string; thread_id: string; unread: string };
     hasGmailAccount: boolean;
 }) {
     const [search, setSearch] = useState(filters.search);
@@ -89,12 +90,12 @@ export default function EmailsIndex({
             searchTimeout.current = setTimeout(() => {
                 router.get(
                     index.url(),
-                    { search: value, customer_id: filters.customer_id },
+                    { search: value, customer_id: filters.customer_id, unread: filters.unread },
                     { preserveState: true, replace: true },
                 );
             }, 300);
         },
-        [filters.customer_id],
+        [filters.customer_id, filters.unread],
     );
 
     const handleFilterCustomer = useCallback(
@@ -104,11 +105,27 @@ export default function EmailsIndex({
                 {
                     search: filters.search,
                     customer_id: customerId === 'all' ? '' : customerId,
+                    unread: filters.unread,
                 },
                 { preserveState: true, replace: true },
             );
         },
-        [filters.search],
+        [filters.search, filters.unread],
+    );
+
+    const handleFilterUnread = useCallback(
+        (checked: boolean) => {
+            router.get(
+                index.url(),
+                {
+                    search: filters.search,
+                    customer_id: filters.customer_id,
+                    unread: checked ? '1' : '',
+                },
+                { preserveState: true, replace: true },
+            );
+        },
+        [filters.search, filters.customer_id],
     );
 
     const selectThread = useCallback(
@@ -119,11 +136,12 @@ export default function EmailsIndex({
                     search: filters.search,
                     customer_id: filters.customer_id,
                     thread_id: threadId,
+                    unread: filters.unread,
                 },
                 { preserveState: false, replace: true },
             );
         },
-        [filters.search, filters.customer_id],
+        [filters.search, filters.customer_id, filters.unread],
     );
 
     if (!hasGmailAccount) {
@@ -180,6 +198,16 @@ export default function EmailsIndex({
                             ))}
                         </SelectContent>
                     </Select>
+                    <div className="flex items-center gap-1.5">
+                        <Checkbox
+                            id="unread-filter"
+                            checked={filters.unread === '1'}
+                            onCheckedChange={handleFilterUnread}
+                        />
+                        <Label htmlFor="unread-filter" className="text-sm font-normal whitespace-nowrap">
+                            Unread only
+                        </Label>
+                    </div>
                     <Button
                         variant="outline"
                         size="icon"
@@ -311,6 +339,7 @@ export default function EmailsIndex({
                                                             search: filters.search,
                                                             customer_id:
                                                                 filters.customer_id,
+                                                            unread: filters.unread,
                                                             page:
                                                                 emails.current_page -
                                                                 1,
@@ -338,6 +367,7 @@ export default function EmailsIndex({
                                                             search: filters.search,
                                                             customer_id:
                                                                 filters.customer_id,
+                                                            unread: filters.unread,
                                                             page:
                                                                 emails.current_page +
                                                                 1,

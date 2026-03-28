@@ -29,6 +29,10 @@ class EmailController extends Controller
             $query->where('customer_id', $request->query('customer_id'));
         }
 
+        if ($request->filled('unread') && $request->query('unread') === '1') {
+            $query->where('is_read', false);
+        }
+
         if ($request->filled('search')) {
             $search = $request->query('search');
             $query->where(function ($q) use ($search) {
@@ -70,6 +74,7 @@ class EmailController extends Controller
                 'search' => $request->query('search', ''),
                 'customer_id' => $request->query('customer_id', ''),
                 'thread_id' => $request->query('thread_id', ''),
+                'unread' => $request->query('unread', ''),
             ],
             'hasGmailAccount' => $request->user()->gmailAccount !== null,
         ]);
