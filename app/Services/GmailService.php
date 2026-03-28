@@ -91,9 +91,25 @@ class GmailService
         ];
     }
 
+    public function getSignature(): string
+    {
+        try {
+            $sendAs = $this->gmail->users_settings_sendAs->get('me', $this->account->email);
+
+            return $sendAs->getSignature() ?? '';
+        } catch (Exception) {
+            return '';
+        }
+    }
+
     public function sendMessage(string $to, string $subject, string $body, ?string $threadId = null): Message
     {
         $from = $this->account->email;
+
+        $signature = $this->getSignature();
+        if ($signature) {
+            $body .= '<div class="gmail_signature"><br>--<br>'.$signature.'</div>';
+        }
 
         $to = str_replace(["\r", "\n"], '', $to);
         $subject = str_replace(["\r", "\n"], '', $subject);
