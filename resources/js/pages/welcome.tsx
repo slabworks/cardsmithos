@@ -142,8 +142,8 @@ export default function Welcome({
                             Cardsmith OS is an open-source platform built for
                             trading card restoration shops. Manage every job
                             from intake to shipment, track finances, and let
-                            customers follow their card’s progress in
-                            real time—all without lock-in or subscription fees.
+                            customers follow their card’s progress in real
+                            time—all without lock-in or subscription fees.
                         </p>
                         {auth.user ? (
                             <p className="mt-6">
@@ -284,8 +284,7 @@ export default function Welcome({
                                     Generate waiver links for customers to sign
                                     digitally. Waivers are tracked with IP
                                     address and expiration date, keeping your
-                                    shop legally protected without paper
-                                    hassle.
+                                    shop legally protected without paper hassle.
                                 </p>
                             </div>
                         </div>

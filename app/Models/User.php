@@ -84,4 +84,20 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasOne(BusinessSettings::class);
     }
+
+    /**
+     * @return HasOne<GmailAccount>
+     */
+    public function gmailAccount(): HasOne
+    {
+        return $this->hasOne(GmailAccount::class);
+    }
+
+    /**
+     * @return HasMany<EmailMessage>
+     */
+    public function emailMessages(): HasMany
+    {
+        return $this->hasMany(EmailMessage::class);
+    }
 }

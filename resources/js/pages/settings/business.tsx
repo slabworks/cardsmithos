@@ -346,9 +346,7 @@ export default function Business({
                                         id="hide_pricing"
                                         checked={hidePricing}
                                         onCheckedChange={(checked) => {
-                                            setHidePricing(
-                                                checked === true,
-                                            );
+                                            setHidePricing(checked === true);
                                         }}
                                     />
                                     <Label

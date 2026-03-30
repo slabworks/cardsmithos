@@ -79,6 +79,14 @@ class Customer extends Model
     }
 
     /**
+     * @return HasMany<EmailMessage>
+     */
+    public function emailMessages(): HasMany
+    {
+        return $this->hasMany(EmailMessage::class);
+    }
+
+    /**
      * Get the customer's service waiver, creating one if none exists (e.g. for customers created before waivers were added).
      */
     public function getOrCreateServiceWaiver(): ServiceWaiver

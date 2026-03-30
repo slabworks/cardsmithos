@@ -25,6 +25,7 @@ class Inquiry extends Model
         'inquired_at',
         'converted',
         'notes',
+        'gmail_message_id',
     ];
 
     /**

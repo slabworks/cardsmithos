@@ -77,7 +77,7 @@ class CustomerController extends Controller
         return url($relativeUrl);
     }
 
-    public function show(Customer $customer): Response
+    public function show(Request $request, Customer $customer): Response
     {
         $this->authorize('view', $customer);
 
@@ -86,9 +86,17 @@ class CustomerController extends Controller
 
         $waiverUrl = self::waiverUrl($customer);
 
+        $recentEmails = $request->user()->emailMessages()
+            ->where('customer_id', $customer->id)
+            ->select('id', 'customer_id', 'gmail_thread_id', 'direction', 'from_address', 'from_name', 'subject', 'snippet', 'is_read', 'received_at')
+            ->latest('received_at')
+            ->limit(5)
+            ->get();
+
         return Inertia::render('customers/show', [
             'customer' => $customer,
             'waiverUrl' => $waiverUrl,
+            'recentEmails' => $recentEmails,
         ]);
     }
 

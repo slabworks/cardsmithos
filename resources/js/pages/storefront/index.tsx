@@ -296,7 +296,8 @@ export default function StorefrontIndex({
                                                         </span>
                                                     ) : (
                                                         <>
-                                                            {s.hourly_rate !== null && (
+                                                            {s.hourly_rate !==
+                                                                null && (
                                                                 <span className="rounded-full border border-[#e8e8e6] px-2 py-0.5">
                                                                     {formatCurrency(
                                                                         s.hourly_rate,

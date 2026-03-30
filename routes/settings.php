@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Settings\BusinessSettingsController;
+use App\Http\Controllers\Settings\GmailConnectionController;
 use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\Settings\SecurityController;
 use Illuminate\Support\Facades\Route;
@@ -25,4 +26,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('user-password.update');
 
     Route::inertia('settings/appearance', 'settings/appearance')->name('appearance.edit');
+
+    Route::get('settings/gmail', [GmailConnectionController::class, 'edit'])->name('gmail.edit');
+    Route::get('settings/gmail/connect', [GmailConnectionController::class, 'connect'])->name('gmail.connect');
+    Route::get('settings/gmail/callback', [GmailConnectionController::class, 'callback'])->name('gmail.callback');
+    Route::post('settings/gmail/disconnect', [GmailConnectionController::class, 'disconnect'])->name('gmail.disconnect');
 });

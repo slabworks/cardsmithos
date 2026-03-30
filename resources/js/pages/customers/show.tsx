@@ -1,5 +1,5 @@
 import { Form, Head, Link } from '@inertiajs/react';
-import { Copy, FileDown, Pencil, Plus } from 'lucide-react';
+import { Copy, FileDown, Mail, Pencil, Plus } from 'lucide-react';
 import { useState } from 'react';
 import CardController from '@/actions/App/Http/Controllers/CardController';
 import CustomerController from '@/actions/App/Http/Controllers/CustomerController';
@@ -21,7 +21,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import { index } from '@/routes/customers';
-import type { BreadcrumbItem } from '@/types';
+import { index as emailsIndex } from '@/routes/emails';
+import type { BreadcrumbItem, EmailItem } from '@/types';
 
 const statusBadgeVariant: Record<string, 'default' | 'secondary' | 'outline'> =
     {
@@ -36,7 +37,9 @@ const statusBadgeVariant: Record<string, 'default' | 'secondary' | 'outline'> =
 export default function CustomersShow({
     customer,
     waiverUrl,
+    recentEmails,
 }: {
+    recentEmails: EmailItem[];
     customer: {
         id: number;
         name: string;
@@ -240,6 +243,61 @@ export default function CustomersShow({
                         </p>
                     )}
                 </div>
+
+                {recentEmails.length > 0 && (
+                    <section className="rounded-lg border border-sidebar-border bg-card">
+                        <div className="flex items-center justify-between border-b border-sidebar-border px-4 py-3">
+                            <h2 className="font-medium">Recent emails</h2>
+                            <Button size="sm" variant="outline" asChild>
+                                <Link
+                                    href={emailsIndex.url({
+                                        query: {
+                                            customer_id: customer.id.toString(),
+                                        },
+                                    })}
+                                >
+                                    <Mail className="mr-1 size-4" />
+                                    View all
+                                </Link>
+                            </Button>
+                        </div>
+                        <ul className="divide-y divide-sidebar-border">
+                            {recentEmails.map((email) => (
+                                <li key={email.id}>
+                                    <Link
+                                        href={emailsIndex.url({
+                                            query: {
+                                                thread_id:
+                                                    email.gmail_thread_id,
+                                                customer_id:
+                                                    customer.id.toString(),
+                                            },
+                                        })}
+                                        className={`flex items-center justify-between px-4 py-3 hover:bg-muted/50 ${!email.is_read ? 'font-semibold' : ''}`}
+                                    >
+                                        <div className="min-w-0 flex-1">
+                                            <p className="truncate text-sm">
+                                                {email.from_name ||
+                                                    email.from_address}
+                                            </p>
+                                            <p className="truncate text-sm text-muted-foreground">
+                                                {email.subject ||
+                                                    '(no subject)'}
+                                            </p>
+                                        </div>
+                                        <span className="shrink-0 text-xs text-muted-foreground">
+                                            {new Date(
+                                                email.received_at,
+                                            ).toLocaleDateString(undefined, {
+                                                dateStyle: 'medium',
+                                            })}
+                                        </span>
+                                    </Link>
+                                </li>
+                            ))}
+                        </ul>
+                    </section>
+                )}
 
                 <section className="rounded-lg border border-sidebar-border bg-card">
                     <div className="flex items-center justify-between border-b border-sidebar-border px-4 py-3">

@@ -178,7 +178,10 @@ export default function StorefrontShow({
                                                 Hourly rate
                                             </p>
                                             <p className="text-3xl font-semibold text-[#1b1b18]">
-                                                {formatCurrency(hourlyRate, curr)}
+                                                {formatCurrency(
+                                                    hourlyRate,
+                                                    curr,
+                                                )}
                                             </p>
                                             <p className="mt-1 text-sm text-[#575754]">
                                                 per hour
@@ -191,7 +194,10 @@ export default function StorefrontShow({
                                                 Fixed rate
                                             </p>
                                             <p className="text-3xl font-semibold text-[#1b1b18]">
-                                                {formatCurrency(fixedRate, curr)}
+                                                {formatCurrency(
+                                                    fixedRate,
+                                                    curr,
+                                                )}
                                             </p>
                                             <p className="mt-1 text-sm text-[#575754]">
                                                 per card
