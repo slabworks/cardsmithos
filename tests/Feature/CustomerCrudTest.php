@@ -30,6 +30,7 @@ test('customer can be created', function () {
         'user_id' => $user->id,
         'name' => 'Jane Doe',
         'email' => 'jane@example.com',
+        'converted' => false,
     ]);
 });
 
@@ -96,6 +97,38 @@ test('customer can be updated', function () {
     $customer->refresh();
     expect($customer->name)->toBe('Updated Name');
     expect($customer->email)->toBe('updated@example.com');
+});
+
+test('customer converted flag can be toggled from show page', function () {
+    $user = User::factory()->create();
+    $customer = Customer::factory()->for($user)->create([
+        'converted' => false,
+    ]);
+
+    $response = $this->actingAs($user)->put(route('customers.update', $customer), [
+        'name' => $customer->name,
+        'converted' => '1',
+    ]);
+
+    $response->assertRedirect(route('customers.show', $customer));
+    $customer->refresh();
+    expect($customer->converted)->toBeTrue();
+});
+
+test('customer converted flag can be toggled off from show page', function () {
+    $user = User::factory()->create();
+    $customer = Customer::factory()->for($user)->create([
+        'converted' => true,
+    ]);
+
+    $response = $this->actingAs($user)->put(route('customers.update', $customer), [
+        'name' => $customer->name,
+        'converted' => '0',
+    ]);
+
+    $response->assertRedirect(route('customers.show', $customer));
+    $customer->refresh();
+    expect($customer->converted)->toBeFalse();
 });
 
 test('customer update forbidden for other user', function () {

@@ -7,7 +7,6 @@ use App\Models\Card;
 use App\Models\CardActivity;
 use App\Models\Customer;
 use App\Models\Expense;
-use App\Models\Inquiry;
 use App\Models\Payment;
 use App\Models\Shipment;
 use App\Models\User;
@@ -88,17 +87,8 @@ class DatabaseSeeder extends Seeder
                 }
             });
 
-        // Create inquiries — some unlinked, some converted to customers
-        Inquiry::factory()
-            ->count(5)
-            ->for($user)
-            ->create();
-
-        $customers->take(3)->each(function (Customer $customer) use ($user): void {
-            Inquiry::factory()
-                ->for($user)
-                ->for($customer)
-                ->create(['converted' => true]);
+        $customers->take(3)->each(function (Customer $customer): void {
+            $customer->update(['converted' => true]);
         });
 
         // Seed expenses

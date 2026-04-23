@@ -42,6 +42,7 @@ class CustomerFactory extends Factory
                 'Instagram', 'Discord', 'eBay', 'Local card show', 'Facebook group',
                 'Reddit', 'Friend referral', 'YouTube', 'TikTok', 'Google search',
             ]),
+            'converted' => false,
             'waiver_agreed' => fake()->optional(0.3)->boolean(),
             'waiver_agreed_at' => fake()->optional(0.3)->dateTimeBetween('-1 year'),
         ];

@@ -23,10 +23,14 @@ test('authenticated users can visit the dashboard', function () {
         ->has('totalPayments')
         ->has('totalShipmentFees')
         ->has('totalExpenses')
+        ->has('totalCustomers')
+        ->has('convertedCustomers')
         ->has('revenueByMonth')
         ->where('totalPayments', 0)
         ->where('totalShipmentFees', 0)
         ->where('totalExpenses', 0)
+        ->where('totalCustomers', 0)
+        ->where('convertedCustomers', 0)
         ->has('revenueByMonth')
         ->has('cardsByStatus', fn ($prop) => $prop
             ->has('backlog')
@@ -59,7 +63,30 @@ test('dashboard shows stats and newest customer when user has customers and paym
         ->where('totalPayments', 225)
         ->where('totalShipmentFees', 0)
         ->where('totalExpenses', 0)
+        ->where('totalCustomers', 2)
+        ->where('convertedCustomers', 0)
         ->has('revenueByMonth')
+    );
+});
+
+test('dashboard shows customer conversion stats', function () {
+    $user = User::factory()->create();
+
+    Customer::factory()->for($user)->count(3)->create([
+        'converted' => false,
+    ]);
+    Customer::factory()->for($user)->create([
+        'converted' => true,
+    ]);
+
+    $this->actingAs($user);
+    $response = $this->get(route('dashboard'));
+
+    $response->assertOk();
+    $response->assertInertia(fn ($page) => $page
+        ->component('dashboard')
+        ->where('totalCustomers', 4)
+        ->where('convertedCustomers', 1)
     );
 });
 

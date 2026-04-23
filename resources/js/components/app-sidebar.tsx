@@ -4,7 +4,6 @@ import {
     Heart,
     LayoutGrid,
     MessageCircle,
-    MessageSquare,
     Receipt,
     Users,
 } from 'lucide-react';
@@ -24,7 +23,6 @@ import {
 import { dashboard } from '@/routes';
 import { index as customersIndex } from '@/routes/customers';
 import { index as expensesIndex } from '@/routes/expenses';
-import { index as inquiriesIndex } from '@/routes/inquiries';
 import type { NavItem } from '@/types';
 
 const mainNavItems: NavItem[] = [
@@ -37,11 +35,6 @@ const mainNavItems: NavItem[] = [
         title: 'Customers',
         href: customersIndex(),
         icon: Users,
-    },
-    {
-        title: 'Inquiries',
-        href: inquiriesIndex(),
-        icon: MessageSquare,
     },
     {
         title: 'Expenses',

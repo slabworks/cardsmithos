@@ -27,6 +27,7 @@ class Customer extends Model
         'address',
         'notes',
         'referral_source',
+        'converted',
     ];
 
     /**
@@ -36,6 +37,7 @@ class Customer extends Model
     {
         return [
             'status' => CustomerStatus::class,
+            'converted' => 'boolean',
             'waiver_agreed' => 'boolean',
             'waiver_agreed_at' => 'datetime',
         ];

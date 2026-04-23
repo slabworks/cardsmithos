@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Enums\CardStatus;
 use App\Models\Card;
 use App\Models\Expense;
-use App\Models\Inquiry;
 use App\Models\Payment;
 use App\Models\Shipment;
 use Carbon\Carbon;
@@ -23,13 +22,12 @@ class DashboardController extends Controller
     public function __invoke(Request $request): Response
     {
         $customerIds = $request->user()->customers()->pluck('id');
+        $totalCustomers = $customerIds->count();
+        $convertedCustomers = $request->user()->customers()->where('converted', true)->count();
 
         $totalPayments = Payment::whereIn('customer_id', $customerIds)->sum('amount');
         $totalShipmentFees = Shipment::whereIn('customer_id', $customerIds)->sum('amount');
         $totalExpenses = (float) Expense::where('user_id', $request->user()->id)->sum('amount');
-
-        $totalInquiries = Inquiry::where('user_id', $request->user()->id)->count();
-        $convertedInquiries = Inquiry::where('user_id', $request->user()->id)->where('converted', true)->count();
 
         $revenueByMonth = $this->revenueByMonth($customerIds);
 
@@ -46,8 +44,8 @@ class DashboardController extends Controller
             'totalPayments' => (float) $totalPayments - (float) $totalShipmentFees,
             'totalShipmentFees' => (float) $totalShipmentFees,
             'totalExpenses' => $totalExpenses,
-            'totalInquiries' => $totalInquiries,
-            'convertedInquiries' => $convertedInquiries,
+            'totalCustomers' => $totalCustomers,
+            'convertedCustomers' => $convertedCustomers,
             'revenueByMonth' => $revenueByMonth,
             'cardsByStatus' => [
                 'backlog' => $cards->get('backlog', collect())->values(),

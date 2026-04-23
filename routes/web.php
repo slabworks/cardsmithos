@@ -7,7 +7,6 @@ use App\Http\Controllers\CardTimelineController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExpenseController;
-use App\Http\Controllers\InquiryController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PricingCalculatorController;
@@ -50,7 +49,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', DashboardController::class)->name('dashboard');
     Route::get('pricing-calculator', PricingCalculatorController::class)->name('pricing-calculator.index');
     Route::resource('expenses', ExpenseController::class);
-    Route::resource('inquiries', InquiryController::class);
     Route::resource('customers', CustomerController::class);
     Route::resource('customers.cards', CardController::class)->except(['index', 'show'])->scoped();
     Route::post('customers/{customer}/cards/{card}/timeline/rotate-token', [CardTimelineController::class, 'rotateToken'])

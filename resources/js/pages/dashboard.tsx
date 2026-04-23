@@ -58,8 +58,8 @@ type DashboardProps = {
     totalPayments: number;
     totalShipmentFees: number;
     totalExpenses: number;
-    totalInquiries: number;
-    convertedInquiries: number;
+    totalCustomers: number;
+    convertedCustomers: number;
     revenueByMonth: RevenueByMonth[];
     cardsByStatus: {
         backlog: KanbanCard[];
@@ -115,16 +115,16 @@ export default function Dashboard({
     totalPayments,
     totalShipmentFees,
     totalExpenses,
-    totalInquiries,
-    convertedInquiries,
+    totalCustomers,
+    convertedCustomers,
     revenueByMonth,
     cardsByStatus,
 }: DashboardProps) {
-    const conversionRate =
-        totalInquiries > 0
-            ? Math.round((convertedInquiries / totalInquiries) * 100)
-            : 0;
     const hasRevenue = revenueByMonth.some((r) => r.total > 0);
+    const conversionRate =
+        totalCustomers > 0
+            ? Math.round((convertedCustomers / totalCustomers) * 100)
+            : 0;
     const chartData = {
         labels: revenueByMonth.map((r) => formatMonthLabel(r.month)),
         datasets: [
@@ -215,7 +215,7 @@ export default function Dashboard({
                     <Card className="border-sidebar-border/70 dark:border-sidebar-border">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">
-                                Lead conversion
+                                Customer conversion
                             </CardTitle>
                             <UserCheck className="size-4 text-muted-foreground" />
                         </CardHeader>
@@ -224,8 +224,8 @@ export default function Dashboard({
                                 {conversionRate}%
                             </div>
                             <p className="text-xs text-muted-foreground">
-                                {convertedInquiries} of {totalInquiries}{' '}
-                                inquiries converted
+                                {convertedCustomers} of {totalCustomers}{' '}
+                                customers converted
                             </p>
                         </CardContent>
                     </Card>
