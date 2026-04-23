@@ -14,7 +14,6 @@ import {
     Package,
     Receipt,
     TrendingUp,
-    UserCheck,
 } from 'lucide-react';
 import { Bar } from 'react-chartjs-2';
 import CardController from '@/actions/App/Http/Controllers/CardController';
@@ -55,11 +54,10 @@ type KanbanCard = {
 };
 
 type DashboardProps = {
-    totalPayments: number;
+    grossRevenue: number;
+    netRevenue: number;
     totalShipmentFees: number;
     totalExpenses: number;
-    totalCustomers: number;
-    convertedCustomers: number;
     revenueByMonth: RevenueByMonth[];
     cardsByStatus: {
         backlog: KanbanCard[];
@@ -112,19 +110,14 @@ const columns: {
 ];
 
 export default function Dashboard({
-    totalPayments,
+    grossRevenue,
+    netRevenue,
     totalShipmentFees,
     totalExpenses,
-    totalCustomers,
-    convertedCustomers,
     revenueByMonth,
     cardsByStatus,
 }: DashboardProps) {
     const hasRevenue = revenueByMonth.some((r) => r.total > 0);
-    const conversionRate =
-        totalCustomers > 0
-            ? Math.round((convertedCustomers / totalCustomers) * 100)
-            : 0;
     const chartData = {
         labels: revenueByMonth.map((r) => formatMonthLabel(r.month)),
         datasets: [
@@ -173,7 +166,7 @@ export default function Dashboard({
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">
-                                {formatCurrency(totalPayments)}
+                                {formatCurrency(netRevenue)}
                             </div>
                             <p className="text-xs text-muted-foreground">
                                 After shipping and expenses
@@ -215,17 +208,16 @@ export default function Dashboard({
                     <Card className="border-sidebar-border/70 dark:border-sidebar-border">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">
-                                Customer conversion
+                                Gross revenue
                             </CardTitle>
-                            <UserCheck className="size-4 text-muted-foreground" />
+                            <DollarSign className="size-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">
-                                {conversionRate}%
+                                {formatCurrency(grossRevenue)}
                             </div>
                             <p className="text-xs text-muted-foreground">
-                                {convertedCustomers} of {totalCustomers}{' '}
-                                customers converted
+                                All recorded payments before costs
                             </p>
                         </CardContent>
                     </Card>

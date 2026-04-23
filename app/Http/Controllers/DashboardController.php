@@ -22,12 +22,11 @@ class DashboardController extends Controller
     public function __invoke(Request $request): Response
     {
         $customerIds = $request->user()->customers()->pluck('id');
-        $totalCustomers = $customerIds->count();
-        $convertedCustomers = $request->user()->customers()->where('converted', true)->count();
 
-        $totalPayments = Payment::whereIn('customer_id', $customerIds)->sum('amount');
+        $grossRevenue = Payment::whereIn('customer_id', $customerIds)->sum('amount');
         $totalShipmentFees = Shipment::whereIn('customer_id', $customerIds)->sum('amount');
         $totalExpenses = (float) Expense::where('user_id', $request->user()->id)->sum('amount');
+        $netRevenue = (float) $grossRevenue - (float) $totalShipmentFees - $totalExpenses;
 
         $revenueByMonth = $this->revenueByMonth($customerIds);
 
@@ -41,11 +40,10 @@ class DashboardController extends Controller
             ->groupBy(fn (Card $card) => $card->status->value);
 
         return Inertia::render('dashboard', [
-            'totalPayments' => (float) $totalPayments - (float) $totalShipmentFees - $totalExpenses,
+            'grossRevenue' => (float) $grossRevenue,
+            'netRevenue' => $netRevenue,
             'totalShipmentFees' => (float) $totalShipmentFees,
             'totalExpenses' => $totalExpenses,
-            'totalCustomers' => $totalCustomers,
-            'convertedCustomers' => $convertedCustomers,
             'revenueByMonth' => $revenueByMonth,
             'cardsByStatus' => [
                 'backlog' => $cards->get('backlog', collect())->values(),

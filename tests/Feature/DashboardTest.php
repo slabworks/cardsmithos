@@ -21,17 +21,15 @@ test('authenticated users can visit the dashboard', function () {
     $response->assertOk();
     $response->assertInertia(fn ($page) => $page
         ->component('dashboard')
-        ->has('totalPayments')
+        ->has('grossRevenue')
+        ->has('netRevenue')
         ->has('totalShipmentFees')
         ->has('totalExpenses')
-        ->has('totalCustomers')
-        ->has('convertedCustomers')
         ->has('revenueByMonth')
-        ->where('totalPayments', 0)
+        ->where('grossRevenue', 0)
+        ->where('netRevenue', 0)
         ->where('totalShipmentFees', 0)
         ->where('totalExpenses', 0)
-        ->where('totalCustomers', 0)
-        ->where('convertedCustomers', 0)
         ->has('revenueByMonth')
         ->has('cardsByStatus', fn ($prop) => $prop
             ->has('backlog')
@@ -41,7 +39,7 @@ test('authenticated users can visit the dashboard', function () {
     );
 });
 
-test('dashboard shows stats and newest customer when user has customers and payments', function () {
+test('dashboard shows revenue stats when user has payments', function () {
     $user = User::factory()->create();
     $customer1 = Customer::factory()->for($user)->create([
         'name' => 'First Customer',
@@ -61,24 +59,26 @@ test('dashboard shows stats and newest customer when user has customers and paym
     $response->assertOk();
     $response->assertInertia(fn ($page) => $page
         ->component('dashboard')
-        ->where('totalPayments', 225)
+        ->where('grossRevenue', 225)
+        ->where('netRevenue', 225)
         ->where('totalShipmentFees', 0)
         ->where('totalExpenses', 0)
-        ->where('totalPayments', 225)
-        ->where('totalCustomers', 2)
-        ->where('convertedCustomers', 0)
         ->has('revenueByMonth')
     );
 });
 
-test('dashboard shows customer conversion stats', function () {
+test('dashboard shows gross revenue separately from net revenue', function () {
     $user = User::factory()->create();
+    $customer = Customer::factory()->for($user)->create();
 
-    Customer::factory()->for($user)->count(3)->create([
-        'converted' => false,
+    Payment::factory()->for($customer)->create([
+        'amount' => 200.00,
     ]);
-    Customer::factory()->for($user)->create([
-        'converted' => true,
+    Shipment::factory()->for($customer)->create([
+        'amount' => 25.00,
+    ]);
+    Expense::factory()->for($user)->create([
+        'amount' => 15.00,
     ]);
 
     $this->actingAs($user);
@@ -87,12 +87,12 @@ test('dashboard shows customer conversion stats', function () {
     $response->assertOk();
     $response->assertInertia(fn ($page) => $page
         ->component('dashboard')
-        ->where('totalCustomers', 4)
-        ->where('convertedCustomers', 1)
+        ->where('grossRevenue', 200)
+        ->where('netRevenue', 160)
     );
 });
 
-test('dashboard subtracts shipment fees from all payment-derived metrics', function () {
+test('dashboard subtracts shipment fees and expenses from net revenue', function () {
     $user = User::factory()->create();
     $customer = Customer::factory()->for($user)->create();
 
@@ -128,7 +128,8 @@ test('dashboard subtracts shipment fees from all payment-derived metrics', funct
     $response->assertOk();
     $response->assertInertia(fn ($page) => $page
         ->component('dashboard')
-        ->where('totalPayments', 105)
+        ->where('grossRevenue', 150)
+        ->where('netRevenue', 105)
         ->where('totalShipmentFees', 25)
         ->where('totalExpenses', 20)
         ->where('revenueByMonth.10.total', 40)
