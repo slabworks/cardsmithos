@@ -3,6 +3,7 @@
 use App\Enums\CardStatus;
 use App\Models\Card;
 use App\Models\Customer;
+use App\Models\Expense;
 use App\Models\Payment;
 use App\Models\Shipment;
 use App\Models\User;
@@ -63,6 +64,7 @@ test('dashboard shows stats and newest customer when user has customers and paym
         ->where('totalPayments', 225)
         ->where('totalShipmentFees', 0)
         ->where('totalExpenses', 0)
+        ->where('totalPayments', 225)
         ->where('totalCustomers', 2)
         ->where('convertedCustomers', 0)
         ->has('revenueByMonth')
@@ -111,6 +113,9 @@ test('dashboard subtracts shipment fees from all payment-derived metrics', funct
         'amount' => 10.00,
         'shipped_at' => now()->subMonth()->format('Y-m-d'),
     ]);
+    Expense::factory()->for($user)->create([
+        'amount' => 20.00,
+    ]);
 
     $otherUser = User::factory()->create();
     $otherCustomer = Customer::factory()->for($otherUser)->create();
@@ -123,8 +128,9 @@ test('dashboard subtracts shipment fees from all payment-derived metrics', funct
     $response->assertOk();
     $response->assertInertia(fn ($page) => $page
         ->component('dashboard')
-        ->where('totalPayments', 125)
+        ->where('totalPayments', 105)
         ->where('totalShipmentFees', 25)
+        ->where('totalExpenses', 20)
         ->where('revenueByMonth.10.total', 40)
         ->where('revenueByMonth.11.total', 85)
     );

@@ -1,7 +1,8 @@
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import {
     Github,
     Heart,
+    Package,
     LayoutGrid,
     MessageCircle,
     Receipt,
@@ -26,6 +27,7 @@ import { index as customersIndex } from '@/routes/customers';
 import { index as expensesIndex } from '@/routes/expenses';
 import type { NavItem } from '@/types';
 import PaymentController from '@/actions/App/Http/Controllers/PaymentController';
+import ShipmentController from '@/actions/App/Http/Controllers/ShipmentController';
 
 const mainNavItems: NavItem[] = [
     {
@@ -48,27 +50,33 @@ const mainNavItems: NavItem[] = [
         href: PaymentController.index.url(),
         icon: CreditCard,
     },
-];
-
-const footerNavItems: NavItem[] = [
     {
-        title: 'GitHub',
-        href: 'https://github.com/slabworks/cardsmithos',
-        icon: Github,
-    },
-    {
-        title: 'Patreon',
-        href: 'https://www.patreon.com/c/CardSmithOS',
-        icon: Heart,
-    },
-    {
-        title: 'Discord',
-        href: 'https://discord.gg/ycBacKEyhW',
-        icon: MessageCircle,
+        title: 'Shipments',
+        href: ShipmentController.index.url(),
+        icon: Package,
     },
 ];
 
 export function AppSidebar() {
+    const { socials } = usePage().props;
+    const footerNavItems: NavItem[] = [
+        {
+            title: 'GitHub',
+            href: socials.github,
+            icon: Github,
+        },
+        {
+            title: 'Patreon',
+            href: socials.patreon,
+            icon: Heart,
+        },
+        {
+            title: 'Discord',
+            href: socials.discord,
+            icon: MessageCircle,
+        },
+    ];
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>

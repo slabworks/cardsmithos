@@ -51,6 +51,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('expenses', ExpenseController::class);
     Route::resource('customers', CustomerController::class);
     Route::resource('payments', PaymentController::class)->except(['show']);
+    Route::resource('shipments', ShipmentController::class)->except(['show']);
     Route::resource('customers.cards', CardController::class)->except(['index', 'show'])->scoped();
     Route::post('customers/{customer}/cards/{card}/timeline/rotate-token', [CardTimelineController::class, 'rotateToken'])
         ->name('customers.cards.timeline.rotate-token');
@@ -61,7 +62,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('customers/{customer}/cards/{card}/photos/{media}', [CardPhotoController::class, 'destroy'])->name('customers.cards.photos.destroy');
     Route::get('customers/{customer}/invoices/create', [InvoiceController::class, 'create'])->name('customers.invoices.create');
     Route::post('customers/{customer}/invoices/download', [InvoiceController::class, 'download'])->name('customers.invoices.download')->middleware('signed:relative');
-    Route::post('customers/{customer}/shipments', [ShipmentController::class, 'store'])->name('customers.shipments.store');
 });
 
 require __DIR__.'/settings.php';

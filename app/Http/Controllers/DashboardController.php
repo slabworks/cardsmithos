@@ -41,7 +41,7 @@ class DashboardController extends Controller
             ->groupBy(fn (Card $card) => $card->status->value);
 
         return Inertia::render('dashboard', [
-            'totalPayments' => (float) $totalPayments - (float) $totalShipmentFees,
+            'totalPayments' => (float) $totalPayments - (float) $totalShipmentFees - $totalExpenses,
             'totalShipmentFees' => (float) $totalShipmentFees,
             'totalExpenses' => $totalExpenses,
             'totalCustomers' => $totalCustomers,

@@ -2,11 +2,6 @@ import { Head, Link, usePage } from '@inertiajs/react';
 import { dashboard, login, register } from '@/routes';
 import { index as storefrontIndex } from '@/routes/storefront';
 
-const GITHUB_URL = 'https://github.com/slabworks/cardsmithos';
-const GITHUB_CONTRIBUTING = `${GITHUB_URL}#contributing`;
-const PATREON_URL = 'https://www.patreon.com/c/CardSmithOS';
-const DISCORD_URL = 'https://discord.gg/ycBacKEyhW';
-
 function ExternalIcon() {
     return (
         <svg
@@ -29,7 +24,9 @@ export default function Welcome({
 }: {
     canRegister?: boolean;
 }) {
-    const { auth } = usePage().props;
+    const { auth, socials } = usePage().props;
+    const githubUrl = socials.github;
+    const githubContributing = `${githubUrl}#contributing`;
 
     return (
         <>
@@ -73,7 +70,7 @@ export default function Welcome({
                         </span>
                         <nav className="flex items-center gap-3 text-sm">
                             <a
-                                href={GITHUB_URL}
+                                href={githubUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center gap-1 rounded px-2.5 py-1.5 text-[#575754] hover:bg-[#f5f5f4] hover:text-[#1b1b18]"
@@ -82,7 +79,7 @@ export default function Welcome({
                                 <ExternalIcon />
                             </a>
                             <a
-                                href={PATREON_URL}
+                                href={socials.patreon}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center gap-1 rounded px-2.5 py-1.5 text-[#575754] hover:bg-[#f5f5f4] hover:text-[#1b1b18]"
@@ -91,7 +88,7 @@ export default function Welcome({
                                 <ExternalIcon />
                             </a>
                             <a
-                                href={DISCORD_URL}
+                                href={socials.discord}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center gap-1 rounded px-2.5 py-1.5 text-[#575754] hover:bg-[#f5f5f4] hover:text-[#1b1b18]"
@@ -397,7 +394,7 @@ export default function Welcome({
                         </p>
                         <p className="flex flex-wrap items-center gap-4 text-sm">
                             <a
-                                href={GITHUB_CONTRIBUTING}
+                                href={githubContributing}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center gap-1.5 font-medium text-[#1b1b18] underline underline-offset-4 hover:no-underline"
@@ -406,7 +403,7 @@ export default function Welcome({
                                 <ExternalIcon />
                             </a>
                             <a
-                                href={GITHUB_URL}
+                                href={githubUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center gap-1.5 font-medium text-[#1b1b18] underline underline-offset-4 hover:no-underline"
@@ -415,7 +412,7 @@ export default function Welcome({
                                 <ExternalIcon />
                             </a>
                             <a
-                                href={PATREON_URL}
+                                href={socials.patreon}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center gap-1.5 font-medium text-[#1b1b18] underline underline-offset-4 hover:no-underline"
@@ -424,7 +421,7 @@ export default function Welcome({
                                 <ExternalIcon />
                             </a>
                             <a
-                                href={DISCORD_URL}
+                                href={socials.discord}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center gap-1.5 font-medium text-[#1b1b18] underline underline-offset-4 hover:no-underline"

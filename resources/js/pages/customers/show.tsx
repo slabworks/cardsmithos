@@ -425,15 +425,18 @@ export default function CustomersShow({
                             </DialogDescription>
                         </DialogHeader>
                         <Form
-                            {...ShipmentController.store.form({
-                                customer: customer.id,
-                            })}
+                            {...ShipmentController.store.form()}
                             resetOnSuccess
                             onSuccess={() => setIsShipmentModalOpen(false)}
                             className="space-y-4"
                         >
                             {({ errors, processing }) => (
                                 <>
+                                    <input
+                                        type="hidden"
+                                        name="customer_id"
+                                        value={customer.id}
+                                    />
                                     <div className="grid gap-2">
                                         <Label htmlFor="shipment_amount">
                                             Amount *

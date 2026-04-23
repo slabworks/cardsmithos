@@ -2,17 +2,16 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Customer;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreShipmentRequest extends FormRequest
+class UpdateShipmentRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        $customer = $this->input('customer_id') ? Customer::query()->find($this->input('customer_id')) : null;
+        $shipment = $this->route('shipment');
 
-        return $customer !== null && $this->user()?->can('update', $customer) === true;
+        return $shipment !== null && $this->user()?->can('update', $shipment) === true;
     }
 
     /**

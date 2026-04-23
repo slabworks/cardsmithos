@@ -47,22 +47,21 @@ const mainNavItems: NavItem[] = [
     },
 ];
 
-const rightNavItems: NavItem[] = [
-    {
-        title: 'Discord',
-        href: 'https://discord.gg/ycBacKEyhW',
-        icon: MessageCircle,
-    },
-];
-
 const activeItemStyles =
     'text-neutral-900 dark:bg-neutral-800 dark:text-neutral-100';
 
 export function AppHeader({ breadcrumbs = [] }: Props) {
     const page = usePage();
-    const { auth } = page.props;
+    const { auth, socials } = page.props;
     const getInitials = useInitials();
     const { isCurrentUrl, whenCurrentUrl } = useCurrentUrl();
+    const rightNavItems: NavItem[] = [
+        {
+            title: 'Discord',
+            href: socials.discord,
+            icon: MessageCircle,
+        },
+    ];
 
     return (
         <>

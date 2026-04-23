@@ -167,7 +167,7 @@ export default function Dashboard({
                     <Card className="border-sidebar-border/70 dark:border-sidebar-border">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">
-                                Revenue (less shipping)
+                                Net revenue
                             </CardTitle>
                             <DollarSign className="size-4 text-muted-foreground" />
                         </CardHeader>
@@ -176,7 +176,7 @@ export default function Dashboard({
                                 {formatCurrency(totalPayments)}
                             </div>
                             <p className="text-xs text-muted-foreground">
-                                Sum of all tracked payments
+                                After shipping and expenses
                             </p>
                         </CardContent>
                     </Card>
