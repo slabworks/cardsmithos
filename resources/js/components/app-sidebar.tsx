@@ -5,6 +5,7 @@ import {
     LayoutGrid,
     MessageCircle,
     Receipt,
+    CreditCard,
     Users,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
@@ -24,6 +25,7 @@ import { dashboard } from '@/routes';
 import { index as customersIndex } from '@/routes/customers';
 import { index as expensesIndex } from '@/routes/expenses';
 import type { NavItem } from '@/types';
+import PaymentController from '@/actions/App/Http/Controllers/PaymentController';
 
 const mainNavItems: NavItem[] = [
     {
@@ -40,6 +42,11 @@ const mainNavItems: NavItem[] = [
         title: 'Expenses',
         href: expensesIndex(),
         icon: Receipt,
+    },
+    {
+        title: 'Payments',
+        href: PaymentController.index.url(),
+        icon: CreditCard,
     },
 ];
 

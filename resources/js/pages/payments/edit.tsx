@@ -1,5 +1,4 @@
-import { Head, Link } from '@inertiajs/react';
-import { Form } from '@inertiajs/react';
+import { Form, Head, Link } from '@inertiajs/react';
 import PaymentController from '@/actions/App/Http/Controllers/PaymentController';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
@@ -16,36 +15,25 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
-import { index } from '@/routes/customers';
 import type { BreadcrumbItem } from '@/types';
 
 export default function PaymentsEdit({
-    customer,
     payment,
-    methodOptions,
+    customers,
 }: {
-    customer: { id: number; name: string };
     payment: {
         id: number;
         amount: string;
         paid_at: string;
-        method: string;
-        reference: string | null;
+        customer_id: number;
     };
-    methodOptions: Array<{ value: string; label: string; color: string }>;
+    customers: Array<{ id: number; name: string }>;
 }) {
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Customers', href: index() },
-        {
-            title: customer.name,
-            href: `/customers/${customer.id}`,
-        },
+        { title: 'Payments', href: PaymentController.index.url() },
         {
             title: 'Edit payment',
-            href: PaymentController.edit.url({
-                customer: customer.id,
-                payment: payment.id,
-            }),
+            href: PaymentController.edit.url({ payment: payment.id }),
         },
     ];
 
@@ -60,15 +48,26 @@ export default function PaymentsEdit({
                     title="Edit payment"
                     description={`$${payment.amount} – ${paidAt}`}
                 />
-                <Form
-                    {...PaymentController.update.form({
-                        customer: customer.id,
-                        payment: payment.id,
-                    })}
-                    className="max-w-xl space-y-6"
-                >
+                <Form {...PaymentController.update.form({ payment: payment.id })} className="max-w-xl space-y-6">
                     {({ errors, processing }) => (
                         <>
+                            <div className="grid gap-2">
+                                <Label htmlFor="customer_id">Customer *</Label>
+                                <select
+                                    id="customer_id"
+                                    name="customer_id"
+                                    defaultValue={payment.customer_id}
+                                    required
+                                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
+                                >
+                                    {customers.map((customer) => (
+                                        <option key={customer.id} value={customer.id}>
+                                            {customer.name}
+                                        </option>
+                                    ))}
+                                </select>
+                                <InputError message={errors.customer_id} />
+                            </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="amount">Amount *</Label>
                                 <Input
@@ -93,40 +92,12 @@ export default function PaymentsEdit({
                                 />
                                 <InputError message={errors.paid_at} />
                             </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="method">Method</Label>
-                                <select
-                                    id="method"
-                                    name="method"
-                                    defaultValue={payment.method ?? ''}
-                                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
-                                >
-                                    {methodOptions.map((opt) => (
-                                        <option
-                                            key={opt.value}
-                                            value={opt.value}
-                                        >
-                                            {opt.label}
-                                        </option>
-                                    ))}
-                                </select>
-                                <InputError message={errors.method} />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="reference">Reference</Label>
-                                <Input
-                                    id="reference"
-                                    name="reference"
-                                    defaultValue={payment.reference ?? ''}
-                                />
-                                <InputError message={errors.reference} />
-                            </div>
                             <div className="flex gap-2">
                                 <Button type="submit" disabled={processing}>
                                     Save changes
                                 </Button>
                                 <Button type="button" variant="outline" asChild>
-                                    <Link href={`/customers/${customer.id}`}>
+                                    <Link href={PaymentController.index.url()}>
                                         Cancel
                                     </Link>
                                 </Button>
@@ -158,10 +129,7 @@ export default function PaymentsEdit({
                                     record. This cannot be undone.
                                 </DialogDescription>
                                 <Form
-                                    {...PaymentController.destroy.form({
-                                        customer: customer.id,
-                                        payment: payment.id,
-                                    })}
+                                    {...PaymentController.destroy.form({ payment: payment.id })}
                                     className="mt-4"
                                 >
                                     {({ processing }) => (

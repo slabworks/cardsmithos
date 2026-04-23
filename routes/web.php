@@ -50,6 +50,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('pricing-calculator', PricingCalculatorController::class)->name('pricing-calculator.index');
     Route::resource('expenses', ExpenseController::class);
     Route::resource('customers', CustomerController::class);
+    Route::resource('payments', PaymentController::class)->except(['show']);
     Route::resource('customers.cards', CardController::class)->except(['index', 'show'])->scoped();
     Route::post('customers/{customer}/cards/{card}/timeline/rotate-token', [CardTimelineController::class, 'rotateToken'])
         ->name('customers.cards.timeline.rotate-token');
@@ -58,7 +59,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('customers/{customer}/cards/{card}/photos/{media}', [CardPhotoController::class, 'show'])->name('customers.cards.photos.show');
     Route::post('customers/{customer}/cards/{card}/photos/{media}/toggle-timeline', [CardPhotoController::class, 'toggleTimeline'])->name('customers.cards.photos.toggle-timeline');
     Route::delete('customers/{customer}/cards/{card}/photos/{media}', [CardPhotoController::class, 'destroy'])->name('customers.cards.photos.destroy');
-    Route::resource('customers.payments', PaymentController::class)->except(['index', 'show'])->scoped();
     Route::get('customers/{customer}/invoices/create', [InvoiceController::class, 'create'])->name('customers.invoices.create');
     Route::post('customers/{customer}/invoices/download', [InvoiceController::class, 'download'])->name('customers.invoices.download')->middleware('signed:relative');
     Route::post('customers/{customer}/shipments', [ShipmentController::class, 'store'])->name('customers.shipments.store');

@@ -2,18 +2,17 @@
 
 namespace App\Http\Requests;
 
-use App\Enums\PaymentMethod;
+use App\Models\Customer;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class StorePaymentRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        $customer = $this->route('customer');
+        $customer = $this->input('customer_id') ? Customer::query()->find($this->input('customer_id')) : null;
 
-        return $this->user()?->can('update', $customer) ?? false;
+        return $customer !== null && $this->user()?->can('update', $customer) === true;
     }
 
     /**
@@ -22,10 +21,9 @@ class StorePaymentRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'customer_id' => ['required', 'exists:customers,id'],
             'amount' => ['required', 'numeric', 'min:0', 'max:9999999.99'],
             'paid_at' => ['required', 'date'],
-            'method' => ['nullable', Rule::enum(PaymentMethod::class)],
-            'reference' => ['nullable', 'string', 'max:255'],
         ];
     }
 }

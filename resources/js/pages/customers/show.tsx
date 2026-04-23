@@ -326,11 +326,7 @@ export default function CustomersShow({
                     <div className="flex items-center justify-between border-b border-sidebar-border px-4 py-3">
                         <h2 className="font-medium">Payments</h2>
                         <Button size="sm" asChild>
-                            <Link
-                                href={PaymentController.create.url({
-                                    customer: customer.id,
-                                })}
-                            >
+                            <Link href={PaymentController.create.url()}>
                                 <Plus className="mr-1 size-4" />
                                 Add payment
                             </Link>
@@ -348,10 +344,7 @@ export default function CustomersShow({
                                     className="flex items-center justify-between px-4 py-3"
                                 >
                                     <Link
-                                        href={PaymentController.edit.url({
-                                            customer: customer.id,
-                                            payment: payment.id,
-                                        })}
+                                        href={PaymentController.edit.url({ payment: payment.id })}
                                         className="hover:underline"
                                     >
                                         ${payment.amount}
