@@ -7,6 +7,7 @@ use App\Models\Card;
 use App\Models\Expense;
 use App\Models\Payment;
 use App\Models\Shipment;
+use App\Services\BusinessStatisticValueResolver;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -16,6 +17,8 @@ use Inertia\Response;
 
 class DashboardController extends Controller
 {
+    public function __construct(private BusinessStatisticValueResolver $valueResolver) {}
+
     /**
      * Handle the incoming request.
      */
@@ -27,6 +30,8 @@ class DashboardController extends Controller
         $totalShipmentFees = Shipment::whereIn('customer_id', $customerIds)->sum('amount');
         $totalExpenses = (float) Expense::where('user_id', $request->user()->id)->sum('amount');
         $netRevenue = (float) $grossRevenue - (float) $totalShipmentFees - $totalExpenses;
+
+        $featuredStatistics = $this->valueResolver->featuredFor($request->user());
 
         $revenueByMonth = $this->revenueByMonth($customerIds);
 
@@ -44,6 +49,7 @@ class DashboardController extends Controller
             'netRevenue' => $netRevenue,
             'totalShipmentFees' => (float) $totalShipmentFees,
             'totalExpenses' => $totalExpenses,
+            'featuredStatistics' => $featuredStatistics,
             'revenueByMonth' => $revenueByMonth,
             'cardsByStatus' => [
                 'backlog' => $cards->get('backlog', collect())->values(),

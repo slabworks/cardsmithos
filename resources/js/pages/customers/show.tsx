@@ -1,8 +1,7 @@
-import { Form, Head, Link } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { Copy, FileDown, Pencil, Plus } from 'lucide-react';
 import { useState } from 'react';
 import CardController from '@/actions/App/Http/Controllers/CardController';
-import CustomerController from '@/actions/App/Http/Controllers/CustomerController';
 import InvoiceController from '@/actions/App/Http/Controllers/InvoiceController';
 import PaymentController from '@/actions/App/Http/Controllers/PaymentController';
 import ShipmentController from '@/actions/App/Http/Controllers/ShipmentController';
@@ -46,7 +45,6 @@ export default function CustomersShow({
         address: string | null;
         notes: string | null;
         referral_source: string | null;
-        converted: boolean;
         waiver_agreed: boolean | null;
         cards: Array<{
             id: number;
@@ -124,9 +122,6 @@ export default function CustomersShow({
                                 ? 'Waiver signed'
                                 : 'Waiver not signed'}
                         </Badge>
-                        <Badge variant={customer.converted ? 'default' : 'outline'}>
-                            {customer.converted ? 'Converted' : 'Not converted'}
-                        </Badge>
                         {customer.lifetime_value != null && (
                             <span className="text-sm font-medium text-muted-foreground">
                                 Lifetime value: $
@@ -158,40 +153,6 @@ export default function CustomersShow({
                             </Link>
                         </Button>
                     </div>
-                </div>
-
-                <div className="rounded-lg border border-sidebar-border bg-card p-4">
-                    <h2 className="mb-2 text-sm font-medium text-muted-foreground">
-                        Conversion
-                    </h2>
-                    <Form
-                        {...CustomerController.update.form(customer)}
-                        className="flex flex-wrap items-center gap-3"
-                    >
-                        {({ processing }) => (
-                            <>
-                                <input
-                                    type="hidden"
-                                    name="name"
-                                    value={customer.name}
-                                />
-                                <input type="hidden" name="converted" value="0" />
-                                <label className="flex items-center gap-2 text-sm">
-                                    <input
-                                        type="checkbox"
-                                        name="converted"
-                                        value="1"
-                                        defaultChecked={customer.converted}
-                                        className="size-4 rounded border-input"
-                                    />
-                                    Mark as converted
-                                </label>
-                                <Button type="submit" size="sm" disabled={processing}>
-                                    Save
-                                </Button>
-                            </>
-                        )}
-                    </Form>
                 </div>
 
                 {(customer.email || customer.phone || customer.address) && (

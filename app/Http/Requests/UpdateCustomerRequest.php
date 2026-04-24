@@ -27,7 +27,6 @@ class UpdateCustomerRequest extends FormRequest
             'address' => ['nullable', 'string'],
             'notes' => ['nullable', 'string'],
             'referral_source' => ['nullable', 'string', 'max:255'],
-            'converted' => ['nullable', 'boolean'],
         ];
     }
 }

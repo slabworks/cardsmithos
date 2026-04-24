@@ -58,6 +58,13 @@ type DashboardProps = {
     netRevenue: number;
     totalShipmentFees: number;
     totalExpenses: number;
+    featuredStatistics: Array<{
+        id: number;
+        name: string;
+        group_name: string | null;
+        category: string;
+        display_value: string;
+    }>;
     revenueByMonth: RevenueByMonth[];
     cardsByStatus: {
         backlog: KanbanCard[];
@@ -114,6 +121,7 @@ export default function Dashboard({
     netRevenue,
     totalShipmentFees,
     totalExpenses,
+    featuredStatistics,
     revenueByMonth,
     cardsByStatus,
 }: DashboardProps) {
@@ -222,6 +230,27 @@ export default function Dashboard({
                         </CardContent>
                     </Card>
                 </div>
+                <Card className="border-sidebar-border/70 dark:border-sidebar-border">
+                    <CardHeader>
+                        <CardTitle>Business statistics</CardTitle>
+                        <CardDescription>Featured KPI snapshots</CardDescription>
+                    </CardHeader>
+                    <CardContent className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                        {featuredStatistics.map((statistic) => {
+                            return (
+                                <div key={statistic.id} className="rounded-lg border p-3">
+                                    <p className="text-xs uppercase text-muted-foreground">
+                                        {statistic.group_name ?? statistic.category}
+                                    </p>
+                                    <p className="mt-1 font-medium">{statistic.name}</p>
+                                    <p className="text-2xl font-semibold">
+                                        {statistic.display_value}
+                                    </p>
+                                </div>
+                            );
+                        })}
+                    </CardContent>
+                </Card>
                 <Card className="flex max-h-[80vh] flex-col border-sidebar-border/70 dark:border-sidebar-border">
                     <CardHeader className="shrink-0">
                         <CardTitle className="flex items-center gap-2">

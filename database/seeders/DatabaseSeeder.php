@@ -25,6 +25,8 @@ class DatabaseSeeder extends Seeder
             'email' => 'ash@pokemon.co',
         ]);
 
+        $this->call(BusinessStatisticSeeder::class);
+
         // Set up Ash's business with realistic rates
         $fixedRate = 35.00;
         BusinessSettings::factory()->for($user)->create([
@@ -86,10 +88,6 @@ class DatabaseSeeder extends Seeder
                     }
                 }
             });
-
-        $customers->take(3)->each(function (Customer $customer): void {
-            $customer->update(['converted' => true]);
-        });
 
         // Seed expenses
         Expense::factory()

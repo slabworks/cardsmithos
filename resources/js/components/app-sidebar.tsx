@@ -8,6 +8,7 @@ import {
     Receipt,
     CreditCard,
     Users,
+    TrendingUp,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
@@ -41,11 +42,6 @@ const mainNavItems: NavItem[] = [
         icon: Users,
     },
     {
-        title: 'Expenses',
-        href: expensesIndex(),
-        icon: Receipt,
-    },
-    {
         title: 'Payments',
         href: PaymentController.index.url(),
         icon: CreditCard,
@@ -54,6 +50,16 @@ const mainNavItems: NavItem[] = [
         title: 'Shipments',
         href: ShipmentController.index.url(),
         icon: Package,
+    },
+    {
+        title: 'Expenses',
+        href: expensesIndex(),
+        icon: Receipt,
+    },
+    {
+        title: 'Statistics',
+        href: '/statistics',
+        icon: TrendingUp,
     },
 ];
 

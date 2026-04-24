@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\BusinessStatisticController;
+use App\Http\Controllers\BusinessStatisticRecordController;
 use App\Http\Controllers\CardActivityController;
 use App\Http\Controllers\CardController;
 use App\Http\Controllers\CardPhotoController;
@@ -48,6 +50,10 @@ Route::inertia('/', 'welcome', [
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', DashboardController::class)->name('dashboard');
     Route::get('pricing-calculator', PricingCalculatorController::class)->name('pricing-calculator.index');
+    Route::resource('statistics', BusinessStatisticController::class)
+        ->parameters(['statistics' => 'businessStatistic']);
+    Route::post('statistics/{businessStatistic}/records', [BusinessStatisticRecordController::class, 'store'])->name('statistics.records.store');
+    Route::delete('statistics/{businessStatistic}/records/{businessStatisticRecord}', [BusinessStatisticRecordController::class, 'destroy'])->name('statistics.records.destroy');
     Route::resource('expenses', ExpenseController::class);
     Route::resource('customers', CustomerController::class);
     Route::resource('payments', PaymentController::class)->except(['show']);
