@@ -133,8 +133,8 @@ test('dashboard subtracts shipment fees and expenses from net revenue', function
         ->where('netRevenue', 105)
         ->where('totalShipmentFees', 25)
         ->where('totalExpenses', 20)
-        ->where('revenueByMonth.10.total', 40)
-        ->where('revenueByMonth.11.total', 65)
+        ->where('revenueByMonth.10.total', 50)
+        ->where('revenueByMonth.11.total', 100)
     );
 });
 

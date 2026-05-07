@@ -33,7 +33,7 @@ class DashboardController extends Controller
 
         $featuredStatistics = $this->valueResolver->featuredFor($request->user());
 
-        $revenueByMonth = $this->revenueByMonth($customerIds, $request->user()->id);
+        $revenueByMonth = $this->revenueByMonth($customerIds);
 
         $kanbanValues = collect(CardStatus::kanbanStatuses())->map(fn (CardStatus $s) => $s->value);
 
@@ -63,7 +63,7 @@ class DashboardController extends Controller
      * @param  Collection<int, int>  $customerIds
      * @return array<int, array{month: string, total: float}>
      */
-    private function revenueByMonth(Collection $customerIds, int $userId): array
+    private function revenueByMonth(Collection $customerIds): array
     {
         $months = collect();
         for ($i = 11; $i >= 0; $i--) {
@@ -74,13 +74,6 @@ class DashboardController extends Controller
         $paymentMonthExpression = $driver === 'sqlite'
             ? "strftime('%Y-%m', paid_at)"
             : "DATE_FORMAT(paid_at, '%Y-%m')";
-        $shipmentMonthExpression = $driver === 'sqlite'
-            ? "strftime('%Y-%m', shipped_at)"
-            : "DATE_FORMAT(shipped_at, '%Y-%m')";
-        $expenseMonthExpression = $driver === 'sqlite'
-            ? "strftime('%Y-%m', occurred_at)"
-            : "DATE_FORMAT(occurred_at, '%Y-%m')";
-
         $paymentTotals = Payment::query()
             ->whereIn('customer_id', $customerIds)
             ->where('paid_at', '>=', Carbon::now()->subMonths(11)->startOfMonth())
@@ -90,29 +83,9 @@ class DashboardController extends Controller
             ->pluck('total', 'month')
             ->map(fn ($total) => (float) $total);
 
-        $shipmentTotals = Shipment::query()
-            ->whereIn('customer_id', $customerIds)
-            ->where('shipped_at', '>=', Carbon::now()->subMonths(11)->startOfMonth())
-            ->selectRaw("{$shipmentMonthExpression} as month, COALESCE(SUM(amount), 0) as total")
-            ->groupBy('month')
-            ->orderBy('month')
-            ->pluck('total', 'month')
-            ->map(fn ($total) => (float) $total);
-
-        $expenseTotals = Expense::query()
-            ->where('user_id', $userId)
-            ->where('occurred_at', '>=', Carbon::now()->subMonths(11)->startOfMonth())
-            ->selectRaw("{$expenseMonthExpression} as month, COALESCE(SUM(amount), 0) as total")
-            ->groupBy('month')
-            ->orderBy('month')
-            ->pluck('total', 'month')
-            ->map(fn ($total) => (float) $total);
-
         return $months->map(fn (string $month) => [
             'month' => $month,
-            'total' => $paymentTotals->get($month, 0.0)
-                - $shipmentTotals->get($month, 0.0)
-                - $expenseTotals->get($month, 0.0),
+            'total' => $paymentTotals->get($month, 0.0),
         ])->values()->all();
     }
 }

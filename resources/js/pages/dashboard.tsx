@@ -130,7 +130,7 @@ export default function Dashboard({
         labels: revenueByMonth.map((r) => formatMonthLabel(r.month)),
         datasets: [
             {
-                label: 'Net revenue',
+                label: 'Gross revenue',
                 data: revenueByMonth.map((r) => r.total),
                 backgroundColor: 'rgba(59, 130, 246, 0.5)',
                 borderColor: 'rgb(59, 130, 246)',
@@ -146,7 +146,7 @@ export default function Dashboard({
             legend: { display: false },
             title: {
                 display: true,
-                text: 'Net revenue (last 12 months)',
+                text: 'Gross revenue (last 12 months)',
             },
         },
         scales: {
@@ -325,7 +325,7 @@ export default function Dashboard({
                             Revenue
                         </CardTitle>
                         <CardDescription>
-                            Monthly revenue after shipping and expenses for the last 12 months
+                            Monthly gross revenue for the last 12 months
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
