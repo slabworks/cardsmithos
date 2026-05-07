@@ -125,12 +125,12 @@ export default function Dashboard({
     revenueByMonth,
     cardsByStatus,
 }: DashboardProps) {
-    const hasRevenue = revenueByMonth.some((r) => r.total > 0);
+    const hasRevenue = revenueByMonth.some((r) => r.total !== 0);
     const chartData = {
         labels: revenueByMonth.map((r) => formatMonthLabel(r.month)),
         datasets: [
             {
-                label: 'Revenue',
+                label: 'Gross revenue',
                 data: revenueByMonth.map((r) => r.total),
                 backgroundColor: 'rgba(59, 130, 246, 0.5)',
                 borderColor: 'rgb(59, 130, 246)',
@@ -146,7 +146,7 @@ export default function Dashboard({
             legend: { display: false },
             title: {
                 display: true,
-                text: 'Revenue (last 12 months)',
+                text: 'Gross revenue (last 12 months)',
             },
         },
         scales: {
@@ -325,7 +325,7 @@ export default function Dashboard({
                             Revenue
                         </CardTitle>
                         <CardDescription>
-                            Monthly revenue for the last 12 months
+                            Monthly gross revenue for the last 12 months
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -337,7 +337,7 @@ export default function Dashboard({
                             <div className="flex flex-col items-center justify-center gap-2 py-12 text-center text-muted-foreground">
                                 <TrendingUp className="size-10" />
                                 <p className="text-sm">
-                                    No payment data yet for the last 12 months
+                                    No revenue data yet for the last 12 months
                                 </p>
                             </div>
                         )}
