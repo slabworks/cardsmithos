@@ -115,6 +115,7 @@ test('dashboard subtracts shipment fees and expenses from net revenue', function
     ]);
     Expense::factory()->for($user)->create([
         'amount' => 20.00,
+        'occurred_at' => now()->format('Y-m-d'),
     ]);
 
     $otherUser = User::factory()->create();
@@ -133,7 +134,7 @@ test('dashboard subtracts shipment fees and expenses from net revenue', function
         ->where('totalShipmentFees', 25)
         ->where('totalExpenses', 20)
         ->where('revenueByMonth.10.total', 40)
-        ->where('revenueByMonth.11.total', 85)
+        ->where('revenueByMonth.11.total', 65)
     );
 });
 
