@@ -56,8 +56,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('statistics/{businessStatistic}/records/{businessStatisticRecord}', [BusinessStatisticRecordController::class, 'destroy'])->name('statistics.records.destroy');
     Route::resource('expenses', ExpenseController::class);
     Route::resource('customers', CustomerController::class);
-    Route::resource('payments', PaymentController::class)->except(['show']);
-    Route::resource('shipments', ShipmentController::class)->except(['show']);
+    Route::resource('payments', PaymentController::class);
+    Route::resource('shipments', ShipmentController::class);
     Route::resource('customers.cards', CardController::class)->except(['index', 'show'])->scoped();
     Route::post('customers/{customer}/cards/{card}/timeline/rotate-token', [CardTimelineController::class, 'rotateToken'])
         ->name('customers.cards.timeline.rotate-token');

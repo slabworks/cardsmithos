@@ -31,6 +31,29 @@ test('payment create page renders', function () {
         ->has('customers'));
 });
 
+test('payment show displays payment', function () {
+    $user = User::factory()->create();
+    $customer = Customer::factory()->for($user)->create(['name' => 'Jane Doe']);
+    $payment = Payment::factory()->for($customer)->create(['amount' => 125]);
+
+    $response = $this->actingAs($user)->get(route('payments.show', $payment));
+
+    $response->assertSuccessful();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('payments/show')
+        ->where('payment.customer.name', 'Jane Doe')
+        ->where('payment.amount', '125.00'));
+});
+
+test('payment show forbidden for other user', function () {
+    $user = User::factory()->create();
+    $payment = Payment::factory()->create();
+
+    $response = $this->actingAs($user)->get(route('payments.show', $payment));
+
+    $response->assertForbidden();
+});
+
 test('payment can be created', function () {
     $user = User::factory()->create();
     $customer = Customer::factory()->for($user)->create();

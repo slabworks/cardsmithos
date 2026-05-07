@@ -53,6 +53,17 @@ class PaymentController extends Controller
         return to_route('payments.index');
     }
 
+    public function show(Payment $payment): Response
+    {
+        $this->authorize('view', $payment);
+
+        $payment->load('customer:id,name');
+
+        return Inertia::render('payments/show', [
+            'payment' => $payment,
+        ]);
+    }
+
     public function edit(Request $request, Payment $payment): Response
     {
         $this->authorize('update', $payment);

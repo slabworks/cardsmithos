@@ -1,7 +1,8 @@
-import { Head, Link } from '@inertiajs/react';
+import { Form, Head, Link } from '@inertiajs/react';
 import { Copy, FileDown, Pencil, Plus } from 'lucide-react';
 import { useState } from 'react';
 import CardController from '@/actions/App/Http/Controllers/CardController';
+import CustomerController from '@/actions/App/Http/Controllers/CustomerController';
 import InvoiceController from '@/actions/App/Http/Controllers/InvoiceController';
 import PaymentController from '@/actions/App/Http/Controllers/PaymentController';
 import ShipmentController from '@/actions/App/Http/Controllers/ShipmentController';
