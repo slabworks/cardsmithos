@@ -53,7 +53,7 @@ export default function ShipmentsIndex({ shipments }: { shipments: ShipmentItem[
                                 shipments.map((shipment) => (
                                     <tr key={shipment.id} className="border-b border-sidebar-border last:border-0">
                                         <td className="px-4 py-3">
-                                            <Link href={`/customers/${shipment.customer.id}`} className="hover:underline">
+                                            <Link href={ShipmentController.show.url({ shipment: shipment.id })} className="hover:underline">
                                                 {shipment.customer.name}
                                             </Link>
                                         </td>

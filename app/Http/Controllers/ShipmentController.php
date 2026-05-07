@@ -53,6 +53,17 @@ class ShipmentController extends Controller
         return to_route('shipments.index');
     }
 
+    public function show(Shipment $shipment): Response
+    {
+        $this->authorize('view', $shipment);
+
+        $shipment->load('customer:id,name');
+
+        return Inertia::render('shipments/show', [
+            'shipment' => $shipment,
+        ]);
+    }
+
     public function edit(Request $request, Shipment $shipment): Response
     {
         $this->authorize('update', $shipment);

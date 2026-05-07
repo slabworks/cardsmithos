@@ -31,6 +31,29 @@ test('shipment create page renders', function () {
         ->has('customers'));
 });
 
+test('shipment show displays shipment', function () {
+    $user = User::factory()->create();
+    $customer = Customer::factory()->for($user)->create(['name' => 'Jane Doe']);
+    $shipment = Shipment::factory()->for($customer)->create(['amount' => 18.75]);
+
+    $response = $this->actingAs($user)->get(route('shipments.show', $shipment));
+
+    $response->assertSuccessful();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('shipments/show')
+        ->where('shipment.customer.name', 'Jane Doe')
+        ->where('shipment.amount', '18.75'));
+});
+
+test('shipment show forbidden for other user', function () {
+    $user = User::factory()->create();
+    $shipment = Shipment::factory()->create();
+
+    $response = $this->actingAs($user)->get(route('shipments.show', $shipment));
+
+    $response->assertForbidden();
+});
+
 test('shipment can be created', function () {
     $user = User::factory()->create();
     $customer = Customer::factory()->for($user)->create();

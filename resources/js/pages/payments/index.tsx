@@ -2,8 +2,8 @@ import { Head, Link } from '@inertiajs/react';
 import { Plus } from 'lucide-react';
 import PaymentController from '@/actions/App/Http/Controllers/PaymentController';
 import Heading from '@/components/heading';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem } from '@/types';
 
@@ -52,7 +52,7 @@ export default function PaymentsIndex({ payments }: { payments: PaymentItem[] })
                                 payments.map((payment) => (
                                     <tr key={payment.id} className="border-b border-sidebar-border last:border-0">
                                         <td className="px-4 py-3">
-                                            <Link href={`/customers/${payment.customer.id}`} className="hover:underline">
+                                            <Link href={PaymentController.show.url({ payment: payment.id })} className="hover:underline">
                                                 {payment.customer.name}
                                             </Link>
                                         </td>

@@ -1,15 +1,17 @@
 import { Link, usePage } from '@inertiajs/react';
 import {
+    CreditCard,
     Github,
     Heart,
-    Package,
     LayoutGrid,
     MessageCircle,
+    Package,
     Receipt,
-    CreditCard,
-    Users,
     TrendingUp,
+    Users,
 } from 'lucide-react';
+import PaymentController from '@/actions/App/Http/Controllers/PaymentController';
+import ShipmentController from '@/actions/App/Http/Controllers/ShipmentController';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -27,8 +29,6 @@ import { dashboard } from '@/routes';
 import { index as customersIndex } from '@/routes/customers';
 import { index as expensesIndex } from '@/routes/expenses';
 import type { NavItem } from '@/types';
-import PaymentController from '@/actions/App/Http/Controllers/PaymentController';
-import ShipmentController from '@/actions/App/Http/Controllers/ShipmentController';
 
 const mainNavItems: NavItem[] = [
     {
