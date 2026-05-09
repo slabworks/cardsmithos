@@ -1,6 +1,8 @@
 <?php
 
 use App\Models\Customer;
+use App\Models\GmailAccount;
+use App\Models\GmailContact;
 use App\Models\User;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -57,6 +59,36 @@ test('customer show displays customer', function () {
     $response->assertInertia(fn (Assert $page) => $page
         ->component('customers/show')
         ->where('customer.name', 'Acme'));
+});
+
+test('customer show includes linked gmail contacts', function () {
+    $user = User::factory()->create();
+    $customer = Customer::factory()->for($user)->create(['email' => 'jane@example.com']);
+    $account = GmailAccount::query()->create([
+        'user_id' => $user->id,
+        'email' => 'owner@gmail.com',
+        'access_token' => 'token',
+        'refresh_token' => 'refresh',
+        'token_expires_at' => now()->addHour(),
+    ]);
+    GmailContact::query()->create([
+        'gmail_account_id' => $account->id,
+        'customer_id' => $customer->id,
+        'email' => 'jane@example.com',
+        'name' => 'Jane Example',
+        'latest_subject' => 'Repair question',
+        'latest_snippet' => 'Can you repair this card?',
+        'last_message_at' => now(),
+    ]);
+
+    $response = $this->actingAs($user)->get(route('customers.show', $customer));
+
+    $response->assertSuccessful();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('customers/show')
+        ->has('emailContacts', 1)
+        ->where('emailContacts.0.email', 'jane@example.com')
+        ->where('emailContacts.0.latest_subject', 'Repair question'));
 });
 
 test('customer show includes waiver URL when waiver not signed', function () {
