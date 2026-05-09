@@ -8,6 +8,7 @@ use App\Http\Controllers\CardPhotoController;
 use App\Http\Controllers\CardTimelineController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EmailController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PaymentController;
@@ -49,6 +50,9 @@ Route::inertia('/', 'welcome', [
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', DashboardController::class)->name('dashboard');
+    Route::get('email', [EmailController::class, 'index'])->name('email.index');
+    Route::post('email/sync', [EmailController::class, 'sync'])->name('email.sync');
+    Route::post('email/contacts/convert', [EmailController::class, 'convert'])->name('email.contacts.convert');
     Route::get('pricing-calculator', PricingCalculatorController::class)->name('pricing-calculator.index');
     Route::resource('statistics', BusinessStatisticController::class)
         ->parameters(['statistics' => 'businessStatistic']);

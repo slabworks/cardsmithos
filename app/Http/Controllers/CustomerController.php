@@ -88,6 +88,10 @@ class CustomerController extends Controller
 
         return Inertia::render('customers/show', [
             'customer' => $customer,
+            'emailContacts' => $customer->gmailContacts()
+                ->latest('last_message_at')
+                ->limit(10)
+                ->get(['id', 'email', 'name', 'latest_subject', 'latest_snippet', 'last_message_at']),
             'waiverUrl' => $waiverUrl,
         ]);
     }

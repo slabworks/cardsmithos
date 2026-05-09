@@ -4,6 +4,7 @@ import {
     Github,
     Heart,
     LayoutGrid,
+    Mail,
     MessageCircle,
     Package,
     Receipt,
@@ -40,6 +41,11 @@ const mainNavItems: NavItem[] = [
         title: 'Customers',
         href: customersIndex(),
         icon: Users,
+    },
+    {
+        title: 'Email',
+        href: '/email',
+        icon: Mail,
     },
     {
         title: 'Payments',
