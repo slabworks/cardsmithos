@@ -25,8 +25,9 @@ class EmailController extends Controller
             'contacts' => $account ? $account->contacts()
                 ->with('customer:id,name,email')
                 ->latest('last_message_at')
-                ->get()
-                ->map(fn (GmailContact $contact): array => [
+                ->paginate(25)
+                ->withQueryString()
+                ->through(fn (GmailContact $contact): array => [
                     'email' => $contact->email,
                     'name' => $contact->name,
                     'latestMessage' => [

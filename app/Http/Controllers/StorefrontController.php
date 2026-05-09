@@ -50,8 +50,16 @@ class StorefrontController extends Controller
             ->sort()
             ->values();
 
+        $storefronts = $query->paginate(12)->withQueryString();
+        $storefronts->getCollection()->transform(function (BusinessSettings $settings): BusinessSettings {
+            $settings->hourly_rate = self::displayableRate($settings->hourly_rate);
+            $settings->default_fixed_rate = self::displayableRate($settings->default_fixed_rate);
+
+            return $settings;
+        });
+
         return Inertia::render('storefront/index', [
-            'storefronts' => $query->paginate(12)->withQueryString(),
+            'storefronts' => $storefronts,
             'totalStorefronts' => BusinessSettings::whereNotNull('store_slug')->where('is_listed_in_directory', true)->count(),
             'availableCountries' => $availableCountries,
             'filters' => [
@@ -69,8 +77,8 @@ class StorefrontController extends Controller
 
         return Inertia::render('storefront/show', [
             'companyName' => $settings->company_name,
-            'hourlyRate' => $settings->hourly_rate,
-            'fixedRate' => $settings->default_fixed_rate,
+            'hourlyRate' => self::displayableRate($settings->hourly_rate),
+            'fixedRate' => self::displayableRate($settings->default_fixed_rate),
             'currency' => $settings->currency,
             'bio' => $settings->bio,
             'instagramHandle' => $settings->instagram_handle,
@@ -80,5 +88,14 @@ class StorefrontController extends Controller
             'hidePricing' => (bool) $settings->hide_pricing,
             'contactEmail' => $settings->hide_pricing ? $settings->user->email : null,
         ]);
+    }
+
+    private static function displayableRate(?string $rate): ?string
+    {
+        if ($rate === null || (float) $rate <= 0.0) {
+            return null;
+        }
+
+        return $rate;
     }
 }

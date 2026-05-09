@@ -59,6 +59,25 @@ test('storefront page handles null optional fields', function () {
     );
 });
 
+test('storefront page hides zero rates', function () {
+    $user = User::factory()->create();
+    $user->businessSettings()->create([
+        'store_slug' => 'zero-rate-shop',
+        'company_name' => 'Zero Rate Shop',
+        'hourly_rate' => 0,
+        'default_fixed_rate' => 0,
+    ]);
+
+    $response = $this->get('/c/zero-rate-shop');
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('storefront/show')
+        ->where('hourlyRate', null)
+        ->where('fixedRate', null)
+    );
+});
+
 test('storefront show page includes location data', function () {
     $user = User::factory()->create();
     $user->businessSettings()->create([
@@ -127,6 +146,23 @@ test('directory page includes hide_pricing in storefront data', function () {
     $response->assertInertia(fn (Assert $page) => $page
         ->has('storefronts.data', 1)
         ->where('storefronts.data.0.hide_pricing', true)
+    );
+});
+
+test('directory page hides zero rates', function () {
+    BusinessSettings::factory()->create([
+        'company_name' => 'Zero Rate Shop',
+        'hourly_rate' => 0,
+        'default_fixed_rate' => 0,
+    ]);
+
+    $response = $this->get(route('storefront.index'));
+
+    $response->assertOk();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->has('storefronts.data', 1)
+        ->where('storefronts.data.0.hourly_rate', null)
+        ->where('storefronts.data.0.default_fixed_rate', null)
     );
 });
 

@@ -1,5 +1,11 @@
 import { Form, Head, Link } from '@inertiajs/react';
-import { Mail, RefreshCw, UserPlus } from 'lucide-react';
+import {
+    ChevronLeft,
+    ChevronRight,
+    Mail,
+    RefreshCw,
+    UserPlus,
+} from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
@@ -22,6 +28,18 @@ type InboxContact = {
     customer: Customer | null;
 };
 
+type PaginatedData<T> = {
+    data: T[];
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+    from: number | null;
+    to: number | null;
+    next_page_url: string | null;
+    prev_page_url: string | null;
+};
+
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'Email', href: '/email' }];
 
 export default function EmailIndex({
@@ -29,7 +47,7 @@ export default function EmailIndex({
     contacts,
 }: {
     gmailAccount: { email: string | null; lastSyncedAt: string | null } | null;
-    contacts: InboxContact[];
+    contacts: PaginatedData<InboxContact> | null;
 }) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -71,7 +89,7 @@ export default function EmailIndex({
                             </Link>
                         </Button>
                     </div>
-                ) : contacts.length === 0 ? (
+                ) : contacts === null || contacts.data.length === 0 ? (
                     <div className="rounded-lg border border-sidebar-border bg-card p-8 text-center">
                         <Mail className="mx-auto mb-3 size-10 text-muted-foreground" />
                         <h2 className="font-medium">No inbox contacts yet</h2>
@@ -86,7 +104,7 @@ export default function EmailIndex({
                             <h2 className="font-medium">Inbox contacts</h2>
                         </div>
                         <ul className="divide-y divide-sidebar-border">
-                            {contacts.map((contact) => (
+                            {contacts.data.map((contact) => (
                                 <li
                                     key={contact.email}
                                     className="flex flex-col gap-3 px-4 py-4 md:flex-row md:items-start md:justify-between"
@@ -153,6 +171,68 @@ export default function EmailIndex({
                                 </li>
                             ))}
                         </ul>
+                        <div className="flex flex-col gap-3 border-t border-sidebar-border px-4 py-3 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+                            <span>
+                                Showing {contacts.from ?? 0} to{' '}
+                                {contacts.to ?? 0} of {contacts.total} contacts
+                            </span>
+                            {contacts.last_page > 1 && (
+                                <div className="flex items-center gap-2">
+                                    {contacts.prev_page_url ? (
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            asChild
+                                        >
+                                            <Link
+                                                href={contacts.prev_page_url}
+                                                preserveScroll
+                                            >
+                                                <ChevronLeft className="mr-1 size-4" />
+                                                Previous
+                                            </Link>
+                                        </Button>
+                                    ) : (
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            disabled
+                                        >
+                                            <ChevronLeft className="mr-1 size-4" />
+                                            Previous
+                                        </Button>
+                                    )}
+                                    <span className="px-1">
+                                        Page {contacts.current_page} of{' '}
+                                        {contacts.last_page}
+                                    </span>
+                                    {contacts.next_page_url ? (
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            asChild
+                                        >
+                                            <Link
+                                                href={contacts.next_page_url}
+                                                preserveScroll
+                                            >
+                                                Next
+                                                <ChevronRight className="ml-1 size-4" />
+                                            </Link>
+                                        </Button>
+                                    ) : (
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            disabled
+                                        >
+                                            Next
+                                            <ChevronRight className="ml-1 size-4" />
+                                        </Button>
+                                    )}
+                                </div>
+                            )}
+                        </div>
                     </div>
                 )}
             </div>

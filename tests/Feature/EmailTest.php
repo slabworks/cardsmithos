@@ -45,10 +45,42 @@ test('email index lists only inbound contacts from connected user inbox', functi
     $response->assertSuccessful();
     $response->assertInertia(fn (Assert $page) => $page
         ->component('email/index')
-        ->has('contacts', 1)
-        ->where('contacts.0.email', 'jane@example.com')
-        ->where('contacts.0.name', 'Jane Example')
-        ->where('contacts.0.latestMessage.subject', 'Customer question'));
+        ->where('contacts.total', 1)
+        ->has('contacts.data', 1)
+        ->where('contacts.data.0.email', 'jane@example.com')
+        ->where('contacts.data.0.name', 'Jane Example')
+        ->where('contacts.data.0.latestMessage.subject', 'Customer question'));
+});
+
+test('email index paginates inbox contacts', function () {
+    $user = User::factory()->create();
+    $account = GmailAccount::query()->create([
+        'user_id' => $user->id,
+        'email' => 'owner@gmail.com',
+        'access_token' => 'token',
+        'refresh_token' => 'refresh',
+        'token_expires_at' => now()->addHour(),
+    ]);
+
+    foreach (range(1, 26) as $index) {
+        GmailContact::query()->create([
+            'gmail_account_id' => $account->id,
+            'email' => 'sender'.$index.'@example.com',
+            'latest_subject' => 'Message '.$index,
+            'last_message_at' => now()->subMinutes($index),
+        ]);
+    }
+
+    $response = $this->actingAs($user)->get(route('email.index'));
+
+    $response->assertSuccessful();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('email/index')
+        ->where('contacts.total', 26)
+        ->where('contacts.per_page', 25)
+        ->where('contacts.current_page', 1)
+        ->where('contacts.last_page', 2)
+        ->has('contacts.data', 25));
 });
 
 test('email contact can be converted to customer', function () {
