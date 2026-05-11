@@ -61,7 +61,7 @@ class Card extends Model implements HasMedia
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('photos')
-            ->useDisk('s3');
+            ->useDisk(config('media-library.disk_name'));
     }
 
     public function submission(): BelongsTo
