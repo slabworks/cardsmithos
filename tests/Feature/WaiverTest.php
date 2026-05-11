@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\URL;
 
 test('signed waiver URL shows waiver form when not signed', function () {
     $user = User::factory()->create();
-    $customer = Customer::factory()->for($user)->create(['name' => 'Jane', 'email' => 'jane@example.com']);
+    $customer = Customer::factory()->for($user)->create(['name' => 'Jane', 'contact_detail' => '@jane']);
     $submission = Submission::factory()->for($user)->for($customer)->create();
     $waiver = $submission->serviceWaiver()->create([
         'expires_at' => now()->addDays(30),
@@ -32,7 +32,7 @@ test('waiver sign records signature', function () {
     $user = User::factory()->create();
     $customer = Customer::factory()->for($user)->create([
         'name' => 'Jane',
-        'email' => 'jane@example.com',
+        'contact_detail' => 'jane@example.com',
     ]);
     $submission = Submission::factory()->for($user)->for($customer)->create();
     $waiver = $submission->serviceWaiver()->create([

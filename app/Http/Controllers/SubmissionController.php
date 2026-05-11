@@ -22,7 +22,7 @@ class SubmissionController extends Controller
 
         $submissions = $request->user()
             ->submissions()
-            ->with('customer:id,name,email')
+            ->with('customer:id,name,contact_detail')
             ->latest()
             ->get();
 
@@ -38,7 +38,7 @@ class SubmissionController extends Controller
         return Inertia::render('submissions/create', [
             'customers' => $request->user()
                 ->customers()
-                ->select('id', 'name', 'email')
+                ->select('id', 'name', 'contact_detail', 'platform')
                 ->orderBy('name')
                 ->get(),
             'statusOptions' => $this->statusOptions(),
@@ -49,7 +49,9 @@ class SubmissionController extends Controller
     public function store(StoreSubmissionRequest $request): RedirectResponse
     {
         $validated = $request->validated();
-        $customer = $this->resolveCustomer($request, $validated);
+        $customer = Customer::query()
+            ->where('user_id', $request->user()->id)
+            ->findOrFail($validated['customer_id']);
 
         $submission = $request->user()->submissions()->create([
             'customer_id' => $customer->id,
@@ -109,7 +111,7 @@ class SubmissionController extends Controller
             'submission' => $submission,
             'customers' => $request->user()
                 ->customers()
-                ->select('id', 'name', 'email')
+                ->select('id', 'name', 'contact_detail', 'platform')
                 ->orderBy('name')
                 ->get(),
             'statusOptions' => $this->statusOptions(),
@@ -123,13 +125,6 @@ class SubmissionController extends Controller
         $customer = Customer::query()
             ->where('user_id', $request->user()->id)
             ->findOrFail($validated['customer_id']);
-
-        $customer->update([
-            'name' => $validated['name'],
-            'email' => $validated['email'] ?? null,
-            'phone' => $validated['phone'] ?? null,
-            'address' => $validated['address'] ?? null,
-        ]);
 
         $submission->update([
             'customer_id' => $customer->id,
@@ -148,25 +143,6 @@ class SubmissionController extends Controller
         $submission->delete();
 
         return to_route('submissions.index');
-    }
-
-    /**
-     * @param  array<string, mixed>  $validated
-     */
-    private function resolveCustomer(StoreSubmissionRequest $request, array $validated): Customer
-    {
-        if (! empty($validated['customer_id'])) {
-            return Customer::query()
-                ->where('user_id', $request->user()->id)
-                ->findOrFail($validated['customer_id']);
-        }
-
-        return $request->user()->customers()->create([
-            'name' => $validated['name'],
-            'email' => $validated['email'] ?? null,
-            'phone' => $validated['phone'] ?? null,
-            'address' => $validated['address'] ?? null,
-        ]);
     }
 
     /**

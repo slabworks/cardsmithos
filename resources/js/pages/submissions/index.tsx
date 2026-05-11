@@ -25,7 +25,7 @@ type SubmissionItem = {
     referral_source: string | null;
     customer: {
         name: string;
-        email: string | null;
+        contact_detail: string | null;
     };
 };
 
@@ -40,7 +40,9 @@ export default function SubmissionsIndex({
         ? submissions.filter(
               (submission) =>
                   submission.customer.name.toLowerCase().includes(query) ||
-                  submission.customer.email?.toLowerCase().includes(query) ||
+                  submission.customer.contact_detail
+                      ?.toLowerCase()
+                      .includes(query) ||
                   submission.status?.replace('_', ' ').includes(query) ||
                   submission.referral_source?.toLowerCase().includes(query),
           )
@@ -103,9 +105,13 @@ export default function SubmissionsIndex({
                                             <span className="font-medium">
                                                 {submission.customer.name}
                                             </span>
-                                            {submission.customer.email && (
+                                            {submission.customer
+                                                .contact_detail && (
                                                 <span className="text-sm text-muted-foreground">
-                                                    {submission.customer.email}
+                                                    {
+                                                        submission.customer
+                                                            .contact_detail
+                                                    }
                                                 </span>
                                             )}
                                         </div>

@@ -2,10 +2,9 @@
 
 use App\Http\Controllers\BusinessStatisticController;
 use App\Http\Controllers\BusinessStatisticRecordController;
-use App\Http\Controllers\CardActivityController;
 use App\Http\Controllers\CardController;
 use App\Http\Controllers\CardPhotoController;
-use App\Http\Controllers\CardTimelineController;
+use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\InvoiceController;
@@ -17,11 +16,6 @@ use App\Http\Controllers\SubmissionController;
 use App\Http\Controllers\WaiverController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
-
-Route::get('/cards/{card}/timeline/{token}', [CardTimelineController::class, 'show'])
-    ->name('card.timeline.show');
-Route::get('/cards/{card}/timeline/{token}/photos/{media}', [CardTimelineController::class, 'photo'])
-    ->name('card.timeline.photo');
 
 Route::middleware(['signed:relative'])->group(function (): void {
     Route::get('/waiver/{submission}', [WaiverController::class, 'show'])->name('waiver.show');
@@ -55,16 +49,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('statistics/{businessStatistic}/records', [BusinessStatisticRecordController::class, 'store'])->name('statistics.records.store');
     Route::delete('statistics/{businessStatistic}/records/{businessStatisticRecord}', [BusinessStatisticRecordController::class, 'destroy'])->name('statistics.records.destroy');
     Route::resource('expenses', ExpenseController::class);
+    Route::resource('customers', CustomerController::class)->only(['index', 'create', 'store', 'edit', 'update']);
     Route::resource('submissions', SubmissionController::class);
     Route::resource('submissions.cards', CardController::class)->except(['index', 'show'])->scoped();
     Route::resource('submissions.payments', PaymentController::class)->only(['store', 'update', 'destroy'])->scoped();
     Route::resource('submissions.shipments', ShipmentController::class)->only(['store', 'update', 'destroy'])->scoped();
-    Route::post('submissions/{submission}/cards/{card}/timeline/rotate-token', [CardTimelineController::class, 'rotateToken'])
-        ->name('submissions.cards.timeline.rotate-token');
-    Route::resource('submissions.cards.activities', CardActivityController::class)->only(['store', 'update', 'destroy'])->scoped();
     Route::post('submissions/{submission}/cards/{card}/photos', [CardPhotoController::class, 'store'])->name('submissions.cards.photos.store');
     Route::get('submissions/{submission}/cards/{card}/photos/{media}', [CardPhotoController::class, 'show'])->name('submissions.cards.photos.show');
-    Route::post('submissions/{submission}/cards/{card}/photos/{media}/toggle-timeline', [CardPhotoController::class, 'toggleTimeline'])->name('submissions.cards.photos.toggle-timeline');
     Route::delete('submissions/{submission}/cards/{card}/photos/{media}', [CardPhotoController::class, 'destroy'])->name('submissions.cards.photos.destroy');
     Route::get('submissions/{submission}/invoices/create', [InvoiceController::class, 'create'])->name('submissions.invoices.create');
     Route::post('submissions/{submission}/invoices/download', [InvoiceController::class, 'download'])->name('submissions.invoices.download')->middleware('signed:relative');

@@ -49,7 +49,6 @@ test('invoice create page does not leak sensitive card data', function () {
     $customer = Customer::factory()->for($user)->create();
     $submission = Submission::factory()->for($user)->for($customer)->create();
     $card = Card::factory()->for($submission)->create([
-        'timeline_share_token' => 'secret-token-value',
         'work_done' => 'Secret work notes',
     ]);
 
@@ -57,11 +56,10 @@ test('invoice create page does not leak sensitive card data', function () {
 
     $response->assertInertia(fn (Assert $page) => $page
         ->has('submission.cards', 1)
-        ->missing('submission.cards.0.timeline_share_token')
         ->missing('submission.cards.0.work_done')
         ->missing('submission.cards.0.photos')
         ->missing('submission.user_id')
-        ->missing('submission.customer.email'));
+        ->missing('submission.customer.contact_detail'));
 });
 
 test('invoice download returns pdf with valid signed url', function () {

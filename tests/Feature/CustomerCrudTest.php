@@ -18,12 +18,15 @@ test('submission index lists only own submissions', function () {
         ->has('submissions', 2));
 });
 
-test('submission can be created with a new customer', function () {
+test('submission can be created with an existing customer', function () {
     $user = User::factory()->create();
+    $customer = Customer::factory()->for($user)->create([
+        'name' => 'Jane Doe',
+        'contact_detail' => '@janedoe',
+    ]);
 
     $response = $this->actingAs($user)->post(route('submissions.store'), [
-        'name' => 'Jane Doe',
-        'email' => 'jane@example.com',
+        'customer_id' => $customer->id,
         'status' => 'pending',
         'notes' => 'Needs two cards repaired.',
     ]);
@@ -31,24 +34,31 @@ test('submission can be created with a new customer', function () {
     $submission = Submission::query()->where('user_id', $user->id)->first();
     expect($submission)->not->toBeNull();
     $response->assertRedirect(route('submissions.show', $submission));
-    $this->assertDatabaseHas('customers', [
-        'user_id' => $user->id,
-        'name' => 'Jane Doe',
-        'email' => 'jane@example.com',
-    ]);
     $this->assertDatabaseHas('submissions', [
         'id' => $submission->id,
+        'customer_id' => $customer->id,
         'status' => 'pending',
         'notes' => 'Needs two cards repaired.',
     ]);
 });
 
-test('creating a submission creates a service waiver', function () {
+test('submission cannot be created without a customer', function () {
     $user = User::factory()->create();
 
+    $response = $this->actingAs($user)->post(route('submissions.store'), [
+        'status' => 'pending',
+    ]);
+
+    $response->assertSessionHasErrors('customer_id');
+    $this->assertDatabaseCount('submissions', 0);
+});
+
+test('creating a submission creates a service waiver', function () {
+    $user = User::factory()->create();
+    $customer = Customer::factory()->for($user)->create();
+
     $this->actingAs($user)->post(route('submissions.store'), [
-        'name' => 'Jane Doe',
-        'email' => 'jane@example.com',
+        'customer_id' => $customer->id,
         'status' => 'pending',
     ]);
 
@@ -104,8 +114,6 @@ test('submission can be updated', function () {
         route('submissions.update', $submission),
         [
             'customer_id' => $customer->id,
-            'name' => 'Updated Name',
-            'email' => 'updated@example.com',
             'status' => 'in_progress',
             'notes' => 'Updated notes',
         ]
@@ -114,8 +122,7 @@ test('submission can be updated', function () {
     $response->assertRedirect(route('submissions.show', $submission));
     $customer->refresh();
     $submission->refresh();
-    expect($customer->name)->toBe('Updated Name');
-    expect($customer->email)->toBe('updated@example.com');
+    expect($submission->customer_id)->toBe($customer->id);
     expect($submission->status->value)->toBe('in_progress');
     expect($submission->notes)->toBe('Updated notes');
 });

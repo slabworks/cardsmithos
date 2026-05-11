@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\CustomerPlatform;
 use Database\Factories\CustomerFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -19,10 +20,18 @@ class Customer extends Model
     protected $fillable = [
         'user_id',
         'name',
-        'email',
+        'contact_detail',
+        'platform',
         'phone',
         'address',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'platform' => CustomerPlatform::class,
+        ];
+    }
 
     public function user(): BelongsTo
     {

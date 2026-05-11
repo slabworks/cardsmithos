@@ -96,45 +96,6 @@ test('photo view forbidden for other user', function () {
     $response->assertForbidden();
 });
 
-test('photo timeline visibility can be toggled', function () {
-    $user = User::factory()->create();
-    $customer = Customer::factory()->for($user)->create();
-    $submission = Submission::factory()->for($user)->for($customer)->create();
-    $card = Card::factory()->for($submission)->create();
-    $card->addMedia(UploadedFile::fake()->image('front.jpg'))->toMediaCollection('photos');
-    $media = $card->getMedia('photos')->first();
-
-    expect($media->getCustomProperty('show_on_timeline', false))->toBeFalse();
-
-    $this->actingAs($user)->post(
-        route('submissions.cards.photos.toggle-timeline', [$submission, $card, $media->id])
-    )->assertRedirect();
-
-    $media->refresh();
-    expect($media->getCustomProperty('show_on_timeline'))->toBeTrue();
-
-    $this->actingAs($user)->post(
-        route('submissions.cards.photos.toggle-timeline', [$submission, $card, $media->id])
-    )->assertRedirect();
-
-    $media->refresh();
-    expect($media->getCustomProperty('show_on_timeline'))->toBeFalse();
-});
-
-test('photo toggle timeline forbidden for other user', function () {
-    $user = User::factory()->create();
-    $submission = Submission::factory()->create();
-    $card = Card::factory()->for($submission)->create();
-    $card->addMedia(UploadedFile::fake()->image('front.jpg'))->toMediaCollection('photos');
-    $media = $card->getMedia('photos')->first();
-
-    $response = $this->actingAs($user)->post(
-        route('submissions.cards.photos.toggle-timeline', [$submission, $card, $media->id])
-    );
-
-    $response->assertForbidden();
-});
-
 test('photo can be deleted', function () {
     $user = User::factory()->create();
     $customer = Customer::factory()->for($user)->create();
@@ -163,53 +124,4 @@ test('photo delete forbidden for other user', function () {
     );
 
     $response->assertForbidden();
-});
-
-test('timeline photo accessible with valid share token', function () {
-    $user = User::factory()->create();
-    $submission = Submission::factory()->for($user)->create();
-    $card = Card::factory()->for($submission)->create();
-    $token = $card->ensureTimelineShareToken();
-    $card->addMedia(UploadedFile::fake()->image('front.jpg'))->toMediaCollection('photos');
-    $media = $card->getMedia('photos')->first();
-    $media->setCustomProperty('show_on_timeline', true);
-    $media->save();
-
-    $response = $this->get(
-        route('card.timeline.photo', [$card, $token, $media->id])
-    );
-
-    $response->assertOk();
-});
-
-test('timeline photo not accessible with invalid token', function () {
-    $user = User::factory()->create();
-    $submission = Submission::factory()->for($user)->create();
-    $card = Card::factory()->for($submission)->create();
-    $card->ensureTimelineShareToken();
-    $card->addMedia(UploadedFile::fake()->image('front.jpg'))->toMediaCollection('photos');
-    $media = $card->getMedia('photos')->first();
-    $media->setCustomProperty('show_on_timeline', true);
-    $media->save();
-
-    $response = $this->get(
-        route('card.timeline.photo', [$card, 'invalid-token', $media->id])
-    );
-
-    $response->assertNotFound();
-});
-
-test('timeline photo not accessible if not marked for timeline', function () {
-    $user = User::factory()->create();
-    $submission = Submission::factory()->for($user)->create();
-    $card = Card::factory()->for($submission)->create();
-    $token = $card->ensureTimelineShareToken();
-    $card->addMedia(UploadedFile::fake()->image('front.jpg'))->toMediaCollection('photos');
-    $media = $card->getMedia('photos')->first();
-
-    $response = $this->get(
-        route('card.timeline.photo', [$card, $token, $media->id])
-    );
-
-    $response->assertNotFound();
 });

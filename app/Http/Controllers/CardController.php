@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\CardActivityType;
 use App\Enums\CardCondition;
 use App\Enums\CardStatus;
 use App\Http\Requests\StoreCardRequest;
@@ -10,7 +9,6 @@ use App\Http\Requests\UpdateCardRequest;
 use App\Models\Card;
 use App\Models\Submission;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\URL;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -55,12 +53,9 @@ class CardController extends Controller
         $this->authorize('update', $card);
 
         $submission->load('customer:id,name');
-        $card->load('activities');
         $settings = auth()->user()?->businessSettings;
         $hourlyRate = $settings?->hourly_rate;
         $taxRate = $settings?->tax_rate;
-        $timelineShareToken = $card->ensureTimelineShareToken();
-        $timelineShareUrl = URL::route('card.timeline.show', ['card' => $card, 'token' => $timelineShareToken]);
 
         $photos = $card->getMedia('photos')->map(fn ($media) => [
             'id' => $media->id,
@@ -70,7 +65,6 @@ class CardController extends Controller
                 'media' => $media->id,
             ]),
             'name' => $media->file_name,
-            'show_on_timeline' => (bool) $media->getCustomProperty('show_on_timeline', false),
         ])->values()->all();
 
         return Inertia::render('cards/edit', [
@@ -79,7 +73,6 @@ class CardController extends Controller
             'photos' => $photos,
             'hourlyRate' => $hourlyRate !== null ? (float) $hourlyRate : null,
             'taxRate' => $taxRate !== null ? (float) $taxRate : null,
-            'timelineShareUrl' => $timelineShareUrl,
             'statusOptions' => array_map(
                 fn (CardStatus $case) => [
                     'value' => $case->value,
@@ -95,13 +88,6 @@ class CardController extends Controller
                     'color' => $case->color(),
                 ],
                 CardCondition::cases()
-            ),
-            'activityTypeOptions' => array_map(
-                fn (CardActivityType $case) => [
-                    'value' => $case->value,
-                    'label' => $case->label(),
-                ],
-                CardActivityType::cases()
             ),
         ]);
     }

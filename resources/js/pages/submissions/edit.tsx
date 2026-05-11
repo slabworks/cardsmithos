@@ -3,7 +3,6 @@ import SubmissionController from '@/actions/App/Http/Controllers/SubmissionContr
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import { index } from '@/routes/submissions';
@@ -18,11 +17,19 @@ type Submission = {
     customer: {
         id: number;
         name: string;
-        email: string | null;
+        contact_detail: string | null;
         phone: string | null;
         address: string | null;
     };
 };
+
+const formatPlatform = (platform: string) =>
+    platform === 'x_twitter'
+        ? 'X / Twitter'
+        : platform
+              .split('_')
+              .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+              .join(' ');
 
 export default function SubmissionsEdit({
     submission,
@@ -31,7 +38,12 @@ export default function SubmissionsEdit({
     referralSourceOptions,
 }: {
     submission: Submission;
-    customers: Array<{ id: number; name: string; email: string | null }>;
+    customers: Array<{
+        id: number;
+        name: string;
+        contact_detail: string | null;
+        platform: string | null;
+    }>;
     statusOptions: Array<{ value: string; label: string; color: string }>;
     referralSourceOptions: Array<{ value: string; label: string }>;
 }) {
@@ -73,60 +85,16 @@ export default function SubmissionsEdit({
                                             value={customer.id}
                                         >
                                             {customer.name}
-                                            {customer.email
-                                                ? ` (${customer.email})`
+                                            {customer.contact_detail
+                                                ? ` (${customer.contact_detail})`
+                                                : ''}
+                                            {customer.platform
+                                                ? ` - ${formatPlatform(customer.platform)}`
                                                 : ''}
                                         </option>
                                     ))}
                                 </select>
                                 <InputError message={errors.customer_id} />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="name">Customer name *</Label>
-                                <Input
-                                    id="name"
-                                    name="name"
-                                    defaultValue={submission.customer.name}
-                                    required
-                                />
-                                <InputError message={errors.name} />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="email">Email</Label>
-                                <Input
-                                    id="email"
-                                    type="email"
-                                    name="email"
-                                    defaultValue={
-                                        submission.customer.email ?? ''
-                                    }
-                                />
-                                <InputError message={errors.email} />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="phone">Phone</Label>
-                                <Input
-                                    id="phone"
-                                    name="phone"
-                                    type="tel"
-                                    defaultValue={
-                                        submission.customer.phone ?? ''
-                                    }
-                                />
-                                <InputError message={errors.phone} />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="address">Address</Label>
-                                <textarea
-                                    id="address"
-                                    name="address"
-                                    rows={2}
-                                    defaultValue={
-                                        submission.customer.address ?? ''
-                                    }
-                                    className="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
-                                />
-                                <InputError message={errors.address} />
                             </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="status">

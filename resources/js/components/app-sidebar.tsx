@@ -7,6 +7,7 @@ import {
     MessageCircle,
     Receipt,
     TrendingUp,
+    Users,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
@@ -22,6 +23,7 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
+import { index as customersIndex } from '@/routes/customers';
 import { index as expensesIndex } from '@/routes/expenses';
 import { index as submissionsIndex } from '@/routes/submissions';
 import type { NavItem } from '@/types';
@@ -36,6 +38,11 @@ const mainNavItems: NavItem[] = [
         title: 'Submissions',
         href: submissionsIndex(),
         icon: ClipboardList,
+    },
+    {
+        title: 'Customers',
+        href: customersIndex(),
+        icon: Users,
     },
     {
         title: 'Expenses',

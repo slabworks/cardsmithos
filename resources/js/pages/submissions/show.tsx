@@ -41,7 +41,7 @@ type Submission = {
     customer: {
         id: number;
         name: string;
-        email: string | null;
+        contact_detail: string | null;
         phone: string | null;
         address: string | null;
     };
@@ -161,20 +161,15 @@ export default function SubmissionsShow({
                     </div>
                 </div>
 
-                {(customer.email || customer.phone || customer.address) && (
+                {(customer.contact_detail ||
+                    customer.phone ||
+                    customer.address) && (
                     <div className="rounded-lg border border-sidebar-border bg-card p-4">
                         <h2 className="mb-2 text-sm font-medium text-muted-foreground">
                             Customer
                         </h2>
-                        {customer.email && (
-                            <p>
-                                <a
-                                    href={`mailto:${customer.email}`}
-                                    className="text-primary underline"
-                                >
-                                    {customer.email}
-                                </a>
-                            </p>
+                        {customer.contact_detail && (
+                            <p className="text-sm">{customer.contact_detail}</p>
                         )}
                         {customer.phone && (
                             <p>

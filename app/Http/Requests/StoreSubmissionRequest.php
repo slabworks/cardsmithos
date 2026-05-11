@@ -21,11 +21,10 @@ class StoreSubmissionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'customer_id' => ['nullable', 'exists:customers,id'],
-            'name' => ['required_without:customer_id', 'string', 'max:255'],
-            'email' => ['nullable', 'email', 'max:255'],
-            'phone' => ['nullable', 'string', 'max:255'],
-            'address' => ['nullable', 'string'],
+            'customer_id' => [
+                'required',
+                Rule::exists('customers', 'id')->where('user_id', $this->user()?->id),
+            ],
             'status' => ['required', Rule::enum(SubmissionStatus::class)],
             'notes' => ['nullable', 'string'],
             'referral_source' => ['nullable', Rule::enum(SubmissionReferralSource::class)],

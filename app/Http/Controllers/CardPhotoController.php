@@ -30,23 +30,6 @@ class CardPhotoController extends Controller
         return $mediaItem->toInlineResponse(request());
     }
 
-    public function toggleTimeline(Submission $submission, Card $card, int $media): RedirectResponse
-    {
-        $this->authorize('update', $card);
-
-        $mediaItem = $card->getMedia('photos')->firstWhere('id', $media);
-
-        abort_unless($mediaItem, 404);
-
-        $mediaItem->setCustomProperty(
-            'show_on_timeline',
-            ! $mediaItem->getCustomProperty('show_on_timeline', false)
-        );
-        $mediaItem->save();
-
-        return back();
-    }
-
     public function destroy(Submission $submission, Card $card, int $media): RedirectResponse
     {
         $this->authorize('update', $card);

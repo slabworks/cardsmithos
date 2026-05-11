@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\BusinessSettings;
 use App\Models\Card;
-use App\Models\CardActivity;
 use App\Models\Customer;
 use App\Models\Expense;
 use App\Models\Payment;
@@ -55,13 +54,7 @@ class DatabaseSeeder extends Seeder
                 $cards = Card::factory()
                     ->count(rand(2, 6))
                     ->for($submission)
-                    ->create()
-                    ->each(function (Card $card): void {
-                        CardActivity::factory()
-                            ->count(rand(0, 5))
-                            ->for($card)
-                            ->create();
-                    });
+                    ->create();
 
                 // Create 1-3 payments spread across the last 12 months
                 // Amounts reflect the fixed rate x number of cards in a batch
