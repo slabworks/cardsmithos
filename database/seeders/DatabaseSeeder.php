@@ -9,6 +9,7 @@ use App\Models\Customer;
 use App\Models\Expense;
 use App\Models\Payment;
 use App\Models\Shipment;
+use App\Models\Submission;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Seeder;
@@ -45,10 +46,15 @@ class DatabaseSeeder extends Seeder
             ->count(5)
             ->for($user)
             ->create()
-            ->each(function (Customer $customer) use ($fixedRate): void {
+            ->each(function (Customer $customer) use ($fixedRate, $user): void {
+                $submission = Submission::factory()
+                    ->for($user)
+                    ->for($customer)
+                    ->create();
+
                 $cards = Card::factory()
                     ->count(rand(2, 6))
-                    ->for($customer)
+                    ->for($submission)
                     ->create()
                     ->each(function (Card $card): void {
                         CardActivity::factory()
@@ -71,7 +77,7 @@ class DatabaseSeeder extends Seeder
                     $date = fake()->dateTimeBetween($start, $end)->format('Y-m-d');
 
                     Payment::factory()
-                        ->for($customer)
+                        ->for($submission)
                         ->create([
                             'amount' => $amount,
                             'paid_at' => $date,
@@ -80,7 +86,7 @@ class DatabaseSeeder extends Seeder
                     // ~50% chance of a shipment in the same month, always less than the payment
                     if (fake()->boolean(50)) {
                         Shipment::factory()
-                            ->for($customer)
+                            ->for($submission)
                             ->create([
                                 'amount' => fake()->randomFloat(2, 5, min(15, $amount * 0.3)),
                                 'shipped_at' => $date,

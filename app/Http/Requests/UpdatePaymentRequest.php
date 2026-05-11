@@ -20,9 +20,10 @@ class UpdatePaymentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'customer_id' => ['required', 'exists:customers,id'],
             'amount' => ['required', 'numeric', 'min:0', 'max:9999999.99'],
             'paid_at' => ['required', 'date'],
+            'method' => ['nullable', 'string', 'max:255'],
+            'reference' => ['nullable', 'string', 'max:255'],
         ];
     }
 }

@@ -9,7 +9,7 @@ class StoreInvoiceRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('view', $this->route('customer')) ?? false;
+        return $this->user()?->can('view', $this->route('submission')) ?? false;
     }
 
     /**
@@ -17,13 +17,13 @@ class StoreInvoiceRequest extends FormRequest
      */
     public function rules(): array
     {
-        $customer = $this->route('customer');
+        $submission = $this->route('submission');
 
         return [
             'card_ids' => ['required', 'array', 'min:1'],
             'card_ids.*' => [
                 'integer',
-                Rule::exists('cards', 'id')->where('customer_id', $customer->id),
+                Rule::exists('cards', 'id')->where('submission_id', $submission->id),
             ],
             'shipping' => ['nullable', 'numeric', 'min:0'],
             'packaging' => ['nullable', 'numeric', 'min:0'],

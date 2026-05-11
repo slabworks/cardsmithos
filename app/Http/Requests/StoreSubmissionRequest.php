@@ -2,12 +2,12 @@
 
 namespace App\Http\Requests;
 
-use App\Enums\CustomerStatus;
+use App\Enums\SubmissionStatus;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class StoreCustomerRequest extends FormRequest
+class StoreSubmissionRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -20,11 +20,12 @@ class StoreCustomerRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
-            'status' => ['nullable', Rule::enum(CustomerStatus::class)],
+            'customer_id' => ['nullable', 'exists:customers,id'],
+            'name' => ['required_without:customer_id', 'string', 'max:255'],
             'email' => ['nullable', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:255'],
             'address' => ['nullable', 'string'],
+            'status' => ['nullable', Rule::enum(SubmissionStatus::class)],
             'notes' => ['nullable', 'string'],
             'referral_source' => ['nullable', 'string', 'max:255'],
         ];

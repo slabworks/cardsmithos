@@ -8,13 +8,7 @@ import {
     Title,
     Tooltip,
 } from 'chart.js';
-import {
-    DollarSign,
-    Kanban,
-    Package,
-    Receipt,
-    TrendingUp,
-} from 'lucide-react';
+import { DollarSign, Kanban, Package, Receipt, TrendingUp } from 'lucide-react';
 import { Bar } from 'react-chartjs-2';
 import CardController from '@/actions/App/Http/Controllers/CardController';
 import {
@@ -50,7 +44,7 @@ type KanbanCard = {
     id: number;
     name: string;
     status: string;
-    customer: { id: number; name: string };
+    submission: { id: number; customer: { id: number; name: string } };
 };
 
 type DashboardProps = {
@@ -233,16 +227,24 @@ export default function Dashboard({
                 <Card className="border-sidebar-border/70 dark:border-sidebar-border">
                     <CardHeader>
                         <CardTitle>Business statistics</CardTitle>
-                        <CardDescription>Featured KPI snapshots</CardDescription>
+                        <CardDescription>
+                            Featured KPI snapshots
+                        </CardDescription>
                     </CardHeader>
                     <CardContent className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                         {featuredStatistics.map((statistic) => {
                             return (
-                                <div key={statistic.id} className="rounded-lg border p-3">
-                                    <p className="text-xs uppercase text-muted-foreground">
-                                        {statistic.group_name ?? statistic.category}
+                                <div
+                                    key={statistic.id}
+                                    className="rounded-lg border p-3"
+                                >
+                                    <p className="text-xs text-muted-foreground uppercase">
+                                        {statistic.group_name ??
+                                            statistic.category}
                                     </p>
-                                    <p className="mt-1 font-medium">{statistic.name}</p>
+                                    <p className="mt-1 font-medium">
+                                        {statistic.name}
+                                    </p>
                                     <p className="text-2xl font-semibold">
                                         {statistic.display_value}
                                     </p>
@@ -258,7 +260,7 @@ export default function Dashboard({
                             Work board
                         </CardTitle>
                         <CardDescription>
-                            All cards across customers by status
+                            All cards across submissions by status
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="flex min-h-0 flex-1 flex-col overflow-hidden">
@@ -293,9 +295,9 @@ export default function Dashboard({
                                                         key={card.id}
                                                         href={CardController.edit.url(
                                                             {
-                                                                customer:
+                                                                submission:
                                                                     card
-                                                                        .customer
+                                                                        .submission
                                                                         .id,
                                                                 card: card.id,
                                                             },
@@ -306,7 +308,11 @@ export default function Dashboard({
                                                             {card.name}
                                                         </p>
                                                         <p className="mt-0.5 text-xs text-muted-foreground">
-                                                            {card.customer.name}
+                                                            {
+                                                                card.submission
+                                                                    .customer
+                                                                    .name
+                                                            }
                                                         </p>
                                                     </Link>
                                                 ))}

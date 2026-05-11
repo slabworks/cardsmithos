@@ -2,6 +2,7 @@
 
 use App\Models\Card;
 use App\Models\Customer;
+use App\Models\Submission;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -13,10 +14,11 @@ beforeEach(function () {
 test('photos can be uploaded to a card', function () {
     $user = User::factory()->create();
     $customer = Customer::factory()->for($user)->create();
-    $card = Card::factory()->for($customer)->create();
+    $submission = Submission::factory()->for($user)->for($customer)->create();
+    $card = Card::factory()->for($submission)->create();
 
     $response = $this->actingAs($user)->post(
-        route('customers.cards.photos.store', [$customer, $card]),
+        route('submissions.cards.photos.store', [$submission, $card]),
         ['photos' => [UploadedFile::fake()->image('front.jpg')]]
     );
 
@@ -27,10 +29,11 @@ test('photos can be uploaded to a card', function () {
 test('photo upload requires at least one image', function () {
     $user = User::factory()->create();
     $customer = Customer::factory()->for($user)->create();
-    $card = Card::factory()->for($customer)->create();
+    $submission = Submission::factory()->for($user)->for($customer)->create();
+    $card = Card::factory()->for($submission)->create();
 
     $response = $this->actingAs($user)->post(
-        route('customers.cards.photos.store', [$customer, $card]),
+        route('submissions.cards.photos.store', [$submission, $card]),
         ['photos' => []]
     );
 
@@ -40,10 +43,11 @@ test('photo upload requires at least one image', function () {
 test('photo upload rejects non-image files', function () {
     $user = User::factory()->create();
     $customer = Customer::factory()->for($user)->create();
-    $card = Card::factory()->for($customer)->create();
+    $submission = Submission::factory()->for($user)->for($customer)->create();
+    $card = Card::factory()->for($submission)->create();
 
     $response = $this->actingAs($user)->post(
-        route('customers.cards.photos.store', [$customer, $card]),
+        route('submissions.cards.photos.store', [$submission, $card]),
         ['photos' => [UploadedFile::fake()->create('document.pdf', 100, 'application/pdf')]]
     );
 
@@ -52,11 +56,11 @@ test('photo upload rejects non-image files', function () {
 
 test('photo upload forbidden for other users card', function () {
     $user = User::factory()->create();
-    $customer = Customer::factory()->create();
-    $card = Card::factory()->for($customer)->create();
+    $submission = Submission::factory()->create();
+    $card = Card::factory()->for($submission)->create();
 
     $response = $this->actingAs($user)->post(
-        route('customers.cards.photos.store', [$customer, $card]),
+        route('submissions.cards.photos.store', [$submission, $card]),
         ['photos' => [UploadedFile::fake()->image('front.jpg')]]
     );
 
@@ -66,12 +70,13 @@ test('photo upload forbidden for other users card', function () {
 test('photo can be viewed by card owner', function () {
     $user = User::factory()->create();
     $customer = Customer::factory()->for($user)->create();
-    $card = Card::factory()->for($customer)->create();
+    $submission = Submission::factory()->for($user)->for($customer)->create();
+    $card = Card::factory()->for($submission)->create();
     $card->addMedia(UploadedFile::fake()->image('front.jpg'))->toMediaCollection('photos');
     $media = $card->getMedia('photos')->first();
 
     $response = $this->actingAs($user)->get(
-        route('customers.cards.photos.show', [$customer, $card, $media->id])
+        route('submissions.cards.photos.show', [$submission, $card, $media->id])
     );
 
     $response->assertOk();
@@ -79,13 +84,13 @@ test('photo can be viewed by card owner', function () {
 
 test('photo view forbidden for other user', function () {
     $user = User::factory()->create();
-    $customer = Customer::factory()->create();
-    $card = Card::factory()->for($customer)->create();
+    $submission = Submission::factory()->create();
+    $card = Card::factory()->for($submission)->create();
     $card->addMedia(UploadedFile::fake()->image('front.jpg'))->toMediaCollection('photos');
     $media = $card->getMedia('photos')->first();
 
     $response = $this->actingAs($user)->get(
-        route('customers.cards.photos.show', [$customer, $card, $media->id])
+        route('submissions.cards.photos.show', [$submission, $card, $media->id])
     );
 
     $response->assertForbidden();
@@ -94,21 +99,22 @@ test('photo view forbidden for other user', function () {
 test('photo timeline visibility can be toggled', function () {
     $user = User::factory()->create();
     $customer = Customer::factory()->for($user)->create();
-    $card = Card::factory()->for($customer)->create();
+    $submission = Submission::factory()->for($user)->for($customer)->create();
+    $card = Card::factory()->for($submission)->create();
     $card->addMedia(UploadedFile::fake()->image('front.jpg'))->toMediaCollection('photos');
     $media = $card->getMedia('photos')->first();
 
     expect($media->getCustomProperty('show_on_timeline', false))->toBeFalse();
 
     $this->actingAs($user)->post(
-        route('customers.cards.photos.toggle-timeline', [$customer, $card, $media->id])
+        route('submissions.cards.photos.toggle-timeline', [$submission, $card, $media->id])
     )->assertRedirect();
 
     $media->refresh();
     expect($media->getCustomProperty('show_on_timeline'))->toBeTrue();
 
     $this->actingAs($user)->post(
-        route('customers.cards.photos.toggle-timeline', [$customer, $card, $media->id])
+        route('submissions.cards.photos.toggle-timeline', [$submission, $card, $media->id])
     )->assertRedirect();
 
     $media->refresh();
@@ -117,13 +123,13 @@ test('photo timeline visibility can be toggled', function () {
 
 test('photo toggle timeline forbidden for other user', function () {
     $user = User::factory()->create();
-    $customer = Customer::factory()->create();
-    $card = Card::factory()->for($customer)->create();
+    $submission = Submission::factory()->create();
+    $card = Card::factory()->for($submission)->create();
     $card->addMedia(UploadedFile::fake()->image('front.jpg'))->toMediaCollection('photos');
     $media = $card->getMedia('photos')->first();
 
     $response = $this->actingAs($user)->post(
-        route('customers.cards.photos.toggle-timeline', [$customer, $card, $media->id])
+        route('submissions.cards.photos.toggle-timeline', [$submission, $card, $media->id])
     );
 
     $response->assertForbidden();
@@ -132,12 +138,13 @@ test('photo toggle timeline forbidden for other user', function () {
 test('photo can be deleted', function () {
     $user = User::factory()->create();
     $customer = Customer::factory()->for($user)->create();
-    $card = Card::factory()->for($customer)->create();
+    $submission = Submission::factory()->for($user)->for($customer)->create();
+    $card = Card::factory()->for($submission)->create();
     $card->addMedia(UploadedFile::fake()->image('front.jpg'))->toMediaCollection('photos');
     $media = $card->getMedia('photos')->first();
 
     $response = $this->actingAs($user)->delete(
-        route('customers.cards.photos.destroy', [$customer, $card, $media->id])
+        route('submissions.cards.photos.destroy', [$submission, $card, $media->id])
     );
 
     $response->assertRedirect();
@@ -146,13 +153,13 @@ test('photo can be deleted', function () {
 
 test('photo delete forbidden for other user', function () {
     $user = User::factory()->create();
-    $customer = Customer::factory()->create();
-    $card = Card::factory()->for($customer)->create();
+    $submission = Submission::factory()->create();
+    $card = Card::factory()->for($submission)->create();
     $card->addMedia(UploadedFile::fake()->image('front.jpg'))->toMediaCollection('photos');
     $media = $card->getMedia('photos')->first();
 
     $response = $this->actingAs($user)->delete(
-        route('customers.cards.photos.destroy', [$customer, $card, $media->id])
+        route('submissions.cards.photos.destroy', [$submission, $card, $media->id])
     );
 
     $response->assertForbidden();
@@ -160,8 +167,8 @@ test('photo delete forbidden for other user', function () {
 
 test('timeline photo accessible with valid share token', function () {
     $user = User::factory()->create();
-    $customer = Customer::factory()->for($user)->create();
-    $card = Card::factory()->for($customer)->create();
+    $submission = Submission::factory()->for($user)->create();
+    $card = Card::factory()->for($submission)->create();
     $token = $card->ensureTimelineShareToken();
     $card->addMedia(UploadedFile::fake()->image('front.jpg'))->toMediaCollection('photos');
     $media = $card->getMedia('photos')->first();
@@ -177,8 +184,8 @@ test('timeline photo accessible with valid share token', function () {
 
 test('timeline photo not accessible with invalid token', function () {
     $user = User::factory()->create();
-    $customer = Customer::factory()->for($user)->create();
-    $card = Card::factory()->for($customer)->create();
+    $submission = Submission::factory()->for($user)->create();
+    $card = Card::factory()->for($submission)->create();
     $card->ensureTimelineShareToken();
     $card->addMedia(UploadedFile::fake()->image('front.jpg'))->toMediaCollection('photos');
     $media = $card->getMedia('photos')->first();
@@ -194,8 +201,8 @@ test('timeline photo not accessible with invalid token', function () {
 
 test('timeline photo not accessible if not marked for timeline', function () {
     $user = User::factory()->create();
-    $customer = Customer::factory()->for($user)->create();
-    $card = Card::factory()->for($customer)->create();
+    $submission = Submission::factory()->for($user)->create();
+    $card = Card::factory()->for($submission)->create();
     $token = $card->ensureTimelineShareToken();
     $card->addMedia(UploadedFile::fake()->image('front.jpg'))->toMediaCollection('photos');
     $media = $card->getMedia('photos')->first();

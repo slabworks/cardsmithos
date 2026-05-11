@@ -3,45 +3,46 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\SignWaiverRequest;
-use App\Models\Customer;
+use App\Models\Submission;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class WaiverController extends Controller
 {
-    public function show(Request $request, Customer $customer): View|RedirectResponse
+    public function show(Request $request, Submission $submission): View|RedirectResponse
     {
-        $waiver = $customer->serviceWaiver;
+        $submission->load('customer');
+        $waiver = $submission->serviceWaiver;
 
         if ($waiver === null) {
-            $waiver = $customer->getOrCreateServiceWaiver();
+            $waiver = $submission->getOrCreateServiceWaiver();
         }
 
         if ($waiver->isSigned()) {
             return view('waiver.already-signed', [
-                'customerName' => $customer->name,
+                'customerName' => $submission->customer->name,
                 'justSigned' => $request->session()->pull('success'),
             ]);
         }
 
         if ($waiver->isExpired()) {
             return view('waiver.expired', [
-                'customerName' => $customer->name,
+                'customerName' => $submission->customer->name,
             ]);
         }
 
         $agreementText = config('cardsmithos.waiver.agreement_text', 'I agree to the terms for card repair services.');
 
         return view('waiver.show', [
-            'customer' => $customer,
+            'customer' => $submission->customer,
             'agreementText' => $agreementText,
         ]);
     }
 
-    public function sign(SignWaiverRequest $request, Customer $customer): RedirectResponse
+    public function sign(SignWaiverRequest $request, Submission $submission): RedirectResponse
     {
-        $waiver = $customer->serviceWaiver;
+        $waiver = $submission->serviceWaiver;
 
         if ($waiver === null || $waiver->isSigned() || $waiver->isExpired()) {
             return redirect()->back()->with('error', 'This waiver link is no longer valid.');
@@ -57,10 +58,6 @@ class WaiverController extends Controller
             'signer_user_agent' => $request->userAgent(),
             'agreement_text' => $agreementText,
         ]);
-
-        $customer->waiver_agreed = true;
-        $customer->waiver_agreed_at = now();
-        $customer->save();
 
         return redirect()->back()->with('success', 'Thank you. Your waiver has been recorded.');
     }

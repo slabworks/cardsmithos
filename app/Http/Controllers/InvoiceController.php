@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreInvoiceRequest;
-use App\Models\Customer;
+use App\Models\Submission;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\URL;
 use Inertia\Inertia;
@@ -12,25 +12,30 @@ use Symfony\Component\HttpFoundation\Response as HttpResponse;
 
 class InvoiceController extends Controller
 {
-    public function create(Customer $customer): Response
+    public function create(Submission $submission): Response
     {
-        $this->authorize('view', $customer);
+        $this->authorize('view', $submission);
 
-        $customer->load(['cards' => function ($query): void {
-            $query->select('id', 'customer_id', 'name', 'restoration_hours', 'estimated_fee');
+        $submission->load('customer');
+        $submission->load(['cards' => function ($query): void {
+            $query->select('id', 'submission_id', 'name', 'restoration_hours', 'estimated_fee');
         }]);
 
         $settings = auth()->user()->businessSettings;
 
         $downloadUrl = URL::temporarySignedRoute(
-            'customers.invoices.download',
+            'submissions.invoices.download',
             now()->addHour(),
-            ['customer' => $customer],
+            ['submission' => $submission],
             absolute: false
         );
 
         return Inertia::render('invoices/create', [
-            'customer' => $customer->only('id', 'name', 'cards'),
+            'submission' => [
+                'id' => $submission->id,
+                'customer' => $submission->customer->only('id', 'name'),
+                'cards' => $submission->cards,
+            ],
             'downloadUrl' => url($downloadUrl),
             'businessSettings' => [
                 'hourly_rate' => (float) ($settings?->hourly_rate ?? 0),
@@ -42,8 +47,9 @@ class InvoiceController extends Controller
         ]);
     }
 
-    public function download(StoreInvoiceRequest $request, Customer $customer): HttpResponse
+    public function download(StoreInvoiceRequest $request, Submission $submission): HttpResponse
     {
+        $submission->load('customer');
         $settings = auth()->user()->businessSettings;
         $hourlyRate = (float) ($settings?->hourly_rate ?? 0);
         $defaultFixedRate = (float) ($settings?->default_fixed_rate ?? 0);
@@ -51,7 +57,7 @@ class InvoiceController extends Controller
         $currency = $settings?->currency ?? 'USD';
         $companyName = $settings?->company_name ?? '';
 
-        $cards = $customer->cards()->whereIn('id', $request->validated('card_ids'))->get();
+        $cards = $submission->cards()->whereIn('id', $request->validated('card_ids'))->get();
 
         $lineItems = $cards->map(function ($card) use ($hourlyRate, $defaultFixedRate) {
             if ($card->restoration_hours !== null) {
@@ -85,7 +91,7 @@ class InvoiceController extends Controller
         $pdf = Pdf::loadView('invoices.pdf', [
             'companyName' => $companyName,
             'currency' => $currency,
-            'customer' => $customer,
+            'customer' => $submission->customer,
             'lineItems' => $lineItems,
             'subtotal' => $subtotal,
             'shipping' => $shipping,
@@ -97,7 +103,7 @@ class InvoiceController extends Controller
             'date' => now()->format('F j, Y'),
         ]);
 
-        $filename = 'invoice-'.str($customer->name)->slug().'-'.now()->format('Y-m-d').'.pdf';
+        $filename = 'invoice-'.str($submission->customer->name)->slug().'-'.now()->format('Y-m-d').'.pdf';
 
         return $pdf->download($filename);
     }

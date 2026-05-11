@@ -16,7 +16,7 @@ class Shipment extends Model
      * @var list<string>
      */
     protected $fillable = [
-        'customer_id',
+        'submission_id',
         'amount',
         'shipped_at',
         'reference',
@@ -34,8 +34,8 @@ class Shipment extends Model
         ];
     }
 
-    public function customer(): BelongsTo
+    public function submission(): BelongsTo
     {
-        return $this->belongsTo(Customer::class);
+        return $this->belongsTo(Submission::class);
     }
 }

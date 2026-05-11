@@ -4,17 +4,19 @@ use App\Enums\CardActivityType;
 use App\Models\Card;
 use App\Models\CardActivity;
 use App\Models\Customer;
+use App\Models\Submission;
 use App\Models\User;
 use Inertia\Testing\AssertableInertia as Assert;
 
 test('owner can create card activity', function () {
     $user = User::factory()->create();
     $customer = Customer::factory()->for($user)->create();
-    $card = Card::factory()->for($customer)->create();
+    $submission = Submission::factory()->for($user)->for($customer)->create();
+    $card = Card::factory()->for($submission)->create();
     $occurredAt = now()->subDays(2)->format('Y-m-d\TH:i');
 
     $response = $this->actingAs($user)->post(
-        route('customers.cards.activities.store', [$customer, $card]),
+        route('submissions.cards.activities.store', [$submission, $card]),
         [
             'type' => CardActivityType::Milestone->value,
             'title' => 'Assessment complete',
@@ -23,7 +25,7 @@ test('owner can create card activity', function () {
         ]
     );
 
-    $response->assertRedirect(route('customers.cards.edit', [$customer, $card]));
+    $response->assertRedirect(route('submissions.cards.edit', [$submission, $card]));
     $response->assertSessionHas('success');
     $this->assertDatabaseHas('card_activities', [
         'card_id' => $card->id,
@@ -35,11 +37,11 @@ test('owner can create card activity', function () {
 
 test('card activity store forbidden for non-owner', function () {
     $user = User::factory()->create();
-    $customer = Customer::factory()->create();
-    $card = Card::factory()->for($customer)->create();
+    $submission = Submission::factory()->create();
+    $card = Card::factory()->for($submission)->create();
 
     $response = $this->actingAs($user)->post(
-        route('customers.cards.activities.store', [$customer, $card]),
+        route('submissions.cards.activities.store', [$submission, $card]),
         [
             'type' => CardActivityType::Activity->value,
             'title' => 'Hacked',
@@ -53,7 +55,8 @@ test('card activity store forbidden for non-owner', function () {
 test('owner can update card activity', function () {
     $user = User::factory()->create();
     $customer = Customer::factory()->for($user)->create();
-    $card = Card::factory()->for($customer)->create();
+    $submission = Submission::factory()->for($user)->for($customer)->create();
+    $card = Card::factory()->for($submission)->create();
     $activity = CardActivity::factory()->for($card)->create([
         'title' => 'Old title',
         'type' => CardActivityType::Milestone,
@@ -61,7 +64,7 @@ test('owner can update card activity', function () {
     $occurredAt = now()->subDay()->format('Y-m-d\TH:i');
 
     $response = $this->actingAs($user)->put(
-        route('customers.cards.activities.update', [$customer, $card, $activity]),
+        route('submissions.cards.activities.update', [$submission, $card, $activity]),
         [
             'type' => CardActivityType::Activity->value,
             'title' => 'Updated title',
@@ -70,7 +73,7 @@ test('owner can update card activity', function () {
         ]
     );
 
-    $response->assertRedirect(route('customers.cards.edit', [$customer, $card]));
+    $response->assertRedirect(route('submissions.cards.edit', [$submission, $card]));
     $response->assertSessionHas('success');
     $activity->refresh();
     expect($activity->title)->toBe('Updated title');
@@ -80,12 +83,12 @@ test('owner can update card activity', function () {
 
 test('card activity update forbidden for non-owner', function () {
     $user = User::factory()->create();
-    $customer = Customer::factory()->create();
-    $card = Card::factory()->for($customer)->create();
+    $submission = Submission::factory()->create();
+    $card = Card::factory()->for($submission)->create();
     $activity = CardActivity::factory()->for($card)->create();
 
     $response = $this->actingAs($user)->put(
-        route('customers.cards.activities.update', [$customer, $card, $activity]),
+        route('submissions.cards.activities.update', [$submission, $card, $activity]),
         [
             'type' => CardActivityType::Milestone->value,
             'title' => 'Hacked',
@@ -99,26 +102,27 @@ test('card activity update forbidden for non-owner', function () {
 test('owner can delete card activity', function () {
     $user = User::factory()->create();
     $customer = Customer::factory()->for($user)->create();
-    $card = Card::factory()->for($customer)->create();
+    $submission = Submission::factory()->for($user)->for($customer)->create();
+    $card = Card::factory()->for($submission)->create();
     $activity = CardActivity::factory()->for($card)->create();
 
     $response = $this->actingAs($user)->delete(
-        route('customers.cards.activities.destroy', [$customer, $card, $activity])
+        route('submissions.cards.activities.destroy', [$submission, $card, $activity])
     );
 
-    $response->assertRedirect(route('customers.cards.edit', [$customer, $card]));
+    $response->assertRedirect(route('submissions.cards.edit', [$submission, $card]));
     $response->assertSessionHas('success');
     $this->assertDatabaseMissing('card_activities', ['id' => $activity->id]);
 });
 
 test('card activity destroy forbidden for non-owner', function () {
     $user = User::factory()->create();
-    $customer = Customer::factory()->create();
-    $card = Card::factory()->for($customer)->create();
+    $submission = Submission::factory()->create();
+    $card = Card::factory()->for($submission)->create();
     $activity = CardActivity::factory()->for($card)->create();
 
     $response = $this->actingAs($user)->delete(
-        route('customers.cards.activities.destroy', [$customer, $card, $activity])
+        route('submissions.cards.activities.destroy', [$submission, $card, $activity])
     );
 
     $response->assertForbidden();
@@ -127,7 +131,8 @@ test('card activity destroy forbidden for non-owner', function () {
 test('public timeline returns 200 and card data when token is valid', function () {
     $user = User::factory()->create();
     $customer = Customer::factory()->for($user)->create(['name' => 'Jane']);
-    $card = Card::factory()->for($customer)->create([
+    $submission = Submission::factory()->for($user)->for($customer)->create();
+    $card = Card::factory()->for($submission)->create([
         'name' => 'Pikachu',
         'timeline_share_token' => 'valid-token-123',
     ]);
@@ -143,7 +148,7 @@ test('public timeline returns 200 and card data when token is valid', function (
         ->component('cards/timeline-public')
         ->has('card')
         ->where('card.name', 'Pikachu')
-        ->where('card.customer.name', 'Jane')
+        ->where('card.submission.customer.name', 'Jane')
         ->has('card.activities', 1)
         ->where('card.activities.0.title', 'First milestone')
     );
@@ -151,8 +156,8 @@ test('public timeline returns 200 and card data when token is valid', function (
 
 test('public timeline returns 404 when token is invalid', function () {
     $user = User::factory()->create();
-    $customer = Customer::factory()->for($user)->create();
-    $card = Card::factory()->for($customer)->create([
+    $submission = Submission::factory()->for($user)->create();
+    $card = Card::factory()->for($submission)->create([
         'timeline_share_token' => 'correct-token',
     ]);
 
@@ -163,8 +168,8 @@ test('public timeline returns 404 when token is invalid', function () {
 
 test('public timeline returns 404 when token is empty', function () {
     $user = User::factory()->create();
-    $customer = Customer::factory()->for($user)->create();
-    $card = Card::factory()->for($customer)->create([
+    $submission = Submission::factory()->for($user)->create();
+    $card = Card::factory()->for($submission)->create([
         'timeline_share_token' => 'secret',
     ]);
 
@@ -176,15 +181,16 @@ test('public timeline returns 404 when token is empty', function () {
 test('owner can rotate timeline share token and old url returns 404', function () {
     $user = User::factory()->create();
     $customer = Customer::factory()->for($user)->create();
-    $card = Card::factory()->for($customer)->create([
+    $submission = Submission::factory()->for($user)->for($customer)->create();
+    $card = Card::factory()->for($submission)->create([
         'timeline_share_token' => 'old-token',
     ]);
 
     $response = $this->actingAs($user)->post(
-        route('customers.cards.timeline.rotate-token', [$customer, $card])
+        route('submissions.cards.timeline.rotate-token', [$submission, $card])
     );
 
-    $response->assertRedirect(route('customers.cards.edit', [$customer, $card]));
+    $response->assertRedirect(route('submissions.cards.edit', [$submission, $card]));
     $response->assertSessionHas('success');
 
     $card->refresh();
@@ -196,11 +202,11 @@ test('owner can rotate timeline share token and old url returns 404', function (
 
 test('timeline rotate token forbidden for non-owner', function () {
     $user = User::factory()->create();
-    $customer = Customer::factory()->create();
-    $card = Card::factory()->for($customer)->create(['timeline_share_token' => 'token']);
+    $submission = Submission::factory()->create();
+    $card = Card::factory()->for($submission)->create(['timeline_share_token' => 'token']);
 
     $response = $this->actingAs($user)->post(
-        route('customers.cards.timeline.rotate-token', [$customer, $card])
+        route('submissions.cards.timeline.rotate-token', [$submission, $card])
     );
 
     $response->assertForbidden();

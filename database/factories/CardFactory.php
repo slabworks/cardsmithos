@@ -5,7 +5,7 @@ namespace Database\Factories;
 use App\Enums\CardCondition;
 use App\Enums\CardStatus;
 use App\Models\Card;
-use App\Models\Customer;
+use App\Models\Submission;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -67,7 +67,7 @@ class CardFactory extends Factory
     public function definition(): array
     {
         return [
-            'customer_id' => Customer::factory(),
+            'submission_id' => Submission::factory(),
             'name' => fake()->randomElement(self::CARD_NAMES),
             'work_done' => fake()->optional(0.5)->randomElement(self::WORK_DONE),
             'status' => fake()->randomElement(CardStatus::cases()),

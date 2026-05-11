@@ -11,7 +11,7 @@ class ServiceWaiver extends Model
      * @var list<string>
      */
     protected $fillable = [
-        'customer_id',
+        'submission_id',
         'expires_at',
         'signed_at',
         'signer_name',
@@ -32,9 +32,9 @@ class ServiceWaiver extends Model
         ];
     }
 
-    public function customer(): BelongsTo
+    public function submission(): BelongsTo
     {
-        return $this->belongsTo(Customer::class);
+        return $this->belongsTo(Submission::class);
     }
 
     public function isSigned(): bool

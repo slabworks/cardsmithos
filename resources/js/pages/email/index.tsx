@@ -15,6 +15,7 @@ type Customer = {
     id: number;
     name: string;
     email: string | null;
+    latest_submission_id: number | null;
 };
 
 type InboxContact = {
@@ -125,8 +126,8 @@ export default function EmailIndex({
                                         </p>
                                         <div className="mt-3 max-w-3xl">
                                             <p className="truncate text-sm font-medium">
-                                                {contact.latestMessage.subject ||
-                                                    '(No subject)'}
+                                                {contact.latestMessage
+                                                    .subject || '(No subject)'}
                                             </p>
                                             {contact.latestMessage.snippet && (
                                                 <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
@@ -139,16 +140,17 @@ export default function EmailIndex({
                                         </div>
                                     </div>
                                     <div className="flex shrink-0 justify-start md:justify-end">
-                                        {contact.customer ? (
+                                        {contact.customer
+                                            ?.latest_submission_id ? (
                                             <Button
                                                 size="sm"
                                                 variant="outline"
                                                 asChild
                                             >
                                                 <Link
-                                                    href={`/customers/${contact.customer.id}`}
+                                                    href={`/submissions/${contact.customer.latest_submission_id}`}
                                                 >
-                                                    View customer
+                                                    View submission
                                                 </Link>
                                             </Button>
                                         ) : (

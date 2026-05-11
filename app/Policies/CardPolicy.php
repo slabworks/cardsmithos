@@ -14,7 +14,7 @@ class CardPolicy
 
     public function view(User $user, Card $card): bool
     {
-        return $card->customer->user_id === $user->id;
+        return $card->submission->user_id === $user->id;
     }
 
     public function create(User $user): bool
@@ -24,11 +24,11 @@ class CardPolicy
 
     public function update(User $user, Card $card): bool
     {
-        return $card->customer->user_id === $user->id;
+        return $card->submission->user_id === $user->id;
     }
 
     public function delete(User $user, Card $card): bool
     {
-        return $card->customer->user_id === $user->id;
+        return $card->submission->user_id === $user->id;
     }
 }

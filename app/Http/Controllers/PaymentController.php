@@ -4,94 +4,36 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StorePaymentRequest;
 use App\Http\Requests\UpdatePaymentRequest;
-use App\Models\Customer;
 use App\Models\Payment;
+use App\Models\Submission;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Inertia\Inertia;
-use Inertia\Response;
 
 class PaymentController extends Controller
 {
-    public function index(Request $request): Response
+    public function store(StorePaymentRequest $request, Submission $submission): RedirectResponse
     {
-        $this->authorize('viewAny', Payment::class);
+        $this->authorize('update', $submission);
 
-        $customerIds = $request->user()->customers()->pluck('id');
+        $submission->payments()->create($request->validated());
 
-        $payments = Payment::query()
-            ->with('customer:id,name')
-            ->whereIn('customer_id', $customerIds)
-            ->latest('paid_at')
-            ->get();
-
-        return Inertia::render('payments/index', [
-            'payments' => $payments,
-        ]);
+        return to_route('submissions.show', $submission);
     }
 
-    public function create(Request $request): Response
-    {
-        $this->authorize('create', Payment::class);
-
-        return Inertia::render('payments/create', [
-            'customers' => $request->user()
-                ->customers()
-                ->select('id', 'name')
-                ->orderBy('name')
-                ->get()
-                ->toArray(),
-        ]);
-    }
-
-    public function store(StorePaymentRequest $request): RedirectResponse
-    {
-        $customer = Customer::query()->findOrFail($request->validated()['customer_id']);
-
-        $customer->payments()->create($request->validated());
-
-        return to_route('payments.index');
-    }
-
-    public function show(Payment $payment): Response
-    {
-        $this->authorize('view', $payment);
-
-        $payment->load('customer:id,name');
-
-        return Inertia::render('payments/show', [
-            'payment' => $payment,
-        ]);
-    }
-
-    public function edit(Request $request, Payment $payment): Response
+    public function update(UpdatePaymentRequest $request, Submission $submission, Payment $payment): RedirectResponse
     {
         $this->authorize('update', $payment);
 
-        return Inertia::render('payments/edit', [
-            'payment' => $payment,
-            'customers' => $request->user()
-                ->customers()
-                ->select('id', 'name')
-                ->orderBy('name')
-                ->get()
-                ->toArray(),
-        ]);
-    }
-
-    public function update(UpdatePaymentRequest $request, Payment $payment): RedirectResponse
-    {
         $payment->update($request->validated());
 
-        return to_route('payments.index');
+        return to_route('submissions.show', $submission);
     }
 
-    public function destroy(Payment $payment): RedirectResponse
+    public function destroy(Submission $submission, Payment $payment): RedirectResponse
     {
         $this->authorize('delete', $payment);
 
         $payment->delete();
 
-        return to_route('payments.index');
+        return to_route('submissions.show', $submission);
     }
 }

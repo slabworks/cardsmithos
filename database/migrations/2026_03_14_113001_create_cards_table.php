@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('cards', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('customer_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('submission_id')->constrained()->cascadeOnDelete();
             $table->string('name')->index();
             $table->longText('work_done')->nullable();
             $table->string('status')->default('pending')->index();

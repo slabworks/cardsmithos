@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum CustomerStatus: string
+enum SubmissionStatus: string
 {
     case ColdLead = 'cold_lead';
     case WarmLead = 'warm_lead';

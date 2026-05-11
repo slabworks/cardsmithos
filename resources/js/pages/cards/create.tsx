@@ -7,27 +7,27 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
-import { index } from '@/routes/customers';
+import { index } from '@/routes/submissions';
 import type { BreadcrumbItem } from '@/types';
 
 export default function CardsCreate({
-    customer,
+    submission,
     statusOptions,
     conditionOptions,
 }: {
-    customer: { id: number; name: string };
+    submission: { id: number; customer: { name: string } };
     statusOptions: Array<{ value: string; label: string; color: string }>;
     conditionOptions: Array<{ value: string; label: string; color: string }>;
 }) {
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Customers', href: index() },
+        { title: 'Submissions', href: index() },
         {
-            title: customer.name,
-            href: `/customers/${customer.id}`,
+            title: submission.customer.name,
+            href: `/submissions/${submission.id}`,
         },
         {
             title: 'Add card',
-            href: CardController.create.url({ customer: customer.id }),
+            href: CardController.create.url({ submission: submission.id }),
         },
     ];
 
@@ -37,10 +37,12 @@ export default function CardsCreate({
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <Heading
                     title="Add card"
-                    description={`New card for ${customer.name}`}
+                    description={`New card for ${submission.customer.name}`}
                 />
                 <Form
-                    {...CardController.store.form({ customer: customer.id })}
+                    {...CardController.store.form({
+                        submission: submission.id,
+                    })}
                     className="max-w-xl space-y-6"
                 >
                     {({ errors, processing }) => (
@@ -119,7 +121,9 @@ export default function CardsCreate({
                                     Create card
                                 </Button>
                                 <Button type="button" variant="outline" asChild>
-                                    <Link href={`/customers/${customer.id}`}>
+                                    <Link
+                                        href={`/submissions/${submission.id}`}
+                                    >
                                         Cancel
                                     </Link>
                                 </Button>

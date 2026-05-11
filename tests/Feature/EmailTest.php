@@ -1,9 +1,10 @@
 <?php
 
-use App\Enums\CustomerStatus;
+use App\Enums\SubmissionStatus;
 use App\Models\Customer;
 use App\Models\GmailAccount;
 use App\Models\GmailContact;
+use App\Models\Submission;
 use App\Models\User;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -83,7 +84,7 @@ test('email index paginates inbox contacts', function () {
         ->has('contacts.data', 25));
 });
 
-test('email contact can be converted to customer', function () {
+test('email contact can be converted to submission', function () {
     $user = User::factory()->create();
     $account = GmailAccount::query()->create([
         'user_id' => $user->id,
@@ -110,8 +111,10 @@ test('email contact can be converted to customer', function () {
     $customer = Customer::query()->where('email', 'jane@example.com')->first();
     expect($customer)->not->toBeNull();
     expect($customer->name)->toBe('Jane Example');
-    expect($customer->status)->toBe(CustomerStatus::WarmLead);
-    $response->assertRedirect(route('customers.show', $customer));
+    $submission = Submission::query()->where('customer_id', $customer->id)->first();
+    expect($submission)->not->toBeNull();
+    expect($submission->status)->toBe(SubmissionStatus::WarmLead);
+    $response->assertRedirect(route('submissions.show', $submission));
     $this->assertDatabaseHas('gmail_contacts', [
         'id' => $contact->id,
         'customer_id' => $customer->id,

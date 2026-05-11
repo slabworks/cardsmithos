@@ -24,7 +24,7 @@ class Card extends Model implements HasMedia
      * @var list<string>
      */
     protected $fillable = [
-        'customer_id',
+        'submission_id',
         'name',
         'work_done',
         'status',
@@ -67,9 +67,9 @@ class Card extends Model implements HasMedia
             ->useDisk('s3');
     }
 
-    public function customer(): BelongsTo
+    public function submission(): BelongsTo
     {
-        return $this->belongsTo(Customer::class);
+        return $this->belongsTo(Submission::class);
     }
 
     public function activities(): HasMany

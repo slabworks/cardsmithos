@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Card;
-use App\Models\Customer;
+use App\Models\Submission;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -17,7 +17,7 @@ class CardTimelineController extends Controller
             abort(404);
         }
 
-        $card->load(['customer', 'activities' => fn ($q) => $q->orderByDesc('occurred_at')]);
+        $card->load(['submission.customer', 'activities' => fn ($q) => $q->orderByDesc('occurred_at')]);
         $card->makeHidden('timeline_share_token');
 
         $photos = $card->getMedia('photos')
@@ -49,13 +49,13 @@ class CardTimelineController extends Controller
         return $mediaItem->toInlineResponse(request());
     }
 
-    public function rotateToken(Customer $customer, Card $card): RedirectResponse
+    public function rotateToken(Submission $submission, Card $card): RedirectResponse
     {
         $this->authorize('update', $card);
 
         $card->rotateTimelineShareToken();
 
-        return redirect()->route('customers.cards.edit', [$customer, $card])
+        return redirect()->route('submissions.cards.edit', [$submission, $card])
             ->with('success', 'Timeline link has been reset. Previous link no longer works.');
     }
 }

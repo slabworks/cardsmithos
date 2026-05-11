@@ -21,7 +21,7 @@ export default function CardsTimelinePublic({
     card: {
         id: number;
         name: string;
-        customer: { id: number; name: string };
+        submission: { customer: { id: number; name: string } };
         activities: Activity[];
     };
     photos?: Photo[];
@@ -48,9 +48,9 @@ export default function CardsTimelinePublic({
                             <h1 className="text-lg font-semibold">
                                 {card.name}
                             </h1>
-                            {card.customer?.name && (
+                            {card.submission?.customer?.name && (
                                 <p className="mt-1 text-sm text-muted-foreground">
-                                    {card.customer.name}
+                                    {card.submission.customer.name}
                                 </p>
                             )}
                         </div>

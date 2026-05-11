@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('shipments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('customer_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('submission_id')->constrained()->cascadeOnDelete();
             $table->decimal('amount', 10, 2);
             $table->date('shipped_at')->index();
             $table->string('reference')->nullable();

@@ -24,23 +24,23 @@ class DashboardController extends Controller
      */
     public function __invoke(Request $request): Response
     {
-        $customerIds = $request->user()->customers()->pluck('id');
+        $submissionIds = $request->user()->submissions()->pluck('id');
 
-        $grossRevenue = Payment::whereIn('customer_id', $customerIds)->sum('amount');
-        $totalShipmentFees = Shipment::whereIn('customer_id', $customerIds)->sum('amount');
+        $grossRevenue = Payment::whereIn('submission_id', $submissionIds)->sum('amount');
+        $totalShipmentFees = Shipment::whereIn('submission_id', $submissionIds)->sum('amount');
         $totalExpenses = (float) Expense::where('user_id', $request->user()->id)->sum('amount');
         $netRevenue = (float) $grossRevenue - (float) $totalShipmentFees - $totalExpenses;
 
         $featuredStatistics = $this->valueResolver->featuredFor($request->user());
 
-        $revenueByMonth = $this->revenueByMonth($customerIds);
+        $revenueByMonth = $this->revenueByMonth($submissionIds);
 
         $kanbanValues = collect(CardStatus::kanbanStatuses())->map(fn (CardStatus $s) => $s->value);
 
-        $cards = Card::whereIn('customer_id', $customerIds)
+        $cards = Card::whereIn('submission_id', $submissionIds)
             ->whereIn('status', $kanbanValues)
-            ->with('customer:id,name')
-            ->select('id', 'customer_id', 'name', 'status', 'condition_before', 'estimated_fee')
+            ->with('submission.customer:id,name')
+            ->select('id', 'submission_id', 'name', 'status', 'condition_before', 'estimated_fee')
             ->get()
             ->groupBy(fn (Card $card) => $card->status->value);
 
@@ -60,10 +60,10 @@ class DashboardController extends Controller
     }
 
     /**
-     * @param  Collection<int, int>  $customerIds
+     * @param  Collection<int, int>  $submissionIds
      * @return array<int, array{month: string, total: float}>
      */
-    private function revenueByMonth(Collection $customerIds): array
+    private function revenueByMonth(Collection $submissionIds): array
     {
         $months = collect();
         for ($i = 11; $i >= 0; $i--) {
@@ -75,7 +75,7 @@ class DashboardController extends Controller
             ? "strftime('%Y-%m', paid_at)"
             : "DATE_FORMAT(paid_at, '%Y-%m')";
         $paymentTotals = Payment::query()
-            ->whereIn('customer_id', $customerIds)
+            ->whereIn('submission_id', $submissionIds)
             ->where('paid_at', '>=', Carbon::now()->subMonths(11)->startOfMonth())
             ->selectRaw("{$paymentMonthExpression} as month, COALESCE(SUM(amount), 0) as total")
             ->groupBy('month')

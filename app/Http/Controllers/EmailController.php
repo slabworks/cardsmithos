@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\CustomerStatus;
+use App\Enums\SubmissionStatus;
 use App\Jobs\SyncGmailAccount;
 use App\Models\Customer;
 use App\Models\GmailContact;
@@ -39,6 +39,7 @@ class EmailController extends Controller
                         'id' => $contact->customer->id,
                         'name' => $contact->customer->name,
                         'email' => $contact->customer->email,
+                        'latest_submission_id' => $contact->customer->submissions()->latest()->value('id'),
                     ] : null,
                 ]) : [],
         ]);
@@ -78,19 +79,23 @@ class EmailController extends Controller
             $customer = $request->user()->customers()->create([
                 'name' => $contact->name ?: $this->nameFromEmail($email),
                 'email' => $email,
-                'status' => CustomerStatus::WarmLead,
-                'referral_source' => 'Gmail',
-                'notes' => trim('Converted from Gmail inbox.'.PHP_EOL.PHP_EOL.'Latest message: '.($contact->latest_subject ?: '(No subject)').PHP_EOL.($contact->latest_snippet ?: '')),
-            ]);
-
-            $customer->serviceWaiver()->create([
-                'expires_at' => now()->addDays(config('cardsmithos.waiver.expiration_days', 30)),
             ]);
         }
 
+        $submission = $request->user()->submissions()->create([
+            'customer_id' => $customer->id,
+            'status' => SubmissionStatus::WarmLead,
+            'referral_source' => 'Gmail',
+            'notes' => trim('Converted from Gmail inbox.'.PHP_EOL.PHP_EOL.'Latest message: '.($contact->latest_subject ?: '(No subject)').PHP_EOL.($contact->latest_snippet ?: '')),
+        ]);
+
+        $submission->serviceWaiver()->create([
+            'expires_at' => now()->addDays(config('cardsmithos.waiver.expiration_days', 30)),
+        ]);
+
         $contact->update(['customer_id' => $customer->id]);
 
-        return to_route('customers.show', $customer);
+        return to_route('submissions.show', $submission);
     }
 
     private function nameFromEmail(string $email): string

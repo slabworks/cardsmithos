@@ -14,7 +14,7 @@ class ShipmentPolicy
 
     public function view(User $user, Shipment $shipment): bool
     {
-        return $shipment->customer->user_id === $user->id;
+        return $shipment->submission->user_id === $user->id;
     }
 
     public function create(User $user): bool
@@ -24,11 +24,11 @@ class ShipmentPolicy
 
     public function update(User $user, Shipment $shipment): bool
     {
-        return $shipment->customer->user_id === $user->id;
+        return $shipment->submission->user_id === $user->id;
     }
 
     public function delete(User $user, Shipment $shipment): bool
     {
-        return $shipment->customer->user_id === $user->id;
+        return $shipment->submission->user_id === $user->id;
     }
 }

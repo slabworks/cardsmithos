@@ -8,7 +8,7 @@ use App\Enums\CardStatus;
 use App\Http\Requests\StoreCardRequest;
 use App\Http\Requests\UpdateCardRequest;
 use App\Models\Card;
-use App\Models\Customer;
+use App\Models\Submission;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\URL;
 use Inertia\Inertia;
@@ -16,12 +16,14 @@ use Inertia\Response;
 
 class CardController extends Controller
 {
-    public function create(Customer $customer): Response
+    public function create(Submission $submission): Response
     {
-        $this->authorize('update', $customer);
+        $this->authorize('update', $submission);
+
+        $submission->load('customer:id,name');
 
         return Inertia::render('cards/create', [
-            'customer' => $customer,
+            'submission' => $submission,
             'statusOptions' => array_map(
                 fn (CardStatus $case) => [
                     'value' => $case->value,
@@ -41,17 +43,18 @@ class CardController extends Controller
         ]);
     }
 
-    public function store(StoreCardRequest $request, Customer $customer): RedirectResponse
+    public function store(StoreCardRequest $request, Submission $submission): RedirectResponse
     {
-        $customer->cards()->create($request->validated());
+        $submission->cards()->create($request->validated());
 
-        return to_route('customers.show', $customer);
+        return to_route('submissions.show', $submission);
     }
 
-    public function edit(Customer $customer, Card $card): Response
+    public function edit(Submission $submission, Card $card): Response
     {
         $this->authorize('update', $card);
 
+        $submission->load('customer:id,name');
         $card->load('activities');
         $settings = auth()->user()?->businessSettings;
         $hourlyRate = $settings?->hourly_rate;
@@ -61,8 +64,8 @@ class CardController extends Controller
 
         $photos = $card->getMedia('photos')->map(fn ($media) => [
             'id' => $media->id,
-            'url' => route('customers.cards.photos.show', [
-                'customer' => $customer,
+            'url' => route('submissions.cards.photos.show', [
+                'submission' => $submission,
                 'card' => $card,
                 'media' => $media->id,
             ]),
@@ -71,7 +74,7 @@ class CardController extends Controller
         ])->values()->all();
 
         return Inertia::render('cards/edit', [
-            'customer' => $customer,
+            'submission' => $submission,
             'card' => $card,
             'photos' => $photos,
             'hourlyRate' => $hourlyRate !== null ? (float) $hourlyRate : null,
@@ -103,19 +106,19 @@ class CardController extends Controller
         ]);
     }
 
-    public function update(UpdateCardRequest $request, Customer $customer, Card $card): RedirectResponse
+    public function update(UpdateCardRequest $request, Submission $submission, Card $card): RedirectResponse
     {
         $card->update($request->validated());
 
-        return to_route('customers.show', $customer);
+        return to_route('submissions.show', $submission);
     }
 
-    public function destroy(Customer $customer, Card $card): RedirectResponse
+    public function destroy(Submission $submission, Card $card): RedirectResponse
     {
         $this->authorize('delete', $card);
 
         $card->delete();
 
-        return to_route('customers.show', $customer);
+        return to_route('submissions.show', $submission);
     }
 }

@@ -31,7 +31,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
-import { index } from '@/routes/customers';
+import { index } from '@/routes/submissions';
 import type { BreadcrumbItem } from '@/types';
 
 type Activity = {
@@ -50,7 +50,7 @@ type Photo = {
 };
 
 export default function CardsEdit({
-    customer,
+    submission,
     card,
     hourlyRate,
     taxRate,
@@ -60,7 +60,7 @@ export default function CardsEdit({
     conditionOptions,
     activityTypeOptions = [],
 }: {
-    customer: { id: number; name: string };
+    submission: { id: number; customer: { name: string } };
     card: {
         id: number;
         name: string;
@@ -116,7 +116,7 @@ export default function CardsEdit({
         Array.from(files).forEach((file) => formData.append('photos[]', file));
 
         router.post(
-            CardPhotoController.store({ customer, card }),
+            CardPhotoController.store({ submission, card }),
             formData as never,
             {
                 forceFormData: true,
@@ -135,7 +135,7 @@ export default function CardsEdit({
     const handleToggleTimeline = (mediaId: number) => {
         router.post(
             CardPhotoController.toggleTimeline({
-                customer,
+                submission,
                 card,
                 media: mediaId,
             }),
@@ -146,7 +146,7 @@ export default function CardsEdit({
 
     const handlePhotoDelete = (mediaId: number) => {
         router.delete(
-            CardPhotoController.destroy({ customer, card, media: mediaId }),
+            CardPhotoController.destroy({ submission, card, media: mediaId }),
         );
     };
 
@@ -162,15 +162,15 @@ export default function CardsEdit({
             ? subtotal * (1 + taxRate / 100)
             : subtotal;
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Customers', href: index() },
+        { title: 'Submissions', href: index() },
         {
-            title: customer.name,
-            href: `/customers/${customer.id}`,
+            title: submission.customer.name,
+            href: `/submissions/${submission.id}`,
         },
         {
             title: card.name,
             href: CardController.edit.url({
-                customer: customer.id,
+                submission: submission.id,
                 card: card.id,
             }),
         },
@@ -183,7 +183,7 @@ export default function CardsEdit({
                 <Heading title="Edit card" description={card.name} />
                 <Form
                     {...CardController.update.form({
-                        customer: customer.id,
+                        submission: submission.id,
                         card: card.id,
                     })}
                     className="max-w-xl space-y-6"
@@ -323,7 +323,9 @@ export default function CardsEdit({
                                     Save changes
                                 </Button>
                                 <Button type="button" variant="outline" asChild>
-                                    <Link href={`/customers/${customer.id}`}>
+                                    <Link
+                                        href={`/submissions/${submission.id}`}
+                                    >
                                         Cancel
                                     </Link>
                                 </Button>
@@ -453,7 +455,7 @@ export default function CardsEdit({
                             </Button>
                             <Form
                                 {...CardTimelineController.rotateToken.form({
-                                    customer: customer.id,
+                                    submission: submission.id,
                                     card: card.id,
                                 })}
                                 className="inline-block"
@@ -489,7 +491,7 @@ export default function CardsEdit({
                             <div className="border-b border-sidebar-border p-4">
                                 <Form
                                     {...CardActivityController.store.form({
-                                        customer: customer.id,
+                                        submission: submission.id,
                                         card: card.id,
                                     })}
                                     className="space-y-3"
@@ -658,8 +660,8 @@ export default function CardsEdit({
                                                     <Form
                                                         {...CardActivityController.update.form(
                                                             {
-                                                                customer:
-                                                                    customer.id,
+                                                                submission:
+                                                                    submission.id,
                                                                 card: card.id,
                                                                 activity:
                                                                     activity.id,
@@ -819,8 +821,8 @@ export default function CardsEdit({
                                                     <Form
                                                         {...CardActivityController.destroy.form(
                                                             {
-                                                                customer:
-                                                                    customer.id,
+                                                                submission:
+                                                                    submission.id,
                                                                 card: card.id,
                                                                 activity:
                                                                     activity.id,
@@ -881,7 +883,7 @@ export default function CardsEdit({
                                 </DialogDescription>
                                 <Form
                                     {...CardController.destroy.form({
-                                        customer: customer.id,
+                                        submission: submission.id,
                                         card: card.id,
                                     })}
                                     className="mt-4"

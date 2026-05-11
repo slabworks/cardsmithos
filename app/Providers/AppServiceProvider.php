@@ -6,10 +6,12 @@ use App\Models\BusinessStatistic;
 use App\Models\Customer;
 use App\Models\Payment;
 use App\Models\Shipment;
+use App\Models\Submission;
 use App\Policies\BusinessStatisticPolicy;
 use App\Policies\CustomerPolicy;
 use App\Policies\PaymentPolicy;
 use App\Policies\ShipmentPolicy;
+use App\Policies\SubmissionPolicy;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -33,6 +35,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Gate::policy(Customer::class, CustomerPolicy::class);
+        Gate::policy(Submission::class, SubmissionPolicy::class);
         Gate::policy(Payment::class, PaymentPolicy::class);
         Gate::policy(Shipment::class, ShipmentPolicy::class);
         Gate::policy(BusinessStatistic::class, BusinessStatisticPolicy::class);

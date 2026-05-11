@@ -12,9 +12,9 @@ class StoreCardRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        $customer = $this->route('customer');
+        $submission = $this->route('submission');
 
-        return $this->user()?->can('update', $customer) ?? false;
+        return $this->user()?->can('update', $submission) ?? false;
     }
 
     /**
