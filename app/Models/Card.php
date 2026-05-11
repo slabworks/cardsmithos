@@ -26,8 +26,7 @@ class Card extends Model implements HasMedia
         'name',
         'work_done',
         'status',
-        'condition_before',
-        'condition_after',
+        'condition',
         'restoration_hours',
         'estimated_fee',
     ];
@@ -39,8 +38,7 @@ class Card extends Model implements HasMedia
     {
         return [
             'status' => CardStatus::class,
-            'condition_before' => CardCondition::class,
-            'condition_after' => CardCondition::class,
+            'condition' => CardCondition::class,
             'restoration_hours' => 'decimal:2',
             'estimated_fee' => 'decimal:2',
         ];

@@ -43,15 +43,14 @@ export default function CardsEdit({
         name: string;
         work_done?: string | null;
         status: string;
-        condition_before?: string | null;
-        condition_after?: string | null;
+        condition?: string | null;
         restoration_hours?: string | null;
     };
     hourlyRate: number | null;
     taxRate: number | null;
     photos?: Photo[];
     statusOptions: Array<{ value: string; label: string; color: string }>;
-    conditionOptions: Array<{ value: string; label: string; color: string }>;
+    conditionOptions: Array<{ value: string; label: string }>;
 }) {
     const [uploading, setUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -159,13 +158,11 @@ export default function CardsEdit({
                                 <InputError message={errors.status} />
                             </div>
                             <div className="grid gap-2">
-                                <Label htmlFor="condition_before">
-                                    Condition (before)
-                                </Label>
+                                <Label htmlFor="condition">Condition</Label>
                                 <select
-                                    id="condition_before"
-                                    name="condition_before"
-                                    defaultValue={card.condition_before ?? ''}
+                                    id="condition"
+                                    name="condition"
+                                    defaultValue={card.condition ?? ''}
                                     className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
                                 >
                                     <option value="">None</option>
@@ -178,29 +175,7 @@ export default function CardsEdit({
                                         </option>
                                     ))}
                                 </select>
-                                <InputError message={errors.condition_before} />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="condition_after">
-                                    Condition (after)
-                                </Label>
-                                <select
-                                    id="condition_after"
-                                    name="condition_after"
-                                    defaultValue={card.condition_after ?? ''}
-                                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
-                                >
-                                    <option value="">None</option>
-                                    {conditionOptions.map((opt) => (
-                                        <option
-                                            key={opt.value}
-                                            value={opt.value}
-                                        >
-                                            {opt.label}
-                                        </option>
-                                    ))}
-                                </select>
-                                <InputError message={errors.condition_after} />
+                                <InputError message={errors.condition} />
                             </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="restoration_hours">

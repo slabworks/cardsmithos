@@ -34,7 +34,6 @@ class CardController extends Controller
                 fn (CardCondition $case) => [
                     'value' => $case->value,
                     'label' => $case->label(),
-                    'color' => $case->color(),
                 ],
                 CardCondition::cases()
             ),
@@ -85,7 +84,6 @@ class CardController extends Controller
                 fn (CardCondition $case) => [
                     'value' => $case->value,
                     'label' => $case->label(),
-                    'color' => $case->color(),
                 ],
                 CardCondition::cases()
             ),

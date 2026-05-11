@@ -17,8 +17,7 @@ return new class extends Migration
             $table->string('name')->index();
             $table->longText('work_done')->nullable();
             $table->string('status')->default('pending')->index();
-            $table->string('condition_before')->nullable()->index();
-            $table->string('condition_after')->nullable()->index();
+            $table->string('condition')->nullable()->index();
             $table->decimal('restoration_hours', 5, 2)->nullable();
             $table->decimal('estimated_fee', 10, 2)->nullable();
             $table->json('photos')->nullable();

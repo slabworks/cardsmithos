@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\CardCondition;
 use App\Models\Card;
 use App\Models\Customer;
 use App\Models\Submission;
@@ -15,6 +16,7 @@ test('card can be created for customer', function () {
         [
             'name' => 'Charizard',
             'status' => 'pending',
+            'condition' => CardCondition::NearMint->value,
         ]
     );
 
@@ -23,6 +25,7 @@ test('card can be created for customer', function () {
         'submission_id' => $submission->id,
         'name' => 'Charizard',
         'status' => 'pending',
+        'condition' => CardCondition::NearMint->value,
     ]);
 });
 
@@ -84,13 +87,14 @@ test('card can be updated', function () {
 
     $response = $this->actingAs($user)->patch(
         route('submissions.cards.update', [$submission, $card]),
-        ['name' => 'New Name', 'status' => 'in_progress']
+        ['name' => 'New Name', 'status' => 'in_progress', 'condition' => CardCondition::Damaged->value]
     );
 
     $response->assertRedirect(route('submissions.show', $submission));
     $card->refresh();
     expect($card->name)->toBe('New Name');
     expect($card->status->value)->toBe('in_progress');
+    expect($card->condition)->toBe(CardCondition::Damaged);
 });
 
 test('card update forbidden for other user', function () {

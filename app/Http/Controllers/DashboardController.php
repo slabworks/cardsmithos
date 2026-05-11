@@ -40,7 +40,7 @@ class DashboardController extends Controller
         $cards = Card::whereIn('submission_id', $submissionIds)
             ->whereIn('status', $kanbanValues)
             ->with('submission.customer:id,name')
-            ->select('id', 'submission_id', 'name', 'status', 'condition_before', 'estimated_fee')
+            ->select('id', 'submission_id', 'name', 'status', 'estimated_fee')
             ->get()
             ->groupBy(fn (Card $card) => $card->status->value);
 

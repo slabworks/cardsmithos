@@ -17,7 +17,7 @@ export default function CardsCreate({
 }: {
     submission: { id: number; customer: { name: string } };
     statusOptions: Array<{ value: string; label: string; color: string }>;
-    conditionOptions: Array<{ value: string; label: string; color: string }>;
+    conditionOptions: Array<{ value: string; label: string }>;
 }) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Submissions', href: index() },
@@ -71,12 +71,10 @@ export default function CardsCreate({
                                 <InputError message={errors.status} />
                             </div>
                             <div className="grid gap-2">
-                                <Label htmlFor="condition_before">
-                                    Condition (before)
-                                </Label>
+                                <Label htmlFor="condition">Condition</Label>
                                 <select
-                                    id="condition_before"
-                                    name="condition_before"
+                                    id="condition"
+                                    name="condition"
                                     className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
                                 >
                                     <option value="">None</option>
@@ -89,7 +87,7 @@ export default function CardsCreate({
                                         </option>
                                     ))}
                                 </select>
-                                <InputError message={errors.condition_before} />
+                                <InputError message={errors.condition} />
                             </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="restoration_hours">
