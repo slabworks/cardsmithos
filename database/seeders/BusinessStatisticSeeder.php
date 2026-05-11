@@ -22,8 +22,8 @@ class BusinessStatisticSeeder extends Seeder
     private function defaults(): array
     {
         return [
-            ['name' => 'Inquiries This Week', 'slug' => 'inquiries-this-week', 'source' => 'custom', 'category' => 'leads', 'group_name' => 'Lead Generation', 'period' => 'weekly', 'value_type' => 'number', 'input_method' => 'manual'],
-            ['name' => 'Inquiries This Month', 'slug' => 'inquiries-this-month', 'source' => 'custom', 'category' => 'leads', 'group_name' => 'Lead Generation', 'period' => 'monthly', 'value_type' => 'number', 'input_method' => 'manual'],
+            ['name' => 'Submissions This Week', 'slug' => 'submissions-this-week', 'source' => 'custom', 'category' => 'leads', 'group_name' => 'Lead Generation', 'period' => 'weekly', 'value_type' => 'number', 'input_method' => 'manual'],
+            ['name' => 'Submissions This Month', 'slug' => 'submissions-this-month', 'source' => 'custom', 'category' => 'leads', 'group_name' => 'Lead Generation', 'period' => 'monthly', 'value_type' => 'number', 'input_method' => 'manual'],
             ['name' => 'Conversion Rate', 'slug' => 'conversion-rate', 'source' => 'custom', 'category' => 'sales', 'group_name' => 'Lead Generation', 'period' => 'monthly', 'value_type' => 'percentage', 'input_method' => 'manual'],
             ['name' => 'Leads from Instagram', 'slug' => 'leads-from-instagram', 'source' => 'custom', 'category' => 'marketing', 'group_name' => 'Lead Generation', 'period' => 'monthly', 'value_type' => 'number', 'input_method' => 'manual'],
             ['name' => 'Leads from Email', 'slug' => 'leads-from-email', 'source' => 'custom', 'category' => 'marketing', 'group_name' => 'Lead Generation', 'period' => 'monthly', 'value_type' => 'number', 'input_method' => 'manual'],

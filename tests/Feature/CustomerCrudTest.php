@@ -1,169 +1,150 @@
 <?php
 
 use App\Models\Customer;
-use App\Models\GmailAccount;
-use App\Models\GmailContact;
+use App\Models\Submission;
 use App\Models\User;
 use Inertia\Testing\AssertableInertia as Assert;
 
-test('customer index lists only own customers', function () {
+test('submission index lists only own submissions', function () {
     $user = User::factory()->create();
-    Customer::factory()->for($user)->count(2)->create();
-    Customer::factory()->create();
+    Submission::factory()->for($user)->count(2)->create();
+    Submission::factory()->create();
 
-    $response = $this->actingAs($user)->get(route('customers.index'));
+    $response = $this->actingAs($user)->get(route('submissions.index'));
 
     $response->assertSuccessful();
     $response->assertInertia(fn (Assert $page) => $page
-        ->component('customers/index')
-        ->has('customers', 2));
+        ->component('submissions/index')
+        ->has('submissions', 2));
 });
 
-test('customer can be created', function () {
+test('submission can be created with an existing customer', function () {
     $user = User::factory()->create();
-
-    $response = $this->actingAs($user)->post(route('customers.store'), [
+    $customer = Customer::factory()->for($user)->create([
         'name' => 'Jane Doe',
-        'email' => 'jane@example.com',
+        'contact_detail' => '@janedoe',
     ]);
 
-    $response->assertRedirect(route('customers.index'));
-    $this->assertDatabaseHas('customers', [
-        'user_id' => $user->id,
-        'name' => 'Jane Doe',
-        'email' => 'jane@example.com',
-    ]);
-});
-
-test('creating a customer creates a service waiver', function () {
-    $user = User::factory()->create();
-
-    $this->actingAs($user)->post(route('customers.store'), [
-        'name' => 'Jane Doe',
-        'email' => 'jane@example.com',
-    ]);
-
-    $customer = Customer::where('email', 'jane@example.com')->first();
-    expect($customer)->not->toBeNull();
-    expect($customer->serviceWaiver)->not->toBeNull();
-    expect($customer->serviceWaiver->expires_at->isFuture())->toBeTrue();
-});
-
-test('customer show displays customer', function () {
-    $user = User::factory()->create();
-    $customer = Customer::factory()->for($user)->create(['name' => 'Acme']);
-
-    $response = $this->actingAs($user)->get(route('customers.show', $customer));
-
-    $response->assertSuccessful();
-    $response->assertInertia(fn (Assert $page) => $page
-        ->component('customers/show')
-        ->where('customer.name', 'Acme'));
-});
-
-test('customer show includes linked gmail contacts', function () {
-    $user = User::factory()->create();
-    $customer = Customer::factory()->for($user)->create(['email' => 'jane@example.com']);
-    $account = GmailAccount::query()->create([
-        'user_id' => $user->id,
-        'email' => 'owner@gmail.com',
-        'access_token' => 'token',
-        'refresh_token' => 'refresh',
-        'token_expires_at' => now()->addHour(),
-    ]);
-    GmailContact::query()->create([
-        'gmail_account_id' => $account->id,
+    $response = $this->actingAs($user)->post(route('submissions.store'), [
         'customer_id' => $customer->id,
-        'email' => 'jane@example.com',
-        'name' => 'Jane Example',
-        'latest_subject' => 'Repair question',
-        'latest_snippet' => 'Can you repair this card?',
-        'last_message_at' => now(),
+        'status' => 'pending',
+        'notes' => 'Needs two cards repaired.',
     ]);
 
-    $response = $this->actingAs($user)->get(route('customers.show', $customer));
-
-    $response->assertSuccessful();
-    $response->assertInertia(fn (Assert $page) => $page
-        ->component('customers/show')
-        ->has('emailContacts', 1)
-        ->where('emailContacts.0.email', 'jane@example.com')
-        ->where('emailContacts.0.latest_subject', 'Repair question'));
+    $submission = Submission::query()->where('user_id', $user->id)->first();
+    expect($submission)->not->toBeNull();
+    $response->assertRedirect(route('submissions.show', $submission));
+    $this->assertDatabaseHas('submissions', [
+        'id' => $submission->id,
+        'customer_id' => $customer->id,
+        'status' => 'pending',
+        'notes' => 'Needs two cards repaired.',
+    ]);
 });
 
-test('customer show includes waiver URL when waiver not signed', function () {
+test('submission cannot be created without a customer', function () {
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)->post(route('submissions.store'), [
+        'status' => 'pending',
+    ]);
+
+    $response->assertSessionHasErrors('customer_id');
+    $this->assertDatabaseCount('submissions', 0);
+});
+
+test('creating a submission creates a service waiver', function () {
     $user = User::factory()->create();
     $customer = Customer::factory()->for($user)->create();
-    $customer->serviceWaiver()->create([
+
+    $this->actingAs($user)->post(route('submissions.store'), [
+        'customer_id' => $customer->id,
+        'status' => 'pending',
+    ]);
+
+    $submission = Submission::query()->where('user_id', $user->id)->first();
+    expect($submission)->not->toBeNull();
+    expect($submission->serviceWaiver)->not->toBeNull();
+    expect($submission->serviceWaiver->expires_at->isFuture())->toBeTrue();
+});
+
+test('submission show displays submission customer', function () {
+    $user = User::factory()->create();
+    $customer = Customer::factory()->for($user)->create(['name' => 'Acme']);
+    $submission = Submission::factory()->for($user)->for($customer)->create();
+
+    $response = $this->actingAs($user)->get(route('submissions.show', $submission));
+
+    $response->assertSuccessful();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('submissions/show')
+        ->where('submission.customer.name', 'Acme'));
+});
+
+test('submission show includes waiver URL when waiver not signed', function () {
+    $user = User::factory()->create();
+    $submission = Submission::factory()->for($user)->create();
+    $submission->serviceWaiver()->create([
         'expires_at' => now()->addDays(30),
     ]);
 
-    $response = $this->actingAs($user)->get(route('customers.show', $customer));
+    $response = $this->actingAs($user)->get(route('submissions.show', $submission));
 
     $response->assertSuccessful();
     $response->assertInertia(fn (Assert $page) => $page
-        ->component('customers/show')
-        ->where('waiverUrl', fn ($url) => str_contains($url, '/waiver/'.$customer->id) && str_contains($url, 'signature=')));
+        ->component('submissions/show')
+        ->where('waiverUrl', fn ($url) => str_contains($url, '/waiver/'.$submission->id) && str_contains($url, 'signature=')));
 });
 
-test('customer show forbidden for other user', function () {
+test('submission show forbidden for other user', function () {
     $user = User::factory()->create();
-    $customer = Customer::factory()->create();
+    $submission = Submission::factory()->create();
 
-    $response = $this->actingAs($user)->get(route('customers.show', $customer));
+    $response = $this->actingAs($user)->get(route('submissions.show', $submission));
 
     $response->assertForbidden();
 });
 
-test('customer can be updated', function () {
+test('submission can be updated', function () {
     $user = User::factory()->create();
     $customer = Customer::factory()->for($user)->create();
+    $submission = Submission::factory()->for($user)->for($customer)->create();
 
     $response = $this->actingAs($user)->patch(
-        route('customers.update', $customer),
-        ['name' => 'Updated Name', 'email' => 'updated@example.com']
+        route('submissions.update', $submission),
+        [
+            'customer_id' => $customer->id,
+            'status' => 'in_progress',
+            'notes' => 'Updated notes',
+        ]
     );
 
-    $response->assertRedirect(route('customers.show', $customer));
+    $response->assertRedirect(route('submissions.show', $submission));
     $customer->refresh();
-    expect($customer->name)->toBe('Updated Name');
-    expect($customer->email)->toBe('updated@example.com');
+    $submission->refresh();
+    expect($submission->customer_id)->toBe($customer->id);
+    expect($submission->status->value)->toBe('in_progress');
+    expect($submission->notes)->toBe('Updated notes');
 });
 
-test('customer update forbidden for other user', function () {
+test('submission update forbidden for other user', function () {
     $user = User::factory()->create();
-    $customer = Customer::factory()->create();
+    $submission = Submission::factory()->create();
 
     $response = $this->actingAs($user)->patch(
-        route('customers.update', $customer),
-        ['name' => 'Hacked']
+        route('submissions.update', $submission),
+        ['customer_id' => $submission->customer_id, 'name' => 'Hacked']
     );
 
     $response->assertForbidden();
 });
 
-test('customer creation ignores waiver fields', function () {
+test('submission can be deleted', function () {
     $user = User::factory()->create();
+    $submission = Submission::factory()->for($user)->create();
 
-    $response = $this->actingAs($user)->post(route('customers.store'), [
-        'name' => 'Jane Doe',
-        'email' => 'jane@example.com',
-        'waiver_agreed' => true,
-        'waiver_agreed_at' => '2025-01-01 00:00:00',
-    ]);
+    $response = $this->actingAs($user)->delete(route('submissions.destroy', $submission));
 
-    $response->assertRedirect(route('customers.index'));
-    $customer = Customer::where('email', 'jane@example.com')->first();
-    expect($customer->waiver_agreed)->toBeNull();
-    expect($customer->waiver_agreed_at)->toBeNull();
-});
-
-test('customer can be deleted', function () {
-    $user = User::factory()->create();
-    $customer = Customer::factory()->for($user)->create();
-
-    $response = $this->actingAs($user)->delete(route('customers.destroy', $customer));
-
-    $response->assertRedirect(route('customers.index'));
-    $this->assertDatabaseMissing('customers', ['id' => $customer->id]);
+    $response->assertRedirect(route('submissions.index'));
+    $this->assertDatabaseMissing('submissions', ['id' => $submission->id]);
 });

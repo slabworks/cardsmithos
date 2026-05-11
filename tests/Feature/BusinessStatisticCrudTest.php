@@ -5,6 +5,7 @@ use App\Models\Customer;
 use App\Models\Expense;
 use App\Models\Payment;
 use App\Models\Shipment;
+use App\Models\Submission;
 use App\Models\User;
 
 test('statistics index lists only owned statistics', function () {
@@ -45,12 +46,13 @@ test('user can create a custom statistic and slug is generated automatically', f
 test('system statistics show calculated revenue this month', function () {
     $user = User::factory()->create();
     $customer = Customer::factory()->for($user)->create();
+    $submission = Submission::factory()->for($user)->for($customer)->create();
 
-    Payment::factory()->for($customer)->create([
+    Payment::factory()->for($submission)->create([
         'amount' => 100.00,
         'paid_at' => now()->toDateString(),
     ]);
-    Shipment::factory()->for($customer)->create([
+    Shipment::factory()->for($submission)->create([
         'amount' => 20.00,
         'shipped_at' => now()->toDateString(),
     ]);

@@ -28,7 +28,7 @@
             </div>
             <div>
                 <label for="signer_email" class="block text-sm font-medium">Your email</label>
-                <input type="email" name="signer_email" id="signer_email" value="{{ old('signer_email', $customer->email) }}"
+                <input type="email" name="signer_email" id="signer_email" value="{{ old('signer_email', filter_var($customer->contact_detail, FILTER_VALIDATE_EMAIL) ? $customer->contact_detail : '') }}"
                     class="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     required>
                 @error('signer_email')

@@ -139,8 +139,8 @@ export default function Welcome({
                             Cardsmith OS is an open-source platform built for
                             trading card restoration shops. Manage every job
                             from intake to shipment, track finances, and let
-                            customers follow their card’s progress in
-                            real time—all without lock-in or subscription fees.
+                            customers follow their card’s progress in real
+                            time—all without lock-in or subscription fees.
                         </p>
                         {auth.user ? (
                             <p className="mt-6">
@@ -263,14 +263,12 @@ export default function Welcome({
                         <div className="grid gap-6 sm:grid-cols-2">
                             <div className="rounded-lg border border-[#e8e8e6] bg-[#fafaf9] p-6">
                                 <h3 className="mb-2 font-medium text-[#1b1b18]">
-                                    Shareable progress timelines
+                                    Customer-ready job records
                                 </h3>
                                 <p className="text-sm leading-relaxed text-[#575754]">
-                                    Each card gets a unique timeline link you
-                                    can share with the customer. They can see
-                                    milestones, activity updates, and photos of
-                                    their card’s restoration progress—no login
-                                    required.
+                                    Keep customer details, signed waivers, card
+                                    notes, photos, invoices, payments, and
+                                    shipments connected to each submission.
                                 </p>
                             </div>
                             <div className="rounded-lg border border-[#e8e8e6] bg-[#fafaf9] p-6">
@@ -281,8 +279,7 @@ export default function Welcome({
                                     Generate waiver links for customers to sign
                                     digitally. Waivers are tracked with IP
                                     address and expiration date, keeping your
-                                    shop legally protected without paper
-                                    hassle.
+                                    shop legally protected without paper hassle.
                                 </p>
                             </div>
                         </div>
@@ -358,11 +355,11 @@ export default function Welcome({
                                     3
                                 </div>
                                 <h3 className="mb-1 text-sm font-medium text-[#1b1b18]">
-                                    Track & share progress
+                                    Track progress
                                 </h3>
                                 <p className="text-xs leading-relaxed text-[#575754]">
-                                    Update statuses, upload photos, and share
-                                    the timeline link.
+                                    Update statuses, upload photos, and record
+                                    restoration notes.
                                 </p>
                             </div>
                             <div className="text-center">

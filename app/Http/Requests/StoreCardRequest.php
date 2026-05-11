@@ -12,9 +12,9 @@ class StoreCardRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        $customer = $this->route('customer');
+        $submission = $this->route('submission');
 
-        return $this->user()?->can('update', $customer) ?? false;
+        return $this->user()?->can('update', $submission) ?? false;
     }
 
     /**
@@ -26,8 +26,7 @@ class StoreCardRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'work_done' => ['nullable', 'string'],
             'status' => ['nullable', Rule::enum(CardStatus::class)],
-            'condition_before' => ['nullable', Rule::enum(CardCondition::class)],
-            'condition_after' => ['nullable', Rule::enum(CardCondition::class)],
+            'condition' => ['nullable', Rule::enum(CardCondition::class)],
             'restoration_hours' => ['nullable', 'numeric', 'min:0', 'max:999.99'],
         ];
     }

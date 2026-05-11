@@ -11,15 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('inquiries', function (Blueprint $table) {
+        Schema::create('submissions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('customer_id')->nullable()->constrained()->nullOnDelete();
-            $table->string('contact_username');
-            $table->string('communication_method')->default('other')->index();
-            $table->date('inquired_at')->index();
-            $table->boolean('converted')->default(false)->index();
-            $table->text('notes')->nullable();
+            $table->foreignId('customer_id')->constrained()->cascadeOnDelete();
+            $table->string('status')->default('pending')->index();
+            $table->longText('notes')->nullable();
+            $table->string('referral_source')->nullable()->index();
             $table->timestamps();
         });
     }
@@ -29,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('inquiries');
+        Schema::dropIfExists('submissions');
     }
 };

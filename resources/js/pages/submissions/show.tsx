@@ -2,10 +2,10 @@ import { Form, Head, Link } from '@inertiajs/react';
 import { Copy, FileDown, Pencil, Plus } from 'lucide-react';
 import { useState } from 'react';
 import CardController from '@/actions/App/Http/Controllers/CardController';
-import CustomerController from '@/actions/App/Http/Controllers/CustomerController';
 import InvoiceController from '@/actions/App/Http/Controllers/InvoiceController';
 import PaymentController from '@/actions/App/Http/Controllers/PaymentController';
 import ShipmentController from '@/actions/App/Http/Controllers/ShipmentController';
+import SubmissionController from '@/actions/App/Http/Controllers/SubmissionController';
 import InputError from '@/components/input-error';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -20,68 +20,73 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
-import { index } from '@/routes/customers';
+import { index } from '@/routes/submissions';
 import type { BreadcrumbItem } from '@/types';
 
 const statusBadgeVariant: Record<string, 'default' | 'secondary' | 'outline'> =
     {
-        cold_lead: 'secondary',
-        warm_lead: 'secondary',
-        hot_lead: 'default',
+        pending: 'secondary',
         in_progress: 'default',
-        good_client: 'default',
-        inactive: 'outline',
+        complete: 'default',
+        cancelled: 'outline',
     };
 
-export default function CustomersShow({
-    customer,
-    emailContacts,
-    waiverUrl,
-}: {
+type Submission = {
+    id: number;
+    status: string | null;
+    notes: string | null;
+    referral_source: string | null;
+    lifetime_value: string | number | null;
+    service_waiver: { signed_at: string | null } | null;
     customer: {
         id: number;
         name: string;
-        status: string | null;
-        email: string | null;
+        contact_detail: string | null;
         phone: string | null;
         address: string | null;
-        notes: string | null;
-        referral_source: string | null;
-        waiver_agreed: boolean | null;
-        cards: Array<{
-            id: number;
-            name: string;
-            status: string;
-            estimated_fee: string | null;
-        }>;
-        payments: Array<{
-            id: number;
-            amount: string;
-            paid_at: string;
-            method: string;
-            reference: string | null;
-        }>;
-        shipments: Array<{
-            id: number;
-            amount: string;
-            shipped_at: string;
-            reference: string | null;
-            tracking_number: string | null;
-        }>;
-        lifetime_value: string | number | null;
     };
-    emailContacts: Array<{
+    cards: Array<{
         id: number;
-        email: string;
-        name: string | null;
-        latest_subject: string | null;
-        latest_snippet: string | null;
-        last_message_at: string | null;
+        name: string;
+        status: string;
+        estimated_fee: string | null;
     }>;
+    payments: Array<{
+        id: number;
+        amount: string;
+        paid_at: string;
+        method: string;
+        reference: string | null;
+    }>;
+    shipments: Array<{
+        id: number;
+        amount: string;
+        shipped_at: string;
+        reference: string | null;
+        tracking_number: string | null;
+    }>;
+};
+
+export default function SubmissionsShow({
+    submission,
+    waiverUrl,
+}: {
+    submission: Submission;
     waiverUrl: string | null;
 }) {
     const [copied, setCopied] = useState(false);
+    const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
     const [isShipmentModalOpen, setIsShipmentModalOpen] = useState(false);
+    const customer = submission.customer;
+    const waiverSigned = submission.service_waiver?.signed_at != null;
+
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Submissions', href: index() },
+        {
+            title: customer.name,
+            href: SubmissionController.show.url(submission),
+        },
+    ];
 
     const copyWaiverUrl = () => {
         if (!waiverUrl) {
@@ -93,13 +98,6 @@ export default function CustomersShow({
             setTimeout(() => setCopied(false), 2000);
         });
     };
-    const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Customers', href: index() },
-        {
-            title: customer.name,
-            href: CustomerController.show.url(customer),
-        },
-    ];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -111,32 +109,28 @@ export default function CustomersShow({
                             {customer.name}
                         </h1>
                         <div className="mt-1 flex flex-wrap items-center gap-2">
-                            {customer.status && (
+                            {submission.status && (
                                 <Badge
                                     variant={
-                                        statusBadgeVariant[customer.status] ??
+                                        statusBadgeVariant[submission.status] ??
                                         'outline'
                                     }
                                 >
-                                    {customer.status.replace('_', ' ')}
+                                    {submission.status.replace('_', ' ')}
                                 </Badge>
                             )}
                             <Badge
-                                variant={
-                                    customer.waiver_agreed
-                                        ? 'default'
-                                        : 'outline'
-                                }
+                                variant={waiverSigned ? 'default' : 'outline'}
                             >
-                                {customer.waiver_agreed
+                                {waiverSigned
                                     ? 'Waiver signed'
                                     : 'Waiver not signed'}
                             </Badge>
-                            {customer.lifetime_value != null && (
+                            {submission.lifetime_value != null && (
                                 <span className="text-sm font-medium text-muted-foreground">
-                                    Lifetime value: $
+                                    Paid: $
                                     {Number(
-                                        customer.lifetime_value,
+                                        submission.lifetime_value,
                                     ).toLocaleString('en-US', {
                                         minimumFractionDigits: 2,
                                         maximumFractionDigits: 2,
@@ -149,7 +143,7 @@ export default function CustomersShow({
                         <Button variant="outline" size="sm" asChild>
                             <Link
                                 href={InvoiceController.create.url({
-                                    customer: customer.id,
+                                    submission: submission.id,
                                 })}
                             >
                                 <FileDown className="mr-1 size-4" />
@@ -157,7 +151,9 @@ export default function CustomersShow({
                             </Link>
                         </Button>
                         <Button variant="outline" size="sm" asChild>
-                            <Link href={CustomerController.edit.url(customer)}>
+                            <Link
+                                href={SubmissionController.edit.url(submission)}
+                            >
                                 <Pencil className="mr-1 size-4" />
                                 Edit
                             </Link>
@@ -165,20 +161,15 @@ export default function CustomersShow({
                     </div>
                 </div>
 
-                {(customer.email || customer.phone || customer.address) && (
+                {(customer.contact_detail ||
+                    customer.phone ||
+                    customer.address) && (
                     <div className="rounded-lg border border-sidebar-border bg-card p-4">
                         <h2 className="mb-2 text-sm font-medium text-muted-foreground">
-                            Contact
+                            Customer
                         </h2>
-                        {customer.email && (
-                            <p>
-                                <a
-                                    href={`mailto:${customer.email}`}
-                                    className="text-primary underline"
-                                >
-                                    {customer.email}
-                                </a>
-                            </p>
+                        {customer.contact_detail && (
+                            <p className="text-sm">{customer.contact_detail}</p>
                         )}
                         {customer.phone && (
                             <p>
@@ -191,77 +182,32 @@ export default function CustomersShow({
                             </p>
                         )}
                         {customer.address && (
-                            <p className="text-sm">{customer.address}</p>
+                            <p className="text-sm whitespace-pre-wrap">
+                                {customer.address}
+                            </p>
                         )}
                     </div>
                 )}
 
-                {customer.notes && (
+                {submission.notes && (
                     <div className="rounded-lg border border-sidebar-border bg-card p-4">
                         <h2 className="mb-2 text-sm font-medium text-muted-foreground">
-                            Notes
+                            Submission notes
                         </h2>
                         <p className="text-sm whitespace-pre-wrap">
-                            {customer.notes}
+                            {submission.notes}
                         </p>
                     </div>
                 )}
 
-                {customer.referral_source && (
+                {submission.referral_source && (
                     <div className="rounded-lg border border-sidebar-border bg-card p-4">
                         <h2 className="mb-2 text-sm font-medium text-muted-foreground">
                             Referral source
                         </h2>
-                        <p className="text-sm">{customer.referral_source}</p>
+                        <p className="text-sm">{submission.referral_source}</p>
                     </div>
                 )}
-
-                <div className="rounded-lg border border-sidebar-border bg-card p-4">
-                    <div className="mb-3 flex items-center justify-between gap-2">
-                        <h2 className="text-sm font-medium text-muted-foreground">
-                            Gmail contact
-                        </h2>
-                        {customer.email && (
-                            <Button size="sm" variant="outline" asChild>
-                                <Link href="/email">Open email</Link>
-                            </Button>
-                        )}
-                    </div>
-                    {emailContacts.length === 0 ? (
-                        <p className="text-sm text-muted-foreground">
-                            No synced Gmail contact linked to this customer yet.
-                        </p>
-                    ) : (
-                        <ul className="divide-y divide-sidebar-border">
-                            {emailContacts.map((contact) => (
-                                <li
-                                    key={contact.id}
-                                    className="py-3 first:pt-0 last:pb-0"
-                                >
-                                    <Link
-                                        href="/email"
-                                        className="block hover:underline"
-                                    >
-                                        <span className="text-sm font-medium">
-                                            {contact.latest_subject ||
-                                                '(No subject)'}
-                                        </span>
-                                    </Link>
-                                    <p className="mt-1 text-xs text-muted-foreground">
-                                        {contact.name
-                                            ? `${contact.name} <${contact.email}>`
-                                            : contact.email}
-                                    </p>
-                                    {contact.latest_snippet && (
-                                        <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
-                                            {contact.latest_snippet}
-                                        </p>
-                                    )}
-                                </li>
-                            ))}
-                        </ul>
-                    )}
-                </div>
 
                 <div className="rounded-lg border border-sidebar-border bg-card p-4">
                     <h2 className="mb-2 text-sm font-medium text-muted-foreground">
@@ -271,7 +217,7 @@ export default function CustomersShow({
                         <>
                             <p className="mb-2 text-sm text-muted-foreground">
                                 Share this link with the customer to collect
-                                their waiver for card repair services.
+                                their waiver for this submission.
                             </p>
                             <div className="flex flex-wrap items-center gap-2">
                                 <Input
@@ -303,7 +249,7 @@ export default function CustomersShow({
                         <Button size="sm" asChild>
                             <Link
                                 href={CardController.create.url({
-                                    customer: customer.id,
+                                    submission: submission.id,
                                 })}
                             >
                                 <Plus className="mr-1 size-4" />
@@ -311,20 +257,20 @@ export default function CustomersShow({
                             </Link>
                         </Button>
                     </div>
-                    {customer.cards.length === 0 ? (
+                    {submission.cards.length === 0 ? (
                         <p className="px-4 py-6 text-sm text-muted-foreground">
                             No cards yet.
                         </p>
                     ) : (
                         <ul className="divide-y divide-sidebar-border">
-                            {customer.cards.map((card) => (
+                            {submission.cards.map((card) => (
                                 <li
                                     key={card.id}
                                     className="flex items-center justify-between px-4 py-3"
                                 >
                                     <Link
                                         href={CardController.edit.url({
-                                            customer: customer.id,
+                                            submission: submission.id,
                                             card: card.id,
                                         })}
                                         className="hover:underline"
@@ -343,40 +289,38 @@ export default function CustomersShow({
                 <section className="rounded-lg border border-sidebar-border bg-card">
                     <div className="flex items-center justify-between border-b border-sidebar-border px-4 py-3">
                         <h2 className="font-medium">Payments</h2>
-                        <Button size="sm" asChild>
-                            <Link href={PaymentController.create.url()}>
-                                <Plus className="mr-1 size-4" />
-                                Add payment
-                            </Link>
+                        <Button
+                            size="sm"
+                            onClick={() => setIsPaymentModalOpen(true)}
+                        >
+                            <Plus className="mr-1 size-4" />
+                            Add payment
                         </Button>
                     </div>
-                    {customer.payments.length === 0 ? (
+                    {submission.payments.length === 0 ? (
                         <p className="px-4 py-6 text-sm text-muted-foreground">
                             No payments yet.
                         </p>
                     ) : (
                         <ul className="divide-y divide-sidebar-border">
-                            {customer.payments.map((payment) => (
+                            {submission.payments.map((payment) => (
                                 <li
                                     key={payment.id}
                                     className="flex items-center justify-between px-4 py-3"
                                 >
-                                    <Link
-                                        href={PaymentController.edit.url({ payment: payment.id })}
-                                        className="hover:underline"
-                                    >
-                                        ${payment.amount}
-                                        {payment.paid_at && (
-                                            <span className="ml-2 text-muted-foreground">
-                                                {payment.paid_at.slice(0, 10)}
-                                            </span>
-                                        )}
-                                        {payment.reference && (
-                                            <span className="ml-2 text-muted-foreground">
-                                                {payment.reference}
-                                            </span>
-                                        )}
-                                    </Link>
+                                    <div>
+                                        <p className="font-medium">
+                                            ${payment.amount}
+                                        </p>
+                                        <p className="text-sm text-muted-foreground">
+                                            {payment.paid_at?.slice(0, 10)}
+                                            {payment.reference && (
+                                                <span className="ml-2">
+                                                    {payment.reference}
+                                                </span>
+                                            )}
+                                        </p>
+                                    </div>
                                     <span className="text-sm text-muted-foreground capitalize">
                                         {payment.method?.replace('_', ' ')}
                                     </span>
@@ -385,6 +329,7 @@ export default function CustomersShow({
                         </ul>
                     )}
                 </section>
+
                 <section className="rounded-lg border border-sidebar-border bg-card">
                     <div className="flex items-center justify-between border-b border-sidebar-border px-4 py-3">
                         <h2 className="font-medium">Shipments</h2>
@@ -396,13 +341,13 @@ export default function CustomersShow({
                             Add shipment
                         </Button>
                     </div>
-                    {customer.shipments.length === 0 ? (
+                    {submission.shipments.length === 0 ? (
                         <p className="px-4 py-6 text-sm text-muted-foreground">
                             No shipments yet.
                         </p>
                     ) : (
                         <ul className="divide-y divide-sidebar-border">
-                            {customer.shipments.map((shipment) => (
+                            {submission.shipments.map((shipment) => (
                                 <li
                                     key={shipment.id}
                                     className="flex items-center justify-between px-4 py-3"
@@ -432,6 +377,79 @@ export default function CustomersShow({
                 </section>
 
                 <Dialog
+                    open={isPaymentModalOpen}
+                    onOpenChange={setIsPaymentModalOpen}
+                >
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Add payment</DialogTitle>
+                            <DialogDescription>
+                                Track a payment for {customer.name}.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <Form
+                            {...PaymentController.store.form({
+                                submission: submission.id,
+                            })}
+                            resetOnSuccess
+                            onSuccess={() => setIsPaymentModalOpen(false)}
+                            className="space-y-4"
+                        >
+                            {({ errors, processing }) => (
+                                <>
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="payment_amount">
+                                            Amount *
+                                        </Label>
+                                        <Input
+                                            id="payment_amount"
+                                            name="amount"
+                                            type="number"
+                                            step="0.01"
+                                            min="0"
+                                            required
+                                        />
+                                        <InputError message={errors.amount} />
+                                    </div>
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="payment_paid_at">
+                                            Date *
+                                        </Label>
+                                        <Input
+                                            id="payment_paid_at"
+                                            name="paid_at"
+                                            type="date"
+                                            defaultValue={new Date()
+                                                .toISOString()
+                                                .slice(0, 10)}
+                                            required
+                                        />
+                                        <InputError message={errors.paid_at} />
+                                    </div>
+                                    <DialogFooter>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            onClick={() =>
+                                                setIsPaymentModalOpen(false)
+                                            }
+                                        >
+                                            Cancel
+                                        </Button>
+                                        <Button
+                                            type="submit"
+                                            disabled={processing}
+                                        >
+                                            Add payment
+                                        </Button>
+                                    </DialogFooter>
+                                </>
+                            )}
+                        </Form>
+                    </DialogContent>
+                </Dialog>
+
+                <Dialog
                     open={isShipmentModalOpen}
                     onOpenChange={setIsShipmentModalOpen}
                 >
@@ -443,18 +461,15 @@ export default function CustomersShow({
                             </DialogDescription>
                         </DialogHeader>
                         <Form
-                            {...ShipmentController.store.form()}
+                            {...ShipmentController.store.form({
+                                submission: submission.id,
+                            })}
                             resetOnSuccess
                             onSuccess={() => setIsShipmentModalOpen(false)}
                             className="space-y-4"
                         >
                             {({ errors, processing }) => (
                                 <>
-                                    <input
-                                        type="hidden"
-                                        name="customer_id"
-                                        value={customer.id}
-                                    />
                                     <div className="grid gap-2">
                                         <Label htmlFor="shipment_amount">
                                             Amount *
@@ -524,7 +539,7 @@ export default function CustomersShow({
                                             type="submit"
                                             disabled={processing}
                                         >
-                                            Save shipment
+                                            Add shipment
                                         </Button>
                                     </DialogFooter>
                                 </>

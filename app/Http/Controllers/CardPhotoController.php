@@ -4,13 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreCardPhotoRequest;
 use App\Models\Card;
-use App\Models\Customer;
+use App\Models\Submission;
 use Illuminate\Http\RedirectResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class CardPhotoController extends Controller
 {
-    public function store(StoreCardPhotoRequest $request, Customer $customer, Card $card): RedirectResponse
+    public function store(StoreCardPhotoRequest $request, Submission $submission, Card $card): RedirectResponse
     {
         foreach ($request->file('photos') as $file) {
             $card->addMedia($file)->toMediaCollection('photos');
@@ -19,7 +19,7 @@ class CardPhotoController extends Controller
         return back();
     }
 
-    public function show(Customer $customer, Card $card, int $media): StreamedResponse
+    public function show(Submission $submission, Card $card, int $media): StreamedResponse
     {
         $this->authorize('view', $card);
 
@@ -30,24 +30,7 @@ class CardPhotoController extends Controller
         return $mediaItem->toInlineResponse(request());
     }
 
-    public function toggleTimeline(Customer $customer, Card $card, int $media): RedirectResponse
-    {
-        $this->authorize('update', $card);
-
-        $mediaItem = $card->getMedia('photos')->firstWhere('id', $media);
-
-        abort_unless($mediaItem, 404);
-
-        $mediaItem->setCustomProperty(
-            'show_on_timeline',
-            ! $mediaItem->getCustomProperty('show_on_timeline', false)
-        );
-        $mediaItem->save();
-
-        return back();
-    }
-
-    public function destroy(Customer $customer, Card $card, int $media): RedirectResponse
+    public function destroy(Submission $submission, Card $card, int $media): RedirectResponse
     {
         $this->authorize('update', $card);
 

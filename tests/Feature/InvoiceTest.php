@@ -2,6 +2,7 @@
 
 use App\Models\Card;
 use App\Models\Customer;
+use App\Models\Submission;
 use App\Models\User;
 use Illuminate\Support\Facades\URL;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -9,23 +10,24 @@ use Inertia\Testing\AssertableInertia as Assert;
 test('invoice create page renders for customer owner', function () {
     $user = User::factory()->create();
     $customer = Customer::factory()->for($user)->create();
-    Card::factory()->for($customer)->count(2)->create();
+    $submission = Submission::factory()->for($user)->for($customer)->create();
+    Card::factory()->for($submission)->count(2)->create();
 
-    $response = $this->actingAs($user)->get(route('customers.invoices.create', $customer));
+    $response = $this->actingAs($user)->get(route('submissions.invoices.create', $submission));
 
     $response->assertSuccessful();
     $response->assertInertia(fn (Assert $page) => $page
         ->component('invoices/create')
-        ->has('customer')
+        ->has('submission')
         ->has('downloadUrl')
         ->has('businessSettings'));
 });
 
 test('invoice create page forbidden for non-owner', function () {
     $user = User::factory()->create();
-    $customer = Customer::factory()->create();
+    $submission = Submission::factory()->create();
 
-    $response = $this->actingAs($user)->get(route('customers.invoices.create', $customer));
+    $response = $this->actingAs($user)->get(route('submissions.invoices.create', $submission));
 
     $response->assertForbidden();
 });
@@ -33,31 +35,31 @@ test('invoice create page forbidden for non-owner', function () {
 test('invoice create page includes customer cards', function () {
     $user = User::factory()->create();
     $customer = Customer::factory()->for($user)->create();
-    Card::factory()->for($customer)->count(3)->create();
+    $submission = Submission::factory()->for($user)->for($customer)->create();
+    Card::factory()->for($submission)->count(3)->create();
 
-    $response = $this->actingAs($user)->get(route('customers.invoices.create', $customer));
+    $response = $this->actingAs($user)->get(route('submissions.invoices.create', $submission));
 
     $response->assertInertia(fn (Assert $page) => $page
-        ->has('customer.cards', 3));
+        ->has('submission.cards', 3));
 });
 
 test('invoice create page does not leak sensitive card data', function () {
     $user = User::factory()->create();
     $customer = Customer::factory()->for($user)->create();
-    $card = Card::factory()->for($customer)->create([
-        'timeline_share_token' => 'secret-token-value',
+    $submission = Submission::factory()->for($user)->for($customer)->create();
+    $card = Card::factory()->for($submission)->create([
         'work_done' => 'Secret work notes',
     ]);
 
-    $response = $this->actingAs($user)->get(route('customers.invoices.create', $customer));
+    $response = $this->actingAs($user)->get(route('submissions.invoices.create', $submission));
 
     $response->assertInertia(fn (Assert $page) => $page
-        ->has('customer.cards', 1)
-        ->missing('customer.cards.0.timeline_share_token')
-        ->missing('customer.cards.0.work_done')
-        ->missing('customer.cards.0.photos')
-        ->missing('customer.user_id')
-        ->missing('customer.email'));
+        ->has('submission.cards', 1)
+        ->missing('submission.cards.0.work_done')
+        ->missing('submission.cards.0.photos')
+        ->missing('submission.user_id')
+        ->missing('submission.customer.contact_detail'));
 });
 
 test('invoice download returns pdf with valid signed url', function () {
@@ -70,12 +72,13 @@ test('invoice download returns pdf with valid signed url', function () {
         'company_name' => 'Test Co',
     ]);
     $customer = Customer::factory()->for($user)->create();
-    $card = Card::factory()->for($customer)->create(['restoration_hours' => 2]);
+    $submission = Submission::factory()->for($user)->for($customer)->create();
+    $card = Card::factory()->for($submission)->create(['restoration_hours' => 2]);
 
     $downloadUrl = URL::temporarySignedRoute(
-        'customers.invoices.download',
+        'submissions.invoices.download',
         now()->addHour(),
-        ['customer' => $customer],
+        ['submission' => $submission],
         absolute: false
     );
 
@@ -90,9 +93,10 @@ test('invoice download returns pdf with valid signed url', function () {
 test('invoice download fails without signed url', function () {
     $user = User::factory()->create();
     $customer = Customer::factory()->for($user)->create();
-    $card = Card::factory()->for($customer)->create();
+    $submission = Submission::factory()->for($user)->for($customer)->create();
+    $card = Card::factory()->for($submission)->create();
 
-    $response = $this->actingAs($user)->post(route('customers.invoices.download', $customer), [
+    $response = $this->actingAs($user)->post(route('submissions.invoices.download', $submission), [
         'card_ids' => [$card->id],
     ]);
 
@@ -101,12 +105,12 @@ test('invoice download fails without signed url', function () {
 
 test('invoice download validates card_ids required', function () {
     $user = User::factory()->create();
-    $customer = Customer::factory()->for($user)->create();
+    $submission = Submission::factory()->for($user)->create();
 
     $downloadUrl = URL::temporarySignedRoute(
-        'customers.invoices.download',
+        'submissions.invoices.download',
         now()->addHour(),
-        ['customer' => $customer],
+        ['submission' => $submission],
         absolute: false
     );
 
@@ -120,13 +124,14 @@ test('invoice download validates card_ids required', function () {
 test('invoice download validates cards belong to customer', function () {
     $user = User::factory()->create();
     $customer = Customer::factory()->for($user)->create();
-    $otherCustomer = Customer::factory()->for($user)->create();
-    $otherCard = Card::factory()->for($otherCustomer)->create();
+    $submission = Submission::factory()->for($user)->for($customer)->create();
+    $otherSubmission = Submission::factory()->for($user)->create();
+    $otherCard = Card::factory()->for($otherSubmission)->create();
 
     $downloadUrl = URL::temporarySignedRoute(
-        'customers.invoices.download',
+        'submissions.invoices.download',
         now()->addHour(),
-        ['customer' => $customer],
+        ['submission' => $submission],
         absolute: false
     );
 
@@ -139,12 +144,12 @@ test('invoice download validates cards belong to customer', function () {
 
 test('invoice download forbidden for non-owner', function () {
     $user = User::factory()->create();
-    $customer = Customer::factory()->create();
+    $submission = Submission::factory()->create();
 
     $downloadUrl = URL::temporarySignedRoute(
-        'customers.invoices.download',
+        'submissions.invoices.download',
         now()->addHour(),
-        ['customer' => $customer],
+        ['submission' => $submission],
         absolute: false
     );
 
@@ -165,12 +170,13 @@ test('invoice download includes shipping packaging handling in pdf', function ()
         'company_name' => 'Test Co',
     ]);
     $customer = Customer::factory()->for($user)->create();
-    $card = Card::factory()->for($customer)->create(['restoration_hours' => null]);
+    $submission = Submission::factory()->for($user)->for($customer)->create();
+    $card = Card::factory()->for($submission)->create(['restoration_hours' => null]);
 
     $downloadUrl = URL::temporarySignedRoute(
-        'customers.invoices.download',
+        'submissions.invoices.download',
         now()->addHour(),
-        ['customer' => $customer],
+        ['submission' => $submission],
         absolute: false
     );
 

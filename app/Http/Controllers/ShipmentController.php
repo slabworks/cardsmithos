@@ -4,94 +4,36 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreShipmentRequest;
 use App\Http\Requests\UpdateShipmentRequest;
-use App\Models\Customer;
 use App\Models\Shipment;
+use App\Models\Submission;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Inertia\Inertia;
-use Inertia\Response;
 
 class ShipmentController extends Controller
 {
-    public function index(Request $request): Response
+    public function store(StoreShipmentRequest $request, Submission $submission): RedirectResponse
     {
-        $this->authorize('viewAny', Shipment::class);
+        $this->authorize('update', $submission);
 
-        $customerIds = $request->user()->customers()->pluck('id');
+        $submission->shipments()->create($request->validated());
 
-        $shipments = Shipment::query()
-            ->with('customer:id,name')
-            ->whereIn('customer_id', $customerIds)
-            ->latest('shipped_at')
-            ->get();
-
-        return Inertia::render('shipments/index', [
-            'shipments' => $shipments,
-        ]);
+        return to_route('submissions.show', $submission);
     }
 
-    public function create(Request $request): Response
-    {
-        $this->authorize('create', Shipment::class);
-
-        return Inertia::render('shipments/create', [
-            'customers' => $request->user()
-                ->customers()
-                ->select('id', 'name')
-                ->orderBy('name')
-                ->get()
-                ->toArray(),
-        ]);
-    }
-
-    public function store(StoreShipmentRequest $request): RedirectResponse
-    {
-        $customer = Customer::query()->findOrFail($request->validated()['customer_id']);
-
-        $customer->shipments()->create($request->validated());
-
-        return to_route('shipments.index');
-    }
-
-    public function show(Shipment $shipment): Response
-    {
-        $this->authorize('view', $shipment);
-
-        $shipment->load('customer:id,name');
-
-        return Inertia::render('shipments/show', [
-            'shipment' => $shipment,
-        ]);
-    }
-
-    public function edit(Request $request, Shipment $shipment): Response
+    public function update(UpdateShipmentRequest $request, Submission $submission, Shipment $shipment): RedirectResponse
     {
         $this->authorize('update', $shipment);
 
-        return Inertia::render('shipments/edit', [
-            'shipment' => $shipment,
-            'customers' => $request->user()
-                ->customers()
-                ->select('id', 'name')
-                ->orderBy('name')
-                ->get()
-                ->toArray(),
-        ]);
-    }
-
-    public function update(UpdateShipmentRequest $request, Shipment $shipment): RedirectResponse
-    {
         $shipment->update($request->validated());
 
-        return to_route('shipments.index');
+        return to_route('submissions.show', $submission);
     }
 
-    public function destroy(Shipment $shipment): RedirectResponse
+    public function destroy(Submission $submission, Shipment $shipment): RedirectResponse
     {
         $this->authorize('delete', $shipment);
 
         $shipment->delete();
 
-        return to_route('shipments.index');
+        return to_route('submissions.show', $submission);
     }
 }

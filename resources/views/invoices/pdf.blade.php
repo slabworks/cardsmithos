@@ -32,7 +32,7 @@
     <div class="customer">
         <div class="customer-label">Bill to</div>
         <div><strong>{{ $customer->name }}</strong></div>
-        @if($customer->email)<div>{{ $customer->email }}</div>@endif
+        @if($customer->contact_detail)<div>{{ $customer->contact_detail }}</div>@endif
         @if($customer->address)<div>{{ $customer->address }}</div>@endif
     </div>
 

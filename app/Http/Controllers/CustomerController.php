@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\CustomerStatus;
+use App\Enums\CustomerPlatform;
 use App\Http\Requests\StoreCustomerRequest;
 use App\Http\Requests\UpdateCustomerRequest;
 use App\Models\Customer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\URL;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -18,13 +17,28 @@ class CustomerController extends Controller
     {
         $this->authorize('viewAny', Customer::class);
 
+        $search = trim((string) $request->query('search', ''));
+
         $customers = $request->user()
             ->customers()
-            ->latest()
+            ->select('id', 'name', 'contact_detail', 'platform', 'phone', 'address', 'created_at')
+            ->withCount('submissions')
+            ->when($search !== '', function ($query) use ($search): void {
+                $query->where(function ($query) use ($search): void {
+                    $query
+                        ->where('name', 'like', "%{$search}%")
+                        ->orWhere('contact_detail', 'like', "%{$search}%")
+                        ->orWhere('platform', 'like', "%{$search}%")
+                        ->orWhere('phone', 'like', "%{$search}%")
+                        ->orWhere('address', 'like', "%{$search}%");
+                });
+            })
+            ->orderBy('name')
             ->get();
 
         return Inertia::render('customers/index', [
             'customers' => $customers,
+            'filters' => ['search' => $search],
         ]);
     }
 
@@ -33,14 +47,7 @@ class CustomerController extends Controller
         $this->authorize('create', Customer::class);
 
         return Inertia::render('customers/create', [
-            'statusOptions' => array_map(
-                fn (CustomerStatus $case) => [
-                    'value' => $case->value,
-                    'label' => $case->label(),
-                    'color' => $case->color(),
-                ],
-                CustomerStatus::cases()
-            ),
+            'platformOptions' => $this->platformOptions(),
         ]);
     }
 
@@ -48,68 +55,22 @@ class CustomerController extends Controller
     {
         $customer = $request->user()->customers()->create($request->validated());
 
-        $customer->serviceWaiver()->create([
-            'expires_at' => now()->addDays(config('cardsmithos.waiver.expiration_days', 30)),
-        ]);
-
-        return to_route('customers.index');
-    }
-
-    /**
-     * Generate the absolute waiver URL for a customer (only when not yet signed).
-     * Creates a waiver for the customer if none exists (e.g. for customers created before waivers were added).
-     */
-    public static function waiverUrl(Customer $customer): ?string
-    {
-        $waiver = $customer->getOrCreateServiceWaiver();
-
-        if ($waiver->isSigned()) {
-            return null;
-        }
-
-        $relativeUrl = URL::temporarySignedRoute(
-            'waiver.show',
-            $waiver->expires_at,
-            ['customer' => $customer],
-            absolute: false
-        );
-
-        return url($relativeUrl);
-    }
-
-    public function show(Customer $customer): Response
-    {
-        $this->authorize('view', $customer);
-
-        $customer->load('cards', 'payments', 'shipments', 'serviceWaiver');
-        $customer->loadSum('payments as lifetime_value', 'amount');
-
-        $waiverUrl = self::waiverUrl($customer);
-
-        return Inertia::render('customers/show', [
-            'customer' => $customer,
-            'emailContacts' => $customer->gmailContacts()
-                ->latest('last_message_at')
-                ->limit(10)
-                ->get(['id', 'email', 'name', 'latest_subject', 'latest_snippet', 'last_message_at']),
-            'waiverUrl' => $waiverUrl,
-        ]);
+        return to_route('customers.edit', $customer);
     }
 
     public function edit(Customer $customer): Response
     {
         $this->authorize('update', $customer);
 
+        $customer->load([
+            'submissions' => fn ($query) => $query
+                ->select('id', 'customer_id', 'status', 'created_at')
+                ->latest(),
+        ]);
+
         return Inertia::render('customers/edit', [
             'customer' => $customer,
-            'statusOptions' => array_map(
-                fn (CustomerStatus $case) => [
-                    'value' => $case->value,
-                    'label' => $case->label(),
-                    'color' => $case->color(),
-                ],
-                CustomerStatus::cases()
-            ),
+            'platformOptions' => $this->platformOptions(),
         ]);
     }
 
@@ -117,15 +78,20 @@ class CustomerController extends Controller
     {
         $customer->update($request->validated());
 
-        return to_route('customers.show', $customer);
+        return to_route('customers.edit', $customer);
     }
 
-    public function destroy(Customer $customer): RedirectResponse
+    /**
+     * @return array<int, array{value: string, label: string}>
+     */
+    private function platformOptions(): array
     {
-        $this->authorize('delete', $customer);
-
-        $customer->delete();
-
-        return to_route('customers.index');
+        return array_map(
+            fn (CustomerPlatform $case) => [
+                'value' => $case->value,
+                'label' => $case->label(),
+            ],
+            CustomerPlatform::cases()
+        );
     }
 }

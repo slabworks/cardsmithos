@@ -140,7 +140,7 @@ class BusinessStatisticValueResolver
         };
 
         $notes = match ($statistic->system_key) {
-            'repeat_customers' => 'Calculated from customers with two or more recorded payments.',
+            'repeat_customers' => 'Calculated from customers with payments across two or more submissions.',
             'average_order_value' => 'Calculated from payments recorded this month.',
             'revenue_this_month' => 'Calculated from this month\'s payments, shipment fees, and expenses.',
             default => null,
@@ -153,36 +153,38 @@ class BusinessStatisticValueResolver
     {
         return (float) Customer::query()
             ->where('user_id', $user->id)
-            ->whereHas('payments')
-            ->withCount('payments')
+            ->whereHas('submissions.payments')
+            ->withCount(['submissions as paid_submissions_count' => function ($query): void {
+                $query->whereHas('payments');
+            }])
             ->get()
-            ->filter(fn (Customer $customer) => $customer->payments_count > 1)
+            ->filter(fn (Customer $customer) => $customer->paid_submissions_count > 1)
             ->count();
     }
 
     private function averageOrderValueThisMonth(User $user): float
     {
-        $customerIds = $user->customers()->pluck('id');
+        $submissionIds = $user->submissions()->pluck('id');
 
         return (float) Payment::query()
-            ->whereIn('customer_id', $customerIds)
+            ->whereIn('submission_id', $submissionIds)
             ->whereBetween('paid_at', [now()->startOfMonth()->toDateString(), now()->endOfMonth()->toDateString()])
             ->avg('amount');
     }
 
     private function revenueThisMonth(User $user): float
     {
-        $customerIds = $user->customers()->pluck('id');
+        $submissionIds = $user->submissions()->pluck('id');
         $start = now()->startOfMonth()->toDateString();
         $end = now()->endOfMonth()->toDateString();
 
         $payments = (float) Payment::query()
-            ->whereIn('customer_id', $customerIds)
+            ->whereIn('submission_id', $submissionIds)
             ->whereBetween('paid_at', [$start, $end])
             ->sum('amount');
 
         $shipments = (float) Shipment::query()
-            ->whereIn('customer_id', $customerIds)
+            ->whereIn('submission_id', $submissionIds)
             ->whereBetween('shipped_at', [$start, $end])
             ->sum('amount');
 

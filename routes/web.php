@@ -2,31 +2,24 @@
 
 use App\Http\Controllers\BusinessStatisticController;
 use App\Http\Controllers\BusinessStatisticRecordController;
-use App\Http\Controllers\CardActivityController;
 use App\Http\Controllers\CardController;
 use App\Http\Controllers\CardPhotoController;
-use App\Http\Controllers\CardTimelineController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\EmailController;
 use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PricingCalculatorController;
 use App\Http\Controllers\ShipmentController;
 use App\Http\Controllers\StorefrontController;
+use App\Http\Controllers\SubmissionController;
 use App\Http\Controllers\WaiverController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 
-Route::get('/cards/{card}/timeline/{token}', [CardTimelineController::class, 'show'])
-    ->name('card.timeline.show');
-Route::get('/cards/{card}/timeline/{token}/photos/{media}', [CardTimelineController::class, 'photo'])
-    ->name('card.timeline.photo');
-
 Route::middleware(['signed:relative'])->group(function (): void {
-    Route::get('/waiver/{customer}', [WaiverController::class, 'show'])->name('waiver.show');
-    Route::post('/waiver/{customer}', [WaiverController::class, 'sign'])->name('waiver.sign');
+    Route::get('/waiver/{submission}', [WaiverController::class, 'show'])->name('waiver.show');
+    Route::post('/waiver/{submission}', [WaiverController::class, 'sign'])->name('waiver.sign');
 });
 
 Route::get('/sitemap.xml', function () {
@@ -50,28 +43,22 @@ Route::inertia('/', 'welcome', [
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', DashboardController::class)->name('dashboard');
-    Route::get('email', [EmailController::class, 'index'])->name('email.index');
-    Route::post('email/sync', [EmailController::class, 'sync'])->name('email.sync');
-    Route::post('email/contacts/convert', [EmailController::class, 'convert'])->name('email.contacts.convert');
     Route::get('pricing-calculator', PricingCalculatorController::class)->name('pricing-calculator.index');
     Route::resource('statistics', BusinessStatisticController::class)
         ->parameters(['statistics' => 'businessStatistic']);
     Route::post('statistics/{businessStatistic}/records', [BusinessStatisticRecordController::class, 'store'])->name('statistics.records.store');
     Route::delete('statistics/{businessStatistic}/records/{businessStatisticRecord}', [BusinessStatisticRecordController::class, 'destroy'])->name('statistics.records.destroy');
     Route::resource('expenses', ExpenseController::class);
-    Route::resource('customers', CustomerController::class);
-    Route::resource('payments', PaymentController::class);
-    Route::resource('shipments', ShipmentController::class);
-    Route::resource('customers.cards', CardController::class)->except(['index', 'show'])->scoped();
-    Route::post('customers/{customer}/cards/{card}/timeline/rotate-token', [CardTimelineController::class, 'rotateToken'])
-        ->name('customers.cards.timeline.rotate-token');
-    Route::resource('customers.cards.activities', CardActivityController::class)->only(['store', 'update', 'destroy'])->scoped();
-    Route::post('customers/{customer}/cards/{card}/photos', [CardPhotoController::class, 'store'])->name('customers.cards.photos.store');
-    Route::get('customers/{customer}/cards/{card}/photos/{media}', [CardPhotoController::class, 'show'])->name('customers.cards.photos.show');
-    Route::post('customers/{customer}/cards/{card}/photos/{media}/toggle-timeline', [CardPhotoController::class, 'toggleTimeline'])->name('customers.cards.photos.toggle-timeline');
-    Route::delete('customers/{customer}/cards/{card}/photos/{media}', [CardPhotoController::class, 'destroy'])->name('customers.cards.photos.destroy');
-    Route::get('customers/{customer}/invoices/create', [InvoiceController::class, 'create'])->name('customers.invoices.create');
-    Route::post('customers/{customer}/invoices/download', [InvoiceController::class, 'download'])->name('customers.invoices.download')->middleware('signed:relative');
+    Route::resource('customers', CustomerController::class)->only(['index', 'create', 'store', 'edit', 'update']);
+    Route::resource('submissions', SubmissionController::class);
+    Route::resource('submissions.cards', CardController::class)->except(['index', 'show'])->scoped();
+    Route::resource('submissions.payments', PaymentController::class)->only(['store', 'update', 'destroy'])->scoped();
+    Route::resource('submissions.shipments', ShipmentController::class)->only(['store', 'update', 'destroy'])->scoped();
+    Route::post('submissions/{submission}/cards/{card}/photos', [CardPhotoController::class, 'store'])->name('submissions.cards.photos.store');
+    Route::get('submissions/{submission}/cards/{card}/photos/{media}', [CardPhotoController::class, 'show'])->name('submissions.cards.photos.show');
+    Route::delete('submissions/{submission}/cards/{card}/photos/{media}', [CardPhotoController::class, 'destroy'])->name('submissions.cards.photos.destroy');
+    Route::get('submissions/{submission}/invoices/create', [InvoiceController::class, 'create'])->name('submissions.invoices.create');
+    Route::post('submissions/{submission}/invoices/download', [InvoiceController::class, 'download'])->name('submissions.invoices.download')->middleware('signed:relative');
 });
 
 require __DIR__.'/settings.php';

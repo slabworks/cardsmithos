@@ -15,12 +15,10 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('name');
-            $table->string('status')->nullable()->index();
-            $table->string('email')->nullable()->index();
+            $table->string('contact_detail')->nullable()->index();
+            $table->string('platform')->nullable()->index();
             $table->string('phone')->nullable()->index();
             $table->text('address')->nullable();
-            $table->longText('notes')->nullable();
-            $table->string('referral_source')->nullable()->index();
             $table->timestamps();
         });
     }

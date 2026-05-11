@@ -2,14 +2,14 @@ import { Head, Link } from '@inertiajs/react';
 import axios from 'axios';
 import { FileDown } from 'lucide-react';
 import { useState } from 'react';
-import CustomerController from '@/actions/App/Http/Controllers/CustomerController';
+import SubmissionController from '@/actions/App/Http/Controllers/SubmissionController';
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
-import { index } from '@/routes/customers';
+import { index } from '@/routes/submissions';
 import type { BreadcrumbItem } from '@/types';
 
 type Card = {
@@ -20,13 +20,13 @@ type Card = {
 };
 
 export default function InvoicesCreate({
-    customer,
+    submission,
     downloadUrl,
     businessSettings,
 }: {
-    customer: {
+    submission: {
         id: number;
-        name: string;
+        customer: { id: number; name: string };
         cards: Card[];
     };
     downloadUrl: string;
@@ -74,7 +74,7 @@ export default function InvoicesCreate({
     const rateType = (card: Card): string =>
         card.restoration_hours !== null ? 'Hourly' : 'Fixed';
 
-    const selectedCards = customer.cards.filter((c) =>
+    const selectedCards = submission.cards.filter((c) =>
         selectedCardIds.has(c.id),
     );
     const subtotal = selectedCards.reduce((sum, c) => sum + cardFee(c), 0);
@@ -131,10 +131,10 @@ export default function InvoicesCreate({
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Customers', href: index() },
+        { title: 'Submissions', href: index() },
         {
-            title: customer.name,
-            href: CustomerController.show.url(customer),
+            title: submission.customer.name,
+            href: SubmissionController.show.url(submission),
         },
         { title: 'Generate invoice', href: '#' },
     ];
@@ -145,7 +145,7 @@ export default function InvoicesCreate({
             <div className="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-4">
                 <Heading
                     title="Generate invoice"
-                    description={`Create an invoice for ${customer.name}`}
+                    description={`Create an invoice for ${submission.customer.name}`}
                 />
 
                 <div className="max-w-2xl space-y-6">
@@ -153,13 +153,13 @@ export default function InvoicesCreate({
                         <h2 className="mb-3 text-sm font-medium text-muted-foreground">
                             Select cards to include
                         </h2>
-                        {customer.cards.length === 0 ? (
+                        {submission.cards.length === 0 ? (
                             <p className="text-sm text-muted-foreground">
-                                No cards for this customer.
+                                No cards for this submission.
                             </p>
                         ) : (
                             <ul className="divide-y rounded-lg border">
-                                {customer.cards.map((card) => (
+                                {submission.cards.map((card) => (
                                     <li
                                         key={card.id}
                                         className="flex items-center gap-3 px-4 py-3"
@@ -289,7 +289,9 @@ export default function InvoicesCreate({
                             {downloading ? 'Generating...' : 'Download invoice'}
                         </Button>
                         <Button variant="outline" asChild>
-                            <Link href={CustomerController.show.url(customer)}>
+                            <Link
+                                href={SubmissionController.show.url(submission)}
+                            >
                                 Cancel
                             </Link>
                         </Button>

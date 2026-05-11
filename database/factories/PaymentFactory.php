@@ -3,8 +3,8 @@
 namespace Database\Factories;
 
 use App\Enums\PaymentMethod;
-use App\Models\Customer;
 use App\Models\Payment;
+use App\Models\Submission;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -20,7 +20,7 @@ class PaymentFactory extends Factory
     public function definition(): array
     {
         return [
-            'customer_id' => Customer::factory(),
+            'submission_id' => Submission::factory(),
             'amount' => fake()->randomFloat(2, 10, 500),
             'paid_at' => fake()->dateTimeBetween('-1 year', 'now')->format('Y-m-d'),
             'method' => fake()->randomElement(PaymentMethod::cases()),

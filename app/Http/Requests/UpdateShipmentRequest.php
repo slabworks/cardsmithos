@@ -20,7 +20,6 @@ class UpdateShipmentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'customer_id' => ['required', 'exists:customers,id'],
             'amount' => ['required', 'numeric', 'min:0', 'max:9999999.99'],
             'shipped_at' => ['required', 'date'],
             'tracking_number' => ['nullable', 'string', 'max:255'],

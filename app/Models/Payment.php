@@ -17,7 +17,7 @@ class Payment extends Model
      * @var list<string>
      */
     protected $fillable = [
-        'customer_id',
+        'submission_id',
         'amount',
         'paid_at',
         'method',
@@ -36,8 +36,8 @@ class Payment extends Model
         ];
     }
 
-    public function customer(): BelongsTo
+    public function submission(): BelongsTo
     {
-        return $this->belongsTo(Customer::class);
+        return $this->belongsTo(Submission::class);
     }
 }

@@ -11,39 +11,46 @@ import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'Customers', href: index() }];
 
-const statusBadgeVariant: Record<string, 'default' | 'secondary' | 'outline'> =
-    {
-        cold_lead: 'secondary',
-        warm_lead: 'secondary',
-        hot_lead: 'default',
-        in_progress: 'default',
-        good_client: 'default',
-        inactive: 'outline',
-    };
+const formatPlatform = (platform: string) =>
+    platform === 'x_twitter'
+        ? 'X / Twitter'
+        : platform
+              .split('_')
+              .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+              .join(' ');
+
+type Customer = {
+    id: number;
+    name: string;
+    contact_detail: string | null;
+    platform: string | null;
+    phone: string | null;
+    address: string | null;
+    submissions_count: number;
+};
 
 export default function CustomersIndex({
     customers,
+    filters,
 }: {
-    customers: Array<{
-        id: number;
-        name: string;
-        status: string | null;
-        email: string | null;
-    }>;
+    customers: Customer[];
+    filters: { search: string };
 }) {
-    const [search, setSearch] = useState('');
+    const [search, setSearch] = useState(filters.search);
     const filtered = useMemo(() => {
-        const q = search.toLowerCase();
+        const query = search.toLowerCase();
 
-        if (!q) {
+        if (!query) {
             return customers;
         }
 
         return customers.filter(
-            (c) =>
-                c.name.toLowerCase().includes(q) ||
-                c.email?.toLowerCase().includes(q) ||
-                c.status?.replace('_', ' ').toLowerCase().includes(q),
+            (customer) =>
+                customer.name.toLowerCase().includes(query) ||
+                customer.contact_detail?.toLowerCase().includes(query) ||
+                customer.platform?.replace('_', ' ').includes(query) ||
+                customer.phone?.toLowerCase().includes(query) ||
+                customer.address?.toLowerCase().includes(query),
         );
     }, [customers, search]);
 
@@ -51,8 +58,13 @@ export default function CustomersIndex({
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Customers" />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-                <div className="flex items-center justify-between">
-                    <h1 className="text-xl font-semibold">Customers</h1>
+                <div className="flex items-center justify-between gap-4">
+                    <div>
+                        <h1 className="text-xl font-semibold">Customers</h1>
+                        <p className="text-sm text-muted-foreground">
+                            Search and update reusable customer contact records.
+                        </p>
+                    </div>
                     <Button asChild>
                         <Link href={create()}>
                             <Plus className="mr-2 size-4" />
@@ -60,17 +72,19 @@ export default function CustomersIndex({
                         </Link>
                     </Button>
                 </div>
+
                 {customers.length > 0 && (
                     <div className="relative">
                         <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
                         <Input
                             placeholder="Search customers..."
                             value={search}
-                            onChange={(e) => setSearch(e.target.value)}
+                            onChange={(event) => setSearch(event.target.value)}
                             className="pl-9"
                         />
                     </div>
                 )}
+
                 <div className="rounded-lg border border-sidebar-border bg-card">
                     {customers.length === 0 ? (
                         <div className="flex flex-col items-center justify-center gap-2 py-12 text-center">
@@ -95,35 +109,44 @@ export default function CustomersIndex({
                             {filtered.map((customer) => (
                                 <li key={customer.id}>
                                     <Link
-                                        href={CustomerController.show.url(
+                                        href={CustomerController.edit.url(
                                             customer,
                                         )}
-                                        className="flex items-center justify-between px-4 py-3 hover:bg-muted/50"
+                                        className="flex items-center justify-between gap-4 px-4 py-3 hover:bg-muted/50"
                                     >
-                                        <div className="flex flex-col gap-0.5">
-                                            <span className="font-medium">
+                                        <div className="flex min-w-0 flex-col gap-0.5">
+                                            <span className="truncate font-medium">
                                                 {customer.name}
                                             </span>
-                                            {customer.email && (
-                                                <span className="text-sm text-muted-foreground">
-                                                    {customer.email}
-                                                </span>
-                                            )}
+                                            <span className="truncate text-sm text-muted-foreground">
+                                                {customer.contact_detail ??
+                                                    customer.phone ??
+                                                    'No contact details'}
+                                            </span>
                                         </div>
-                                        {customer.status && (
+                                        <div className="flex shrink-0 items-center gap-2">
+                                            {customer.platform && (
+                                                <Badge variant="secondary">
+                                                    {formatPlatform(
+                                                        customer.platform,
+                                                    )}
+                                                </Badge>
+                                            )}
                                             <Badge
                                                 variant={
-                                                    statusBadgeVariant[
-                                                        customer.status
-                                                    ] ?? 'outline'
+                                                    customer.submissions_count >
+                                                    0
+                                                        ? 'default'
+                                                        : 'outline'
                                                 }
                                             >
-                                                {customer.status.replace(
-                                                    '_',
-                                                    ' ',
-                                                )}
+                                                {customer.submissions_count}{' '}
+                                                {customer.submissions_count ===
+                                                1
+                                                    ? 'submission'
+                                                    : 'submissions'}
                                             </Badge>
-                                        )}
+                                        </div>
                                     </Link>
                                 </li>
                             ))}

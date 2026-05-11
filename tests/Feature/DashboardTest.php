@@ -6,6 +6,7 @@ use App\Models\Customer;
 use App\Models\Expense;
 use App\Models\Payment;
 use App\Models\Shipment;
+use App\Models\Submission;
 use App\Models\User;
 
 test('guests are redirected to the login page', function () {
@@ -49,9 +50,11 @@ test('dashboard shows revenue stats when user has payments', function () {
         'name' => 'Newest Customer',
         'created_at' => now(),
     ]);
-    Payment::factory()->for($customer1)->create(['amount' => 100.50]);
-    Payment::factory()->for($customer1)->create(['amount' => 49.50]);
-    Payment::factory()->for($customer2)->create(['amount' => 75.00]);
+    $submission1 = Submission::factory()->for($user)->for($customer1)->create();
+    $submission2 = Submission::factory()->for($user)->for($customer2)->create();
+    Payment::factory()->for($submission1)->create(['amount' => 100.50]);
+    Payment::factory()->for($submission1)->create(['amount' => 49.50]);
+    Payment::factory()->for($submission2)->create(['amount' => 75.00]);
 
     $this->actingAs($user);
     $response = $this->get(route('dashboard'));
@@ -70,11 +73,12 @@ test('dashboard shows revenue stats when user has payments', function () {
 test('dashboard shows gross revenue separately from net revenue', function () {
     $user = User::factory()->create();
     $customer = Customer::factory()->for($user)->create();
+    $submission = Submission::factory()->for($user)->for($customer)->create();
 
-    Payment::factory()->for($customer)->create([
+    Payment::factory()->for($submission)->create([
         'amount' => 200.00,
     ]);
-    Shipment::factory()->for($customer)->create([
+    Shipment::factory()->for($submission)->create([
         'amount' => 25.00,
     ]);
     Expense::factory()->for($user)->create([
@@ -95,21 +99,22 @@ test('dashboard shows gross revenue separately from net revenue', function () {
 test('dashboard subtracts shipment fees and expenses from net revenue', function () {
     $user = User::factory()->create();
     $customer = Customer::factory()->for($user)->create();
+    $submission = Submission::factory()->for($user)->for($customer)->create();
 
-    Payment::factory()->for($customer)->create([
+    Payment::factory()->for($submission)->create([
         'amount' => 100.00,
         'paid_at' => now()->format('Y-m-d'),
     ]);
-    Payment::factory()->for($customer)->create([
+    Payment::factory()->for($submission)->create([
         'amount' => 50.00,
         'paid_at' => now()->subMonth()->format('Y-m-d'),
     ]);
 
-    Shipment::factory()->for($customer)->create([
+    Shipment::factory()->for($submission)->create([
         'amount' => 15.00,
         'shipped_at' => now()->format('Y-m-d'),
     ]);
-    Shipment::factory()->for($customer)->create([
+    Shipment::factory()->for($submission)->create([
         'amount' => 10.00,
         'shipped_at' => now()->subMonth()->format('Y-m-d'),
     ]);
@@ -120,8 +125,9 @@ test('dashboard subtracts shipment fees and expenses from net revenue', function
 
     $otherUser = User::factory()->create();
     $otherCustomer = Customer::factory()->for($otherUser)->create();
-    Payment::factory()->for($otherCustomer)->create(['amount' => 999.00]);
-    Shipment::factory()->for($otherCustomer)->create(['amount' => 500.00]);
+    $otherSubmission = Submission::factory()->for($otherUser)->for($otherCustomer)->create();
+    Payment::factory()->for($otherSubmission)->create(['amount' => 999.00]);
+    Shipment::factory()->for($otherSubmission)->create(['amount' => 500.00]);
 
     $this->actingAs($user);
     $response = $this->get(route('dashboard'));
@@ -141,16 +147,17 @@ test('dashboard subtracts shipment fees and expenses from net revenue', function
 test('dashboard groups kanban cards by status', function () {
     $user = User::factory()->create();
     $customer = Customer::factory()->for($user)->create();
+    $submission = Submission::factory()->for($user)->for($customer)->create();
 
-    $backlogCard = Card::factory()->for($customer)->create([
+    $backlogCard = Card::factory()->for($submission)->create([
         'name' => 'Backlog Card',
         'status' => CardStatus::Backlog,
     ]);
-    $pendingCard = Card::factory()->for($customer)->create([
+    $pendingCard = Card::factory()->for($submission)->create([
         'name' => 'Pending Card',
         'status' => CardStatus::Pending,
     ]);
-    $inProgressCard = Card::factory()->for($customer)->create([
+    $inProgressCard = Card::factory()->for($submission)->create([
         'name' => 'In Progress Card',
         'status' => CardStatus::InProgress,
     ]);
@@ -167,18 +174,19 @@ test('dashboard groups kanban cards by status', function () {
         ->where('cardsByStatus.backlog.0.name', 'Backlog Card')
         ->where('cardsByStatus.pending.0.name', 'Pending Card')
         ->where('cardsByStatus.in_progress.0.name', 'In Progress Card')
-        ->where('cardsByStatus.backlog.0.customer.name', $customer->name)
+        ->where('cardsByStatus.backlog.0.submission.customer.name', $customer->name)
     );
 });
 
 test('dashboard excludes repaired cards from kanban board', function () {
     $user = User::factory()->create();
     $customer = Customer::factory()->for($user)->create();
+    $submission = Submission::factory()->for($user)->for($customer)->create();
 
-    Card::factory()->for($customer)->create([
+    Card::factory()->for($submission)->create([
         'status' => CardStatus::Repaired,
     ]);
-    Card::factory()->for($customer)->create([
+    Card::factory()->for($submission)->create([
         'status' => CardStatus::Backlog,
     ]);
 
@@ -200,9 +208,11 @@ test('dashboard excludes other users cards from kanban board', function () {
 
     $customer = Customer::factory()->for($user)->create();
     $otherCustomer = Customer::factory()->for($otherUser)->create();
+    $submission = Submission::factory()->for($user)->for($customer)->create();
+    $otherSubmission = Submission::factory()->for($otherUser)->for($otherCustomer)->create();
 
-    Card::factory()->for($customer)->create(['status' => CardStatus::Backlog]);
-    Card::factory()->for($otherCustomer)->create(['status' => CardStatus::Backlog]);
+    Card::factory()->for($submission)->create(['status' => CardStatus::Backlog]);
+    Card::factory()->for($otherSubmission)->create(['status' => CardStatus::Backlog]);
 
     $this->actingAs($user);
     $response = $this->get(route('dashboard'));

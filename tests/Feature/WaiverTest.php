@@ -1,20 +1,22 @@
 <?php
 
 use App\Models\Customer;
+use App\Models\Submission;
 use App\Models\User;
 use Illuminate\Support\Facades\URL;
 
 test('signed waiver URL shows waiver form when not signed', function () {
     $user = User::factory()->create();
-    $customer = Customer::factory()->for($user)->create(['name' => 'Jane', 'email' => 'jane@example.com']);
-    $waiver = $customer->serviceWaiver()->create([
+    $customer = Customer::factory()->for($user)->create(['name' => 'Jane', 'contact_detail' => '@jane']);
+    $submission = Submission::factory()->for($user)->for($customer)->create();
+    $waiver = $submission->serviceWaiver()->create([
         'expires_at' => now()->addDays(30),
     ]);
 
     $url = URL::temporarySignedRoute(
         'waiver.show',
         $waiver->expires_at,
-        ['customer' => $customer],
+        ['submission' => $submission],
         absolute: false
     );
 
@@ -26,20 +28,21 @@ test('signed waiver URL shows waiver form when not signed', function () {
     $response->assertSee('Service Waiver');
 });
 
-test('waiver sign records signature and updates customer', function () {
+test('waiver sign records signature', function () {
     $user = User::factory()->create();
     $customer = Customer::factory()->for($user)->create([
         'name' => 'Jane',
-        'email' => 'jane@example.com',
+        'contact_detail' => 'jane@example.com',
     ]);
-    $waiver = $customer->serviceWaiver()->create([
+    $submission = Submission::factory()->for($user)->for($customer)->create();
+    $waiver = $submission->serviceWaiver()->create([
         'expires_at' => now()->addDays(30),
     ]);
 
     $url = URL::temporarySignedRoute(
         'waiver.show',
         $waiver->expires_at,
-        ['customer' => $customer],
+        ['submission' => $submission],
         absolute: false
     );
 
@@ -57,16 +60,13 @@ test('waiver sign records signature and updates customer', function () {
     expect($waiver->signed_at)->not->toBeNull();
     expect($waiver->signer_name)->toBe('Jane Doe');
     expect($waiver->signer_email)->toBe('jane@example.com');
-
-    $customer->refresh();
-    expect($customer->waiver_agreed)->toBeTrue();
-    expect($customer->waiver_agreed_at)->not->toBeNull();
 });
 
 test('waiver show displays already signed when waiver signed', function () {
     $user = User::factory()->create();
     $customer = Customer::factory()->for($user)->create(['name' => 'Jane']);
-    $waiver = $customer->serviceWaiver()->create([
+    $submission = Submission::factory()->for($user)->for($customer)->create();
+    $waiver = $submission->serviceWaiver()->create([
         'expires_at' => now()->addDays(30),
         'signed_at' => now(),
     ]);
@@ -74,7 +74,7 @@ test('waiver show displays already signed when waiver signed', function () {
     $url = URL::temporarySignedRoute(
         'waiver.show',
         $waiver->expires_at,
-        ['customer' => $customer],
+        ['submission' => $submission],
         absolute: false
     );
 
@@ -88,14 +88,15 @@ test('waiver show displays already signed when waiver signed', function () {
 test('expired signed waiver URL returns 403', function () {
     $user = User::factory()->create();
     $customer = Customer::factory()->for($user)->create(['name' => 'Jane']);
-    $waiver = $customer->serviceWaiver()->create([
+    $submission = Submission::factory()->for($user)->for($customer)->create();
+    $waiver = $submission->serviceWaiver()->create([
         'expires_at' => now()->subDay(),
     ]);
 
     $url = URL::temporarySignedRoute(
         'waiver.show',
         $waiver->expires_at,
-        ['customer' => $customer],
+        ['submission' => $submission],
         absolute: false
     );
 
@@ -107,14 +108,15 @@ test('expired signed waiver URL returns 403', function () {
 test('waiver show displays expired when waiver record expired but URL still valid', function () {
     $user = User::factory()->create();
     $customer = Customer::factory()->for($user)->create(['name' => 'Jane']);
-    $waiver = $customer->serviceWaiver()->create([
+    $submission = Submission::factory()->for($user)->for($customer)->create();
+    $waiver = $submission->serviceWaiver()->create([
         'expires_at' => now()->subDay(),
     ]);
 
     $url = URL::temporarySignedRoute(
         'waiver.show',
         now()->addDays(1),
-        ['customer' => $customer],
+        ['submission' => $submission],
         absolute: false
     );
 
@@ -127,10 +129,10 @@ test('waiver show displays expired when waiver record expired but URL still vali
 
 test('invalid signature returns 403', function () {
     $user = User::factory()->create();
-    $customer = Customer::factory()->for($user)->create();
-    $customer->serviceWaiver()->create(['expires_at' => now()->addDays(30)]);
+    $submission = Submission::factory()->for($user)->create();
+    $submission->serviceWaiver()->create(['expires_at' => now()->addDays(30)]);
 
-    $response = $this->get(route('waiver.show', $customer));
+    $response = $this->get(route('waiver.show', $submission));
 
     $response->assertForbidden();
 });

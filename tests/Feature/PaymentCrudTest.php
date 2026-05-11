@@ -2,82 +2,32 @@
 
 use App\Models\Customer;
 use App\Models\Payment;
+use App\Models\Submission;
 use App\Models\User;
-use Inertia\Testing\AssertableInertia as Assert;
 
-test('payment index lists only owned payments', function () {
+test('payment can be created for submission', function () {
     $user = User::factory()->create();
     $customer = Customer::factory()->for($user)->create();
-    Payment::factory()->for($customer)->count(2)->create();
-    Payment::factory()->create();
+    $submission = Submission::factory()->for($user)->for($customer)->create();
 
-    $response = $this->actingAs($user)->get(route('payments.index'));
-
-    $response->assertSuccessful();
-    $response->assertInertia(fn (Assert $page) => $page
-        ->component('payments/index')
-        ->has('payments', 2));
-});
-
-test('payment create page renders', function () {
-    $user = User::factory()->create();
-    Customer::factory()->for($user)->create();
-
-    $response = $this->actingAs($user)->get(route('payments.create'));
-
-    $response->assertSuccessful();
-    $response->assertInertia(fn (Assert $page) => $page
-        ->component('payments/create')
-        ->has('customers'));
-});
-
-test('payment show displays payment', function () {
-    $user = User::factory()->create();
-    $customer = Customer::factory()->for($user)->create(['name' => 'Jane Doe']);
-    $payment = Payment::factory()->for($customer)->create(['amount' => 125]);
-
-    $response = $this->actingAs($user)->get(route('payments.show', $payment));
-
-    $response->assertSuccessful();
-    $response->assertInertia(fn (Assert $page) => $page
-        ->component('payments/show')
-        ->where('payment.customer.name', 'Jane Doe')
-        ->where('payment.amount', '125.00'));
-});
-
-test('payment show forbidden for other user', function () {
-    $user = User::factory()->create();
-    $payment = Payment::factory()->create();
-
-    $response = $this->actingAs($user)->get(route('payments.show', $payment));
-
-    $response->assertForbidden();
-});
-
-test('payment can be created', function () {
-    $user = User::factory()->create();
-    $customer = Customer::factory()->for($user)->create();
-
-    $response = $this->actingAs($user)->post(route('payments.store'), [
-        'customer_id' => $customer->id,
+    $response = $this->actingAs($user)->post(route('submissions.payments.store', $submission), [
         'amount' => 150.00,
         'paid_at' => '2026-03-17',
     ]);
 
-    $response->assertRedirect(route('payments.index'));
+    $response->assertRedirect(route('submissions.show', $submission));
     $this->assertDatabaseHas('payments', [
-        'customer_id' => $customer->id,
+        'submission_id' => $submission->id,
         'amount' => 150.00,
         'paid_at' => '2026-03-17 00:00:00',
     ]);
 });
 
-test('payment creation validates customer ownership', function () {
+test('payment creation validates submission ownership', function () {
     $user = User::factory()->create();
-    $customer = Customer::factory()->create();
+    $submission = Submission::factory()->create();
 
-    $response = $this->actingAs($user)->post(route('payments.store'), [
-        'customer_id' => $customer->id,
+    $response = $this->actingAs($user)->post(route('submissions.payments.store', $submission), [
         'amount' => 150.00,
         'paid_at' => '2026-03-17',
     ]);
@@ -88,17 +38,15 @@ test('payment creation validates customer ownership', function () {
 test('payment can be updated', function () {
     $user = User::factory()->create();
     $customer = Customer::factory()->for($user)->create();
-    $payment = Payment::factory()->for($customer)->create([
-        'amount' => 50,
-    ]);
+    $submission = Submission::factory()->for($user)->for($customer)->create();
+    $payment = Payment::factory()->for($submission)->create(['amount' => 50]);
 
-    $response = $this->actingAs($user)->put(route('payments.update', $payment), [
-        'customer_id' => $customer->id,
+    $response = $this->actingAs($user)->put(route('submissions.payments.update', [$submission, $payment]), [
         'amount' => 75.50,
         'paid_at' => '2026-03-18',
     ]);
 
-    $response->assertRedirect(route('payments.index'));
+    $response->assertRedirect(route('submissions.show', $submission));
     $payment->refresh();
     expect((float) $payment->amount)->toBe(75.50);
 });
@@ -106,10 +54,11 @@ test('payment can be updated', function () {
 test('payment can be deleted', function () {
     $user = User::factory()->create();
     $customer = Customer::factory()->for($user)->create();
-    $payment = Payment::factory()->for($customer)->create();
+    $submission = Submission::factory()->for($user)->for($customer)->create();
+    $payment = Payment::factory()->for($submission)->create();
 
-    $response = $this->actingAs($user)->delete(route('payments.destroy', $payment));
+    $response = $this->actingAs($user)->delete(route('submissions.payments.destroy', [$submission, $payment]));
 
-    $response->assertRedirect(route('payments.index'));
+    $response->assertRedirect(route('submissions.show', $submission));
     $this->assertDatabaseMissing('payments', ['id' => $payment->id]);
 });
