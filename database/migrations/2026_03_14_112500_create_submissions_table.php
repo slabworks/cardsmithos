@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('customer_id')->constrained()->cascadeOnDelete();
-            $table->string('status')->nullable()->index();
+            $table->string('status')->default('pending')->index();
             $table->longText('notes')->nullable();
             $table->string('referral_source')->nullable()->index();
             $table->timestamps();

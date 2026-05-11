@@ -32,11 +32,6 @@ const sidebarNavItems: NavItem[] = [
         href: editBusiness(),
         icon: null,
     },
-    {
-        title: 'Integrations',
-        href: '/settings/integrations',
-        icon: null,
-    },
 ];
 
 export default function SettingsLayout({ children }: PropsWithChildren) {

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\SubmissionReferralSource;
 use App\Enums\SubmissionStatus;
 use App\Http\Requests\StoreSubmissionRequest;
 use App\Http\Requests\UpdateSubmissionRequest;
@@ -41,6 +42,7 @@ class SubmissionController extends Controller
                 ->orderBy('name')
                 ->get(),
             'statusOptions' => $this->statusOptions(),
+            'referralSourceOptions' => $this->referralSourceOptions(),
         ]);
     }
 
@@ -93,10 +95,6 @@ class SubmissionController extends Controller
 
         return Inertia::render('submissions/show', [
             'submission' => $submission,
-            'emailContacts' => $submission->customer->gmailContacts()
-                ->latest('last_message_at')
-                ->limit(10)
-                ->get(['id', 'email', 'name', 'latest_subject', 'latest_snippet', 'last_message_at']),
             'waiverUrl' => self::waiverUrl($submission),
         ]);
     }
@@ -115,6 +113,7 @@ class SubmissionController extends Controller
                 ->orderBy('name')
                 ->get(),
             'statusOptions' => $this->statusOptions(),
+            'referralSourceOptions' => $this->referralSourceOptions(),
         ]);
     }
 
@@ -182,6 +181,20 @@ class SubmissionController extends Controller
                 'color' => $case->color(),
             ],
             SubmissionStatus::cases()
+        );
+    }
+
+    /**
+     * @return array<int, array{value: string, label: string}>
+     */
+    private function referralSourceOptions(): array
+    {
+        return array_map(
+            fn (SubmissionReferralSource $case) => [
+                'value' => $case->value,
+                'label' => $case->label(),
+            ],
+            SubmissionReferralSource::cases()
         );
     }
 }

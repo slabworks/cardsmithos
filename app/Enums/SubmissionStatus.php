@@ -4,31 +4,28 @@ namespace App\Enums;
 
 enum SubmissionStatus: string
 {
-    case ColdLead = 'cold_lead';
-    case WarmLead = 'warm_lead';
-    case HotLead = 'hot_lead';
+    case Pending = 'pending';
     case InProgress = 'in_progress';
-    case Inactive = 'inactive';
+    case Complete = 'complete';
+    case Cancelled = 'cancelled';
 
     public function label(): string
     {
         return match ($this) {
-            self::ColdLead => 'Cold Lead',
-            self::WarmLead => 'Warm Lead',
-            self::HotLead => 'Hot Lead',
+            self::Pending => 'Pending',
             self::InProgress => 'In Progress',
-            self::Inactive => 'Inactive',
+            self::Complete => 'Complete',
+            self::Cancelled => 'Cancelled',
         };
     }
 
     public function color(): string
     {
         return match ($this) {
-            self::ColdLead => 'slate',
-            self::WarmLead => 'sky',
-            self::HotLead => 'amber',
+            self::Pending => 'amber',
             self::InProgress => 'blue',
-            self::Inactive => 'gray',
+            self::Complete => 'emerald',
+            self::Cancelled => 'gray',
         };
     }
 }

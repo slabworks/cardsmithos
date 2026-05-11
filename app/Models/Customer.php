@@ -36,12 +36,4 @@ class Customer extends Model
     {
         return $this->hasMany(Submission::class);
     }
-
-    /**
-     * @return HasMany<GmailContact>
-     */
-    public function gmailContacts(): HasMany
-    {
-        return $this->hasMany(GmailContact::class);
-    }
 }

@@ -13,11 +13,10 @@ const breadcrumbs: BreadcrumbItem[] = [{ title: 'Submissions', href: index() }];
 
 const statusBadgeVariant: Record<string, 'default' | 'secondary' | 'outline'> =
     {
-        cold_lead: 'secondary',
-        warm_lead: 'secondary',
-        hot_lead: 'default',
+        pending: 'secondary',
         in_progress: 'default',
-        inactive: 'outline',
+        complete: 'default',
+        cancelled: 'outline',
     };
 
 type SubmissionItem = {

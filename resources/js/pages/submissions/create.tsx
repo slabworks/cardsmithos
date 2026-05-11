@@ -1,4 +1,5 @@
 import { Form, Head, Link } from '@inertiajs/react';
+import { useState } from 'react';
 import SubmissionController from '@/actions/App/Http/Controllers/SubmissionController';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
@@ -17,10 +18,15 @@ const breadcrumbs: BreadcrumbItem[] = [
 export default function SubmissionsCreate({
     customers,
     statusOptions,
+    referralSourceOptions,
 }: {
     customers: Array<{ id: number; name: string; email: string | null }>;
     statusOptions: Array<{ value: string; label: string; color: string }>;
+    referralSourceOptions: Array<{ value: string; label: string }>;
 }) {
+    const [selectedCustomerId, setSelectedCustomerId] = useState('');
+    const isUsingExistingCustomer = selectedCustomerId !== '';
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Add submission" />
@@ -43,6 +49,12 @@ export default function SubmissionsCreate({
                                     <select
                                         id="customer_id"
                                         name="customer_id"
+                                        value={selectedCustomerId}
+                                        onChange={(event) =>
+                                            setSelectedCustomerId(
+                                                event.target.value,
+                                            )
+                                        }
                                         className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
                                     >
                                         <option value="">
@@ -63,40 +75,50 @@ export default function SubmissionsCreate({
                                     <InputError message={errors.customer_id} />
                                 </div>
                             )}
-                            <div className="grid gap-2">
-                                <Label htmlFor="name">Customer name *</Label>
-                                <Input
-                                    id="name"
-                                    name="name"
-                                    autoComplete="name"
-                                />
-                                <InputError message={errors.name} />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="email">Email</Label>
-                                <Input
-                                    id="email"
-                                    type="email"
-                                    name="email"
-                                    autoComplete="email"
-                                />
-                                <InputError message={errors.email} />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="phone">Phone</Label>
-                                <Input id="phone" name="phone" type="tel" />
-                                <InputError message={errors.phone} />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="address">Address</Label>
-                                <textarea
-                                    id="address"
-                                    name="address"
-                                    rows={2}
-                                    className="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
-                                />
-                                <InputError message={errors.address} />
-                            </div>
+                            {!isUsingExistingCustomer && (
+                                <>
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="name">
+                                            Customer name *
+                                        </Label>
+                                        <Input
+                                            id="name"
+                                            name="name"
+                                            autoComplete="name"
+                                        />
+                                        <InputError message={errors.name} />
+                                    </div>
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="email">Email</Label>
+                                        <Input
+                                            id="email"
+                                            type="email"
+                                            name="email"
+                                            autoComplete="email"
+                                        />
+                                        <InputError message={errors.email} />
+                                    </div>
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="phone">Phone</Label>
+                                        <Input
+                                            id="phone"
+                                            name="phone"
+                                            type="tel"
+                                        />
+                                        <InputError message={errors.phone} />
+                                    </div>
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="address">Address</Label>
+                                        <textarea
+                                            id="address"
+                                            name="address"
+                                            rows={2}
+                                            className="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
+                                        />
+                                        <InputError message={errors.address} />
+                                    </div>
+                                </>
+                            )}
                             <div className="grid gap-2">
                                 <Label htmlFor="status">
                                     Submission status
@@ -104,9 +126,9 @@ export default function SubmissionsCreate({
                                 <select
                                     id="status"
                                     name="status"
+                                    defaultValue="pending"
                                     className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
                                 >
-                                    <option value="">None</option>
                                     {statusOptions.map((option) => (
                                         <option
                                             key={option.value}
@@ -132,10 +154,21 @@ export default function SubmissionsCreate({
                                 <Label htmlFor="referral_source">
                                     Referral source
                                 </Label>
-                                <Input
+                                <select
                                     id="referral_source"
                                     name="referral_source"
-                                />
+                                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
+                                >
+                                    <option value="">None</option>
+                                    {referralSourceOptions.map((option) => (
+                                        <option
+                                            key={option.value}
+                                            value={option.value}
+                                        >
+                                            {option.label}
+                                        </option>
+                                    ))}
+                                </select>
                                 <InputError message={errors.referral_source} />
                             </div>
                             <div className="flex gap-2">

@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\SubmissionReferralSource;
 use App\Enums\SubmissionStatus;
 use App\Models\Customer;
 use App\Models\Submission;
@@ -36,10 +37,9 @@ class SubmissionFactory extends Factory
                 'Prefers detailed before/after photos for each card. Posts results on Reddit.',
                 'Local collector - drops off and picks up in person. No shipping needed.',
             ]),
-            'referral_source' => fake()->optional(0.4)->randomElement([
-                'Instagram', 'Discord', 'eBay', 'Local card show', 'Facebook group',
-                'Reddit', 'Friend referral', 'YouTube', 'TikTok', 'Google search',
-            ]),
+            'referral_source' => fake()->optional(0.4)->randomElement(
+                array_map(fn (SubmissionReferralSource $case) => $case->value, SubmissionReferralSource::cases())
+            ),
         ];
     }
 }

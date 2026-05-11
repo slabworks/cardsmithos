@@ -28,10 +28,12 @@ export default function SubmissionsEdit({
     submission,
     customers,
     statusOptions,
+    referralSourceOptions,
 }: {
     submission: Submission;
     customers: Array<{ id: number; name: string; email: string | null }>;
     statusOptions: Array<{ value: string; label: string; color: string }>;
+    referralSourceOptions: Array<{ value: string; label: string }>;
 }) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Submissions', href: index() },
@@ -133,10 +135,11 @@ export default function SubmissionsEdit({
                                 <select
                                     id="status"
                                     name="status"
-                                    defaultValue={submission.status ?? ''}
+                                    defaultValue={
+                                        submission.status ?? 'pending'
+                                    }
                                     className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
                                 >
-                                    <option value="">None</option>
                                     {statusOptions.map((option) => (
                                         <option
                                             key={option.value}
@@ -163,13 +166,24 @@ export default function SubmissionsEdit({
                                 <Label htmlFor="referral_source">
                                     Referral source
                                 </Label>
-                                <Input
+                                <select
                                     id="referral_source"
                                     name="referral_source"
                                     defaultValue={
                                         submission.referral_source ?? ''
                                     }
-                                />
+                                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
+                                >
+                                    <option value="">None</option>
+                                    {referralSourceOptions.map((option) => (
+                                        <option
+                                            key={option.value}
+                                            value={option.value}
+                                        >
+                                            {option.label}
+                                        </option>
+                                    ))}
+                                </select>
                                 <InputError message={errors.referral_source} />
                             </div>
                             <div className="flex gap-2">

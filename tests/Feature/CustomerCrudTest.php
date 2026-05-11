@@ -1,8 +1,6 @@
 <?php
 
 use App\Models\Customer;
-use App\Models\GmailAccount;
-use App\Models\GmailContact;
 use App\Models\Submission;
 use App\Models\User;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -26,7 +24,7 @@ test('submission can be created with a new customer', function () {
     $response = $this->actingAs($user)->post(route('submissions.store'), [
         'name' => 'Jane Doe',
         'email' => 'jane@example.com',
-        'status' => 'warm_lead',
+        'status' => 'pending',
         'notes' => 'Needs two cards repaired.',
     ]);
 
@@ -40,7 +38,7 @@ test('submission can be created with a new customer', function () {
     ]);
     $this->assertDatabaseHas('submissions', [
         'id' => $submission->id,
-        'status' => 'warm_lead',
+        'status' => 'pending',
         'notes' => 'Needs two cards repaired.',
     ]);
 });
@@ -51,6 +49,7 @@ test('creating a submission creates a service waiver', function () {
     $this->actingAs($user)->post(route('submissions.store'), [
         'name' => 'Jane Doe',
         'email' => 'jane@example.com',
+        'status' => 'pending',
     ]);
 
     $submission = Submission::query()->where('user_id', $user->id)->first();
@@ -70,37 +69,6 @@ test('submission show displays submission customer', function () {
     $response->assertInertia(fn (Assert $page) => $page
         ->component('submissions/show')
         ->where('submission.customer.name', 'Acme'));
-});
-
-test('submission show includes linked gmail contacts', function () {
-    $user = User::factory()->create();
-    $customer = Customer::factory()->for($user)->create(['email' => 'jane@example.com']);
-    $submission = Submission::factory()->for($user)->for($customer)->create();
-    $account = GmailAccount::query()->create([
-        'user_id' => $user->id,
-        'email' => 'owner@gmail.com',
-        'access_token' => 'token',
-        'refresh_token' => 'refresh',
-        'token_expires_at' => now()->addHour(),
-    ]);
-    GmailContact::query()->create([
-        'gmail_account_id' => $account->id,
-        'customer_id' => $customer->id,
-        'email' => 'jane@example.com',
-        'name' => 'Jane Example',
-        'latest_subject' => 'Repair question',
-        'latest_snippet' => 'Can you repair this card?',
-        'last_message_at' => now(),
-    ]);
-
-    $response = $this->actingAs($user)->get(route('submissions.show', $submission));
-
-    $response->assertSuccessful();
-    $response->assertInertia(fn (Assert $page) => $page
-        ->component('submissions/show')
-        ->has('emailContacts', 1)
-        ->where('emailContacts.0.email', 'jane@example.com')
-        ->where('emailContacts.0.latest_subject', 'Repair question'));
 });
 
 test('submission show includes waiver URL when waiver not signed', function () {

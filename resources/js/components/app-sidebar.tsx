@@ -4,7 +4,6 @@ import {
     Github,
     Heart,
     LayoutGrid,
-    Mail,
     MessageCircle,
     Receipt,
     TrendingUp,
@@ -37,11 +36,6 @@ const mainNavItems: NavItem[] = [
         title: 'Submissions',
         href: submissionsIndex(),
         icon: ClipboardList,
-    },
-    {
-        title: 'Email',
-        href: '/email',
-        icon: Mail,
     },
     {
         title: 'Expenses',

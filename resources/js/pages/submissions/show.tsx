@@ -25,11 +25,10 @@ import type { BreadcrumbItem } from '@/types';
 
 const statusBadgeVariant: Record<string, 'default' | 'secondary' | 'outline'> =
     {
-        cold_lead: 'secondary',
-        warm_lead: 'secondary',
-        hot_lead: 'default',
+        pending: 'secondary',
         in_progress: 'default',
-        inactive: 'outline',
+        complete: 'default',
+        cancelled: 'outline',
     };
 
 type Submission = {
@@ -70,18 +69,9 @@ type Submission = {
 
 export default function SubmissionsShow({
     submission,
-    emailContacts,
     waiverUrl,
 }: {
     submission: Submission;
-    emailContacts: Array<{
-        id: number;
-        email: string;
-        name: string | null;
-        latest_subject: string | null;
-        latest_snippet: string | null;
-        last_message_at: string | null;
-    }>;
     waiverUrl: string | null;
 }) {
     const [copied, setCopied] = useState(false);
@@ -223,53 +213,6 @@ export default function SubmissionsShow({
                         <p className="text-sm">{submission.referral_source}</p>
                     </div>
                 )}
-
-                <div className="rounded-lg border border-sidebar-border bg-card p-4">
-                    <div className="mb-3 flex items-center justify-between gap-2">
-                        <h2 className="text-sm font-medium text-muted-foreground">
-                            Gmail contact
-                        </h2>
-                        {customer.email && (
-                            <Button size="sm" variant="outline" asChild>
-                                <Link href="/email">Open email</Link>
-                            </Button>
-                        )}
-                    </div>
-                    {emailContacts.length === 0 ? (
-                        <p className="text-sm text-muted-foreground">
-                            No synced Gmail contact linked to this customer yet.
-                        </p>
-                    ) : (
-                        <ul className="divide-y divide-sidebar-border">
-                            {emailContacts.map((contact) => (
-                                <li
-                                    key={contact.id}
-                                    className="py-3 first:pt-0 last:pb-0"
-                                >
-                                    <Link
-                                        href="/email"
-                                        className="block hover:underline"
-                                    >
-                                        <span className="text-sm font-medium">
-                                            {contact.latest_subject ||
-                                                '(No subject)'}
-                                        </span>
-                                    </Link>
-                                    <p className="mt-1 text-xs text-muted-foreground">
-                                        {contact.name
-                                            ? `${contact.name} <${contact.email}>`
-                                            : contact.email}
-                                    </p>
-                                    {contact.latest_snippet && (
-                                        <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
-                                            {contact.latest_snippet}
-                                        </p>
-                                    )}
-                                </li>
-                            ))}
-                        </ul>
-                    )}
-                </div>
 
                 <div className="rounded-lg border border-sidebar-border bg-card p-4">
                     <h2 className="mb-2 text-sm font-medium text-muted-foreground">

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\SubmissionReferralSource;
 use App\Enums\SubmissionStatus;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -27,9 +28,9 @@ class UpdateSubmissionRequest extends FormRequest
             'email' => ['nullable', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:255'],
             'address' => ['nullable', 'string'],
-            'status' => ['nullable', Rule::enum(SubmissionStatus::class)],
+            'status' => ['required', Rule::enum(SubmissionStatus::class)],
             'notes' => ['nullable', 'string'],
-            'referral_source' => ['nullable', 'string', 'max:255'],
+            'referral_source' => ['nullable', Rule::enum(SubmissionReferralSource::class)],
         ];
     }
 }
