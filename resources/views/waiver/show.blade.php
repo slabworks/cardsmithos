@@ -5,7 +5,7 @@
 @section('content')
     <div class="rounded-lg border border-sidebar-border bg-card p-6 shadow-sm">
         <h1 class="text-xl font-semibold">Service Waiver</h1>
-        <p class="mt-1 text-sm text-muted-foreground">Please review and sign for {{ $customer->name }}.</p>
+        <p class="mt-1 text-sm text-muted-foreground">Please review and sign this service waiver.</p>
 
         <div class="mt-6 rounded-md bg-muted/50 p-4 text-sm">
             {!! nl2br(e($agreementText)) !!}
@@ -19,7 +19,7 @@
             @csrf
             <div>
                 <label for="signer_name" class="block text-sm font-medium">Your name</label>
-                <input type="text" name="signer_name" id="signer_name" value="{{ old('signer_name', $customer->name) }}"
+                <input type="text" name="signer_name" id="signer_name" value="{{ old('signer_name') }}"
                     class="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     required autofocus>
                 @error('signer_name')
@@ -28,7 +28,7 @@
             </div>
             <div>
                 <label for="signer_email" class="block text-sm font-medium">Your email</label>
-                <input type="email" name="signer_email" id="signer_email" value="{{ old('signer_email', filter_var($customer->contact_detail, FILTER_VALIDATE_EMAIL) ? $customer->contact_detail : '') }}"
+                <input type="email" name="signer_email" id="signer_email" value="{{ old('signer_email') }}"
                     class="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     required>
                 @error('signer_email')

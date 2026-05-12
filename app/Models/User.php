@@ -70,6 +70,14 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * @return HasMany<ServiceWaiver>
+     */
+    public function serviceWaivers(): HasMany
+    {
+        return $this->hasMany(ServiceWaiver::class);
+    }
+
+    /**
      * @return HasMany<Expense>
      */
     public function expenses(): HasMany

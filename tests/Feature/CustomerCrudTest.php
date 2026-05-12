@@ -53,21 +53,6 @@ test('submission cannot be created without a customer', function () {
     $this->assertDatabaseCount('submissions', 0);
 });
 
-test('creating a submission creates a service waiver', function () {
-    $user = User::factory()->create();
-    $customer = Customer::factory()->for($user)->create();
-
-    $this->actingAs($user)->post(route('submissions.store'), [
-        'customer_id' => $customer->id,
-        'status' => 'pending',
-    ]);
-
-    $submission = Submission::query()->where('user_id', $user->id)->first();
-    expect($submission)->not->toBeNull();
-    expect($submission->serviceWaiver)->not->toBeNull();
-    expect($submission->serviceWaiver->expires_at->isFuture())->toBeTrue();
-});
-
 test('submission show displays submission customer', function () {
     $user = User::factory()->create();
     $customer = Customer::factory()->for($user)->create(['name' => 'Acme']);
@@ -79,21 +64,6 @@ test('submission show displays submission customer', function () {
     $response->assertInertia(fn (Assert $page) => $page
         ->component('submissions/show')
         ->where('submission.customer.name', 'Acme'));
-});
-
-test('submission show includes waiver URL when waiver not signed', function () {
-    $user = User::factory()->create();
-    $submission = Submission::factory()->for($user)->create();
-    $submission->serviceWaiver()->create([
-        'expires_at' => now()->addDays(30),
-    ]);
-
-    $response = $this->actingAs($user)->get(route('submissions.show', $submission));
-
-    $response->assertSuccessful();
-    $response->assertInertia(fn (Assert $page) => $page
-        ->component('submissions/show')
-        ->where('waiverUrl', fn ($url) => str_contains($url, '/waiver/'.$submission->id) && str_contains($url, 'signature=')));
 });
 
 test('submission show forbidden for other user', function () {
