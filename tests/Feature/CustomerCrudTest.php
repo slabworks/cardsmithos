@@ -42,6 +42,20 @@ test('submission can be created with an existing customer', function () {
     ]);
 });
 
+test('submission create page can preselect a customer', function () {
+    $user = User::factory()->create();
+    $customer = Customer::factory()->for($user)->create();
+
+    $response = $this->actingAs($user)->get(route('submissions.create', [
+        'customer_id' => $customer->id,
+    ]));
+
+    $response->assertSuccessful();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('submissions/create')
+        ->where('selectedCustomerId', $customer->id));
+});
+
 test('submission cannot be created without a customer', function () {
     $user = User::factory()->create();
 
