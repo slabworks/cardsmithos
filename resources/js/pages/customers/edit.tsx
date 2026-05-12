@@ -128,11 +128,22 @@ export default function CustomersEdit({
                 </Form>
 
                 <div className="max-w-xl space-y-3 border-t pt-6">
-                    <Heading
-                        variant="small"
-                        title="Submissions"
-                        description="Jobs tied to this customer."
-                    />
+                    <div className="flex items-start justify-between gap-4">
+                        <Heading
+                            variant="small"
+                            title="Submissions"
+                            description="Jobs tied to this customer."
+                        />
+                        <Button size="sm" asChild>
+                            <Link
+                                href={SubmissionController.create.url({
+                                    query: { customer_id: customer.id },
+                                })}
+                            >
+                                Create submission
+                            </Link>
+                        </Button>
+                    </div>
                     {customer.submissions.length === 0 ? (
                         <p className="text-sm text-muted-foreground">
                             This customer has no submissions yet.

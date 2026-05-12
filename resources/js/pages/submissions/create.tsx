@@ -27,6 +27,7 @@ const formatPlatform = (platform: string) =>
 
 export default function SubmissionsCreate({
     customers,
+    selectedCustomerId,
     statusOptions,
     referralSourceOptions,
 }: {
@@ -36,14 +37,26 @@ export default function SubmissionsCreate({
         contact_detail: string | null;
         platform: string | null;
     }>;
+    selectedCustomerId: number | null;
     statusOptions: Array<{ value: string; label: string; color: string }>;
     referralSourceOptions: Array<{ value: string; label: string }>;
 }) {
-    const [selectedCustomerId, setSelectedCustomerId] = useState('');
-    const [customerSearch, setCustomerSearch] = useState('');
+    const initialSelectedCustomer = customers.find(
+        (customer) => customer.id === selectedCustomerId,
+    );
+    const [selectedCustomerIdValue, setSelectedCustomerIdValue] = useState(
+        initialSelectedCustomer ? String(initialSelectedCustomer.id) : '',
+    );
+    const [customerSearch, setCustomerSearch] = useState(
+        initialSelectedCustomer
+            ? initialSelectedCustomer.contact_detail
+                ? `${initialSelectedCustomer.name} (${initialSelectedCustomer.contact_detail})`
+                : initialSelectedCustomer.name
+            : '',
+    );
     const [isCustomerSearchOpen, setIsCustomerSearchOpen] = useState(false);
     const selectedCustomer = customers.find(
-        (customer) => String(customer.id) === selectedCustomerId,
+        (customer) => String(customer.id) === selectedCustomerIdValue,
     );
     const filteredCustomers = customers.filter((customer) => {
         const query = customerSearch.trim().toLowerCase();
@@ -60,7 +73,7 @@ export default function SubmissionsCreate({
     });
 
     const selectCustomer = (customer: (typeof customers)[number]) => {
-        setSelectedCustomerId(String(customer.id));
+        setSelectedCustomerIdValue(String(customer.id));
         setCustomerSearch(
             customer.contact_detail
                 ? `${customer.name} (${customer.contact_detail})`
@@ -70,7 +83,7 @@ export default function SubmissionsCreate({
     };
 
     const clearSelectedCustomer = () => {
-        setSelectedCustomerId('');
+        setSelectedCustomerIdValue('');
         setCustomerSearch('');
         setIsCustomerSearchOpen(false);
     };
@@ -106,7 +119,7 @@ export default function SubmissionsCreate({
                                     <input
                                         type="hidden"
                                         name="customer_id"
-                                        value={selectedCustomerId}
+                                        value={selectedCustomerIdValue}
                                     />
                                     <div className="relative">
                                         <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -117,7 +130,7 @@ export default function SubmissionsCreate({
                                                 setCustomerSearch(
                                                     event.target.value,
                                                 );
-                                                setSelectedCustomerId('');
+                                                setSelectedCustomerIdValue('');
                                                 setIsCustomerSearchOpen(true);
                                             }}
                                             onFocus={() =>

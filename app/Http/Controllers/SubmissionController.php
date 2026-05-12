@@ -34,13 +34,16 @@ class SubmissionController extends Controller
     public function create(Request $request): Response
     {
         $this->authorize('create', Submission::class);
+        $selectedCustomerId = $request->integer('customer_id');
+        $customers = $request->user()
+            ->customers()
+            ->select('id', 'name', 'contact_detail', 'platform')
+            ->orderBy('name')
+            ->get();
 
         return Inertia::render('submissions/create', [
-            'customers' => $request->user()
-                ->customers()
-                ->select('id', 'name', 'contact_detail', 'platform')
-                ->orderBy('name')
-                ->get(),
+            'customers' => $customers,
+            'selectedCustomerId' => $customers->contains('id', $selectedCustomerId) ? $selectedCustomerId : null,
             'statusOptions' => $this->statusOptions(),
             'referralSourceOptions' => $this->referralSourceOptions(),
         ]);
