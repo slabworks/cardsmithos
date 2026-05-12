@@ -1,5 +1,5 @@
 import { Form, Head, Link } from '@inertiajs/react';
-import { Copy, FileDown, Pencil, Plus } from 'lucide-react';
+import { FileDown, Pencil, Plus } from 'lucide-react';
 import { useState } from 'react';
 import CardController from '@/actions/App/Http/Controllers/CardController';
 import InvoiceController from '@/actions/App/Http/Controllers/InvoiceController';
@@ -37,7 +37,6 @@ type Submission = {
     notes: string | null;
     referral_source: string | null;
     lifetime_value: string | number | null;
-    service_waiver: { signed_at: string | null } | null;
     customer: {
         id: number;
         name: string;
@@ -69,16 +68,12 @@ type Submission = {
 
 export default function SubmissionsShow({
     submission,
-    waiverUrl,
 }: {
     submission: Submission;
-    waiverUrl: string | null;
 }) {
-    const [copied, setCopied] = useState(false);
     const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
     const [isShipmentModalOpen, setIsShipmentModalOpen] = useState(false);
     const customer = submission.customer;
-    const waiverSigned = submission.service_waiver?.signed_at != null;
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Submissions', href: index() },
@@ -87,17 +82,6 @@ export default function SubmissionsShow({
             href: SubmissionController.show.url(submission),
         },
     ];
-
-    const copyWaiverUrl = () => {
-        if (!waiverUrl) {
-            return;
-        }
-
-        void navigator.clipboard.writeText(waiverUrl).then(() => {
-            setCopied(true);
-            setTimeout(() => setCopied(false), 2000);
-        });
-    };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -119,13 +103,6 @@ export default function SubmissionsShow({
                                     {submission.status.replace('_', ' ')}
                                 </Badge>
                             )}
-                            <Badge
-                                variant={waiverSigned ? 'default' : 'outline'}
-                            >
-                                {waiverSigned
-                                    ? 'Waiver signed'
-                                    : 'Waiver not signed'}
-                            </Badge>
                             {submission.lifetime_value != null && (
                                 <span className="text-sm font-medium text-muted-foreground">
                                     Paid: $
@@ -208,40 +185,6 @@ export default function SubmissionsShow({
                         <p className="text-sm">{submission.referral_source}</p>
                     </div>
                 )}
-
-                <div className="rounded-lg border border-sidebar-border bg-card p-4">
-                    <h2 className="mb-2 text-sm font-medium text-muted-foreground">
-                        Waiver
-                    </h2>
-                    {waiverUrl ? (
-                        <>
-                            <p className="mb-2 text-sm text-muted-foreground">
-                                Share this link with the customer to collect
-                                their waiver for this submission.
-                            </p>
-                            <div className="flex flex-wrap items-center gap-2">
-                                <Input
-                                    readOnly
-                                    value={waiverUrl}
-                                    className="font-mono text-sm"
-                                />
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={copyWaiverUrl}
-                                >
-                                    <Copy className="mr-1 size-4" />
-                                    {copied ? 'Copied' : 'Copy'}
-                                </Button>
-                            </div>
-                        </>
-                    ) : (
-                        <p className="text-sm text-muted-foreground">
-                            Waiver signed.
-                        </p>
-                    )}
-                </div>
 
                 <section className="rounded-lg border border-sidebar-border bg-card">
                     <div className="flex items-center justify-between border-b border-sidebar-border px-4 py-3">

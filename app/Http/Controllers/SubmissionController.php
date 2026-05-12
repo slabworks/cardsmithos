@@ -10,7 +10,6 @@ use App\Models\Customer;
 use App\Models\Submission;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\URL;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -60,44 +59,18 @@ class SubmissionController extends Controller
             'referral_source' => $validated['referral_source'] ?? null,
         ]);
 
-        $submission->serviceWaiver()->create([
-            'expires_at' => now()->addDays(config('cardsmithos.waiver.expiration_days', 30)),
-        ]);
-
         return to_route('submissions.show', $submission);
-    }
-
-    /**
-     * Generate the absolute waiver URL for a submission when not yet signed.
-     */
-    public static function waiverUrl(Submission $submission): ?string
-    {
-        $waiver = $submission->getOrCreateServiceWaiver();
-
-        if ($waiver->isSigned()) {
-            return null;
-        }
-
-        $relativeUrl = URL::temporarySignedRoute(
-            'waiver.show',
-            $waiver->expires_at,
-            ['submission' => $submission],
-            absolute: false
-        );
-
-        return url($relativeUrl);
     }
 
     public function show(Submission $submission): Response
     {
         $this->authorize('view', $submission);
 
-        $submission->load('customer', 'cards', 'payments', 'shipments', 'serviceWaiver');
+        $submission->load('customer', 'cards', 'payments', 'shipments');
         $submission->loadSum('payments as lifetime_value', 'amount');
 
         return Inertia::render('submissions/show', [
             'submission' => $submission,
-            'waiverUrl' => self::waiverUrl($submission),
         ]);
     }
 

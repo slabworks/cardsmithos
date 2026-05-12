@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('service_waivers', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('submission_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->dateTime('expires_at');
             $table->dateTime('signed_at')->nullable();
             $table->string('signer_name')->nullable();

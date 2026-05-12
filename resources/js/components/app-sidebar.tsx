@@ -1,6 +1,7 @@
 import { Link, usePage } from '@inertiajs/react';
 import {
     ClipboardList,
+    FileText,
     Github,
     Heart,
     LayoutGrid,
@@ -43,6 +44,11 @@ const mainNavItems: NavItem[] = [
         title: 'Customers',
         href: customersIndex(),
         icon: Users,
+    },
+    {
+        title: 'Waivers',
+        href: '/waivers',
+        icon: FileText,
     },
     {
         title: 'Expenses',

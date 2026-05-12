@@ -9,7 +9,7 @@
             <p class="mt-2 text-muted-foreground">{{ $justSigned }}</p>
         @else
             <h1 class="text-xl font-semibold">Already signed</h1>
-            <p class="mt-2 text-muted-foreground">The waiver for {{ $customerName }} has already been signed. No further action is needed.</p>
+            <p class="mt-2 text-muted-foreground">This waiver{{ $signerName ? ' for '.$signerName : '' }} has already been signed. No further action is needed.</p>
         @endif
     </div>
 @endsection

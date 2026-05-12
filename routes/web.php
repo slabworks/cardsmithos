@@ -10,6 +10,7 @@ use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PricingCalculatorController;
+use App\Http\Controllers\ServiceWaiverController;
 use App\Http\Controllers\ShipmentController;
 use App\Http\Controllers\StorefrontController;
 use App\Http\Controllers\SubmissionController;
@@ -18,8 +19,8 @@ use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 
 Route::middleware(['signed:relative'])->group(function (): void {
-    Route::get('/waiver/{submission}', [WaiverController::class, 'show'])->name('waiver.show');
-    Route::post('/waiver/{submission}', [WaiverController::class, 'sign'])->name('waiver.sign');
+    Route::get('/waiver/{serviceWaiver}', [WaiverController::class, 'show'])->name('waiver.show');
+    Route::post('/waiver/{serviceWaiver}', [WaiverController::class, 'sign'])->name('waiver.sign');
 });
 
 Route::get('/sitemap.xml', function () {
@@ -44,6 +45,7 @@ Route::inertia('/', 'welcome', [
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', DashboardController::class)->name('dashboard');
     Route::get('pricing-calculator', PricingCalculatorController::class)->name('pricing-calculator.index');
+    Route::resource('waivers', ServiceWaiverController::class)->only(['index', 'store', 'destroy']);
     Route::resource('statistics', BusinessStatisticController::class)
         ->parameters(['statistics' => 'businessStatistic']);
     Route::post('statistics/{businessStatistic}/records', [BusinessStatisticRecordController::class, 'store'])->name('statistics.records.store');
