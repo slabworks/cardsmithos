@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\PaymentMethod;
 use App\Enums\SubmissionReferralSource;
 use App\Enums\SubmissionStatus;
 use App\Http\Requests\StoreSubmissionRequest;
@@ -71,6 +72,7 @@ class SubmissionController extends Controller
 
         return Inertia::render('submissions/show', [
             'submission' => $submission,
+            'paymentMethodOptions' => $this->paymentMethodOptions(),
         ]);
     }
 
@@ -144,6 +146,20 @@ class SubmissionController extends Controller
                 'label' => $case->label(),
             ],
             SubmissionReferralSource::cases()
+        );
+    }
+
+    /**
+     * @return array<int, array{value: string, label: string}>
+     */
+    private function paymentMethodOptions(): array
+    {
+        return array_map(
+            fn (PaymentMethod $case) => [
+                'value' => $case->value,
+                'label' => $case->label(),
+            ],
+            PaymentMethod::cases()
         );
     }
 }
