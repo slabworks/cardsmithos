@@ -1,5 +1,5 @@
-import { Form, Head, Link } from '@inertiajs/react';
-import { FileDown, Pencil, Plus } from 'lucide-react';
+import { Form, Head, Link, router } from '@inertiajs/react';
+import { FileDown, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import CardController from '@/actions/App/Http/Controllers/CardController';
 import InvoiceController from '@/actions/App/Http/Controllers/InvoiceController';
@@ -50,30 +50,48 @@ type Submission = {
         status: string;
         estimated_fee: string | null;
     }>;
-    payments: Array<{
-        id: number;
-        amount: string;
-        paid_at: string;
-        method: string;
-        reference: string | null;
-    }>;
-    shipments: Array<{
-        id: number;
-        amount: string;
-        shipped_at: string;
-        reference: string | null;
-        tracking_number: string | null;
-    }>;
+    payments: Payment[];
+    shipments: Shipment[];
+};
+
+type Payment = {
+    id: number;
+    amount: string;
+    paid_at: string;
+    method: string | null;
+    reference: string | null;
+};
+
+type Shipment = {
+    id: number;
+    amount: string;
+    shipped_at: string;
+    reference: string | null;
+    tracking_number: string | null;
+};
+
+type Option = {
+    value: string;
+    label: string;
 };
 
 export default function SubmissionsShow({
     submission,
+    paymentMethodOptions,
 }: {
     submission: Submission;
+    paymentMethodOptions: Option[];
 }) {
     const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
     const [isShipmentModalOpen, setIsShipmentModalOpen] = useState(false);
+    const [selectedPayment, setSelectedPayment] = useState<Payment | null>(
+        null,
+    );
+    const [selectedShipment, setSelectedShipment] = useState<Shipment | null>(
+        null,
+    );
     const customer = submission.customer;
+    const today = new Date().toISOString().slice(0, 10);
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Submissions', href: index() },
@@ -82,6 +100,54 @@ export default function SubmissionsShow({
             href: SubmissionController.show.url(submission),
         },
     ];
+
+    const openPaymentModal = (payment: Payment | null = null) => {
+        setSelectedPayment(payment);
+        setIsPaymentModalOpen(true);
+    };
+
+    const openShipmentModal = (shipment: Shipment | null = null) => {
+        setSelectedShipment(shipment);
+        setIsShipmentModalOpen(true);
+    };
+
+    const closePaymentModal = () => {
+        setIsPaymentModalOpen(false);
+        setSelectedPayment(null);
+    };
+
+    const closeShipmentModal = () => {
+        setIsShipmentModalOpen(false);
+        setSelectedShipment(null);
+    };
+
+    const deletePayment = () => {
+        if (!selectedPayment || !window.confirm('Delete this payment?')) {
+            return;
+        }
+
+        router.delete(
+            PaymentController.destroy.url({
+                submission: submission.id,
+                payment: selectedPayment.id,
+            }),
+            { onSuccess: closePaymentModal },
+        );
+    };
+
+    const deleteShipment = () => {
+        if (!selectedShipment || !window.confirm('Delete this shipment?')) {
+            return;
+        }
+
+        router.delete(
+            ShipmentController.destroy.url({
+                submission: submission.id,
+                shipment: selectedShipment.id,
+            }),
+            { onSuccess: closeShipmentModal },
+        );
+    };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -232,10 +298,7 @@ export default function SubmissionsShow({
                 <section className="rounded-lg border border-sidebar-border bg-card">
                     <div className="flex items-center justify-between border-b border-sidebar-border px-4 py-3">
                         <h2 className="font-medium">Payments</h2>
-                        <Button
-                            size="sm"
-                            onClick={() => setIsPaymentModalOpen(true)}
-                        >
+                        <Button size="sm" onClick={() => openPaymentModal()}>
                             <Plus className="mr-1 size-4" />
                             Add payment
                         </Button>
@@ -262,11 +325,27 @@ export default function SubmissionsShow({
                                                     {payment.reference}
                                                 </span>
                                             )}
+                                            {payment.method && (
+                                                <span className="ml-2 capitalize">
+                                                    {payment.method.replace(
+                                                        '_',
+                                                        ' ',
+                                                    )}
+                                                </span>
+                                            )}
                                         </p>
                                     </div>
-                                    <span className="text-sm text-muted-foreground capitalize">
-                                        {payment.method?.replace('_', ' ')}
-                                    </span>
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() =>
+                                            openPaymentModal(payment)
+                                        }
+                                    >
+                                        <Pencil className="mr-1 size-4" />
+                                        Edit
+                                    </Button>
                                 </li>
                             ))}
                         </ul>
@@ -276,10 +355,7 @@ export default function SubmissionsShow({
                 <section className="rounded-lg border border-sidebar-border bg-card">
                     <div className="flex items-center justify-between border-b border-sidebar-border px-4 py-3">
                         <h2 className="font-medium">Shipments</h2>
-                        <Button
-                            size="sm"
-                            onClick={() => setIsShipmentModalOpen(true)}
-                        >
+                        <Button size="sm" onClick={() => openShipmentModal()}>
                             <Plus className="mr-1 size-4" />
                             Add shipment
                         </Button>
@@ -306,13 +382,24 @@ export default function SubmissionsShow({
                                                     {shipment.reference}
                                                 </span>
                                             )}
+                                            {shipment.tracking_number && (
+                                                <span className="ml-2">
+                                                    {shipment.tracking_number}
+                                                </span>
+                                            )}
                                         </p>
                                     </div>
-                                    {shipment.tracking_number && (
-                                        <span className="text-sm text-muted-foreground">
-                                            {shipment.tracking_number}
-                                        </span>
-                                    )}
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() =>
+                                            openShipmentModal(shipment)
+                                        }
+                                    >
+                                        <Pencil className="mr-1 size-4" />
+                                        Edit
+                                    </Button>
                                 </li>
                             ))}
                         </ul>
@@ -321,21 +408,39 @@ export default function SubmissionsShow({
 
                 <Dialog
                     open={isPaymentModalOpen}
-                    onOpenChange={setIsPaymentModalOpen}
+                    onOpenChange={(open) => {
+                        if (open) {
+                            setIsPaymentModalOpen(true);
+                        } else {
+                            closePaymentModal();
+                        }
+                    }}
                 >
                     <DialogContent>
                         <DialogHeader>
-                            <DialogTitle>Add payment</DialogTitle>
+                            <DialogTitle>
+                                {selectedPayment
+                                    ? 'Edit payment'
+                                    : 'Add payment'}
+                            </DialogTitle>
                             <DialogDescription>
-                                Track a payment for {customer.name}.
+                                {selectedPayment
+                                    ? `Update payment details for ${customer.name}.`
+                                    : `Track a payment for ${customer.name}.`}
                             </DialogDescription>
                         </DialogHeader>
                         <Form
-                            {...PaymentController.store.form({
-                                submission: submission.id,
-                            })}
-                            resetOnSuccess
-                            onSuccess={() => setIsPaymentModalOpen(false)}
+                            key={selectedPayment?.id ?? 'new-payment'}
+                            {...(selectedPayment
+                                ? PaymentController.update.form({
+                                      submission: submission.id,
+                                      payment: selectedPayment.id,
+                                  })
+                                : PaymentController.store.form({
+                                      submission: submission.id,
+                                  }))}
+                            resetOnSuccess={!selectedPayment}
+                            onSuccess={closePaymentModal}
                             className="space-y-4"
                         >
                             {({ errors, processing }) => (
@@ -350,6 +455,9 @@ export default function SubmissionsShow({
                                             type="number"
                                             step="0.01"
                                             min="0"
+                                            defaultValue={
+                                                selectedPayment?.amount ?? ''
+                                            }
                                             required
                                         />
                                         <InputError message={errors.amount} />
@@ -362,20 +470,72 @@ export default function SubmissionsShow({
                                             id="payment_paid_at"
                                             name="paid_at"
                                             type="date"
-                                            defaultValue={new Date()
-                                                .toISOString()
-                                                .slice(0, 10)}
+                                            defaultValue={
+                                                selectedPayment?.paid_at?.slice(
+                                                    0,
+                                                    10,
+                                                ) ?? today
+                                            }
                                             required
                                         />
                                         <InputError message={errors.paid_at} />
                                     </div>
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="payment_method">
+                                            Method
+                                        </Label>
+                                        <select
+                                            id="payment_method"
+                                            name="method"
+                                            defaultValue={
+                                                selectedPayment?.method ?? ''
+                                            }
+                                            className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm ring-offset-background transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                                        >
+                                            <option value="">No method</option>
+                                            {paymentMethodOptions.map(
+                                                (option) => (
+                                                    <option
+                                                        key={option.value}
+                                                        value={option.value}
+                                                    >
+                                                        {option.label}
+                                                    </option>
+                                                ),
+                                            )}
+                                        </select>
+                                        <InputError message={errors.method} />
+                                    </div>
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="payment_reference">
+                                            Reference
+                                        </Label>
+                                        <Input
+                                            id="payment_reference"
+                                            name="reference"
+                                            defaultValue={
+                                                selectedPayment?.reference ?? ''
+                                            }
+                                        />
+                                        <InputError
+                                            message={errors.reference}
+                                        />
+                                    </div>
                                     <DialogFooter>
+                                        {selectedPayment && (
+                                            <Button
+                                                type="button"
+                                                variant="destructive"
+                                                onClick={deletePayment}
+                                            >
+                                                <Trash2 className="mr-1 size-4" />
+                                                Delete
+                                            </Button>
+                                        )}
                                         <Button
                                             type="button"
                                             variant="outline"
-                                            onClick={() =>
-                                                setIsPaymentModalOpen(false)
-                                            }
+                                            onClick={closePaymentModal}
                                         >
                                             Cancel
                                         </Button>
@@ -383,7 +543,9 @@ export default function SubmissionsShow({
                                             type="submit"
                                             disabled={processing}
                                         >
-                                            Add payment
+                                            {selectedPayment
+                                                ? 'Save payment'
+                                                : 'Add payment'}
                                         </Button>
                                     </DialogFooter>
                                 </>
@@ -394,21 +556,39 @@ export default function SubmissionsShow({
 
                 <Dialog
                     open={isShipmentModalOpen}
-                    onOpenChange={setIsShipmentModalOpen}
+                    onOpenChange={(open) => {
+                        if (open) {
+                            setIsShipmentModalOpen(true);
+                        } else {
+                            closeShipmentModal();
+                        }
+                    }}
                 >
                     <DialogContent>
                         <DialogHeader>
-                            <DialogTitle>Add shipment</DialogTitle>
+                            <DialogTitle>
+                                {selectedShipment
+                                    ? 'Edit shipment'
+                                    : 'Add shipment'}
+                            </DialogTitle>
                             <DialogDescription>
-                                Track return shipping fees for {customer.name}.
+                                {selectedShipment
+                                    ? `Update shipment details for ${customer.name}.`
+                                    : `Track return shipping fees for ${customer.name}.`}
                             </DialogDescription>
                         </DialogHeader>
                         <Form
-                            {...ShipmentController.store.form({
-                                submission: submission.id,
-                            })}
-                            resetOnSuccess
-                            onSuccess={() => setIsShipmentModalOpen(false)}
+                            key={selectedShipment?.id ?? 'new-shipment'}
+                            {...(selectedShipment
+                                ? ShipmentController.update.form({
+                                      submission: submission.id,
+                                      shipment: selectedShipment.id,
+                                  })
+                                : ShipmentController.store.form({
+                                      submission: submission.id,
+                                  }))}
+                            resetOnSuccess={!selectedShipment}
+                            onSuccess={closeShipmentModal}
                             className="space-y-4"
                         >
                             {({ errors, processing }) => (
@@ -423,6 +603,9 @@ export default function SubmissionsShow({
                                             type="number"
                                             step="0.01"
                                             min="0"
+                                            defaultValue={
+                                                selectedShipment?.amount ?? ''
+                                            }
                                             required
                                         />
                                         <InputError message={errors.amount} />
@@ -435,9 +618,12 @@ export default function SubmissionsShow({
                                             id="shipment_shipped_at"
                                             name="shipped_at"
                                             type="date"
-                                            defaultValue={new Date()
-                                                .toISOString()
-                                                .slice(0, 10)}
+                                            defaultValue={
+                                                selectedShipment?.shipped_at?.slice(
+                                                    0,
+                                                    10,
+                                                ) ?? today
+                                            }
                                             required
                                         />
                                         <InputError
@@ -451,6 +637,10 @@ export default function SubmissionsShow({
                                         <Input
                                             id="shipment_tracking_number"
                                             name="tracking_number"
+                                            defaultValue={
+                                                selectedShipment?.tracking_number ??
+                                                ''
+                                            }
                                         />
                                         <InputError
                                             message={errors.tracking_number}
@@ -463,18 +653,30 @@ export default function SubmissionsShow({
                                         <Input
                                             id="shipment_reference"
                                             name="reference"
+                                            defaultValue={
+                                                selectedShipment?.reference ??
+                                                ''
+                                            }
                                         />
                                         <InputError
                                             message={errors.reference}
                                         />
                                     </div>
                                     <DialogFooter>
+                                        {selectedShipment && (
+                                            <Button
+                                                type="button"
+                                                variant="destructive"
+                                                onClick={deleteShipment}
+                                            >
+                                                <Trash2 className="mr-1 size-4" />
+                                                Delete
+                                            </Button>
+                                        )}
                                         <Button
                                             type="button"
                                             variant="outline"
-                                            onClick={() =>
-                                                setIsShipmentModalOpen(false)
-                                            }
+                                            onClick={closeShipmentModal}
                                         >
                                             Cancel
                                         </Button>
@@ -482,7 +684,9 @@ export default function SubmissionsShow({
                                             type="submit"
                                             disabled={processing}
                                         >
-                                            Add shipment
+                                            {selectedShipment
+                                                ? 'Save shipment'
+                                                : 'Add shipment'}
                                         </Button>
                                     </DialogFooter>
                                 </>

@@ -2,9 +2,11 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\PaymentMethod;
 use App\Models\Submission;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StorePaymentRequest extends FormRequest
 {
@@ -15,6 +17,14 @@ class StorePaymentRequest extends FormRequest
         return $submission !== null && $this->user()?->can('update', $submission) === true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'method' => $this->filled('method') ? $this->input('method') : null,
+            'reference' => $this->filled('reference') ? $this->input('reference') : null,
+        ]);
+    }
+
     /**
      * @return array<string, ValidationRule|array<mixed>|string>
      */
@@ -23,7 +33,7 @@ class StorePaymentRequest extends FormRequest
         return [
             'amount' => ['required', 'numeric', 'min:0', 'max:9999999.99'],
             'paid_at' => ['required', 'date'],
-            'method' => ['nullable', 'string', 'max:255'],
+            'method' => ['nullable', Rule::enum(PaymentMethod::class)],
             'reference' => ['nullable', 'string', 'max:255'],
         ];
     }
