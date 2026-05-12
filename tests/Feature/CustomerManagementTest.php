@@ -4,6 +4,7 @@ use App\Enums\CustomerPlatform;
 use App\Models\Customer;
 use App\Models\Submission;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Inertia\Testing\AssertableInertia as Assert;
 
 test('customer index lists only own customers', function () {
@@ -65,6 +66,9 @@ test('customer can be created', function () {
         'contact_detail' => '@janedoe',
         'platform' => CustomerPlatform::TikTok->value,
     ]);
+
+    expect($customer->address)->toBe('123 Main St')
+        ->and(DB::table('customers')->where('id', $customer->id)->value('address'))->not->toBe('123 Main St');
 });
 
 test('customer edit page includes submissions', function () {
@@ -101,6 +105,11 @@ test('customer can be updated', function () {
         'contact_detail' => 'updated@example.com',
         'platform' => CustomerPlatform::Email->value,
     ]);
+
+    $customer->refresh();
+
+    expect($customer->address)->toBe('456 Oak Ave')
+        ->and(DB::table('customers')->where('id', $customer->id)->value('address'))->not->toBe('456 Oak Ave');
 });
 
 test('customer edit forbidden for other user', function () {

@@ -29,6 +29,7 @@ class Customer extends Model
     protected function casts(): array
     {
         return [
+            'address' => 'encrypted',
             'platform' => CustomerPlatform::class,
         ];
     }
