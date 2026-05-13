@@ -1,6 +1,6 @@
 import { Form, Head } from '@inertiajs/react';
-import { Copy, FileText, Plus, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { Copy, FileText, Plus, Search, Trash2 } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -46,6 +46,28 @@ export default function WaiversIndex({
     waivers: ServiceWaiver[];
 }) {
     const [copiedWaiverId, setCopiedWaiverId] = useState<number | null>(null);
+    const [search, setSearch] = useState('');
+    const filtered = useMemo(() => {
+        const query = search.toLowerCase();
+
+        if (!query) {
+            return waivers;
+        }
+
+        return waivers.filter((waiver) => {
+            const status = waiver.signed_at ? 'signed' : 'unsigned';
+
+            return (
+                `waiver #${waiver.id}`.includes(query) ||
+                status.includes(query) ||
+                waiver.signer_name?.toLowerCase().includes(query) ||
+                waiver.signer_email?.toLowerCase().includes(query) ||
+                waiver.signed_url?.toLowerCase().includes(query) ||
+                waiver.signed_at?.toLowerCase().includes(query) ||
+                waiver.expires_at.toLowerCase().includes(query)
+            );
+        });
+    }, [search, waivers]);
 
     const copyWaiverUrl = (waiver: ServiceWaiver) => {
         if (!waiver.signed_url) {
@@ -80,6 +102,18 @@ export default function WaiversIndex({
                     </Form>
                 </div>
 
+                {waivers.length > 0 && (
+                    <div className="relative">
+                        <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                            placeholder="Search waivers..."
+                            value={search}
+                            onChange={(event) => setSearch(event.target.value)}
+                            className="pl-9"
+                        />
+                    </div>
+                )}
+
                 <div className="overflow-hidden rounded-lg border border-sidebar-border bg-card">
                     {waivers.length === 0 ? (
                         <div className="flex flex-col items-center justify-center gap-2 py-12 text-center">
@@ -88,9 +122,15 @@ export default function WaiversIndex({
                                 No waivers yet
                             </p>
                         </div>
+                    ) : filtered.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center gap-2 py-12 text-center">
+                            <p className="text-sm text-muted-foreground">
+                                No waivers match your search
+                            </p>
+                        </div>
                     ) : (
                         <ul className="divide-y divide-sidebar-border">
-                            {waivers.map((waiver) => (
+                            {filtered.map((waiver) => (
                                 <li key={waiver.id} className="space-y-3 p-4">
                                     <div className="flex flex-wrap items-start justify-between gap-3">
                                         <div className="min-w-0">
