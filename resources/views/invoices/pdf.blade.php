@@ -40,19 +40,13 @@
         <thead>
             <tr>
                 <th>Card</th>
-                <th>Rate type</th>
-                <th>Hours</th>
-                <th>Unit rate</th>
-                <th>Total</th>
+                <th>Charged</th>
             </tr>
         </thead>
         <tbody>
             @foreach($lineItems as $item)
                 <tr>
                     <td>{{ $item['name'] }}</td>
-                    <td>{{ $item['rate_type'] === 'hourly' ? 'Hourly' : 'Fixed' }}</td>
-                    <td>{{ $item['hours'] !== null ? number_format($item['hours'], 2) : '—' }}</td>
-                    <td>${{ number_format($item['unit_rate'], 2) }}</td>
                     <td>${{ number_format($item['total'], 2) }}</td>
                 </tr>
             @endforeach

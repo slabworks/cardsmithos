@@ -44,6 +44,9 @@ export default function InvoicesCreate({
     const [shipping, setShipping] = useState('');
     const [packaging, setPackaging] = useState('');
     const [handling, setHandling] = useState('');
+    const [lineItemPrices, setLineItemPrices] = useState<
+        Record<number, string>
+    >({});
     const [downloading, setDownloading] = useState(false);
 
     const toggleCard = (id: number) => {
@@ -71,13 +74,26 @@ export default function InvoicesCreate({
         return businessSettings.default_fixed_rate;
     };
 
+    const lineItemPrice = (card: Card): number => {
+        const price = lineItemPrices[card.id];
+
+        if (price !== undefined && price !== '') {
+            return parseFloat(price) || 0;
+        }
+
+        return cardFee(card);
+    };
+
     const rateType = (card: Card): string =>
         card.restoration_hours !== null ? 'Hourly' : 'Fixed';
 
     const selectedCards = submission.cards.filter((c) =>
         selectedCardIds.has(c.id),
     );
-    const subtotal = selectedCards.reduce((sum, c) => sum + cardFee(c), 0);
+    const subtotal = selectedCards.reduce(
+        (sum, c) => sum + lineItemPrice(c),
+        0,
+    );
     const shippingVal = parseFloat(shipping) || 0;
     const packagingVal = parseFloat(packaging) || 0;
     const handlingVal = parseFloat(handling) || 0;
@@ -104,6 +120,12 @@ export default function InvoicesCreate({
                 downloadUrl,
                 {
                     card_ids: Array.from(selectedCardIds),
+                    line_item_prices: Object.fromEntries(
+                        selectedCards.map((card) => [
+                            card.id,
+                            lineItemPrice(card),
+                        ]),
+                    ),
                     shipping: shippingVal || null,
                     packaging: packagingVal || null,
                     handling: handlingVal || null,
@@ -160,29 +182,56 @@ export default function InvoicesCreate({
                         ) : (
                             <ul className="divide-y rounded-lg border">
                                 {submission.cards.map((card) => (
-                                    <li
-                                        key={card.id}
-                                        className="flex items-center gap-3 px-4 py-3"
-                                    >
-                                        <Checkbox
-                                            checked={selectedCardIds.has(
-                                                card.id,
-                                            )}
-                                            onCheckedChange={() =>
-                                                toggleCard(card.id)
-                                            }
-                                        />
-                                        <div className="flex-1">
-                                            <span className="font-medium">
-                                                {card.name}
-                                            </span>
-                                            <span className="ml-2 text-sm text-muted-foreground">
-                                                {rateType(card)}
-                                            </span>
+                                    <li key={card.id} className="px-4 py-3">
+                                        <div className="flex items-center gap-3">
+                                            <Checkbox
+                                                checked={selectedCardIds.has(
+                                                    card.id,
+                                                )}
+                                                onCheckedChange={() =>
+                                                    toggleCard(card.id)
+                                                }
+                                            />
+                                            <div className="flex-1">
+                                                <span className="font-medium">
+                                                    {card.name}
+                                                </span>
+                                                <span className="ml-2 text-sm text-muted-foreground">
+                                                    {rateType(card)}
+                                                </span>
+                                            </div>
+                                            <div className="grid w-32 gap-1">
+                                                <Label
+                                                    htmlFor={`line-item-price-${card.id}`}
+                                                    className="sr-only"
+                                                >
+                                                    Line item price for{' '}
+                                                    {card.name}
+                                                </Label>
+                                                <Input
+                                                    id={`line-item-price-${card.id}`}
+                                                    type="number"
+                                                    step="0.01"
+                                                    min="0"
+                                                    value={
+                                                        lineItemPrices[
+                                                            card.id
+                                                        ] ??
+                                                        cardFee(card).toFixed(2)
+                                                    }
+                                                    onChange={(e) =>
+                                                        setLineItemPrices(
+                                                            (current) => ({
+                                                                ...current,
+                                                                [card.id]:
+                                                                    e.target
+                                                                        .value,
+                                                            }),
+                                                        )
+                                                    }
+                                                />
+                                            </div>
                                         </div>
-                                        <span className="text-sm font-medium">
-                                            ${fmt(cardFee(card))}
-                                        </span>
                                     </li>
                                 ))}
                             </ul>

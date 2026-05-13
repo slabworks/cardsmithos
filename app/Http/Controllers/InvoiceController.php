@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreInvoiceRequest;
+use App\Models\Card;
 use App\Models\Submission;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\URL;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -57,27 +59,11 @@ class InvoiceController extends Controller
         $currency = $settings?->currency ?? 'USD';
         $companyName = $settings?->company_name ?? '';
 
-        $cards = $submission->cards()->whereIn('id', $request->validated('card_ids'))->get();
+        $validated = $request->validated();
+        $lineItemPrices = $validated['line_item_prices'] ?? [];
+        $cards = $submission->cards()->whereIn('id', $validated['card_ids'])->get();
 
-        $lineItems = $cards->map(function ($card) use ($hourlyRate, $defaultFixedRate) {
-            if ($card->restoration_hours !== null) {
-                return [
-                    'name' => $card->name,
-                    'rate_type' => 'hourly',
-                    'hours' => (float) $card->restoration_hours,
-                    'unit_rate' => $hourlyRate,
-                    'total' => (float) $card->restoration_hours * $hourlyRate,
-                ];
-            }
-
-            return [
-                'name' => $card->name,
-                'rate_type' => 'fixed',
-                'hours' => null,
-                'unit_rate' => $defaultFixedRate,
-                'total' => $defaultFixedRate,
-            ];
-        });
+        $lineItems = $this->lineItems($cards, $hourlyRate, $defaultFixedRate, $lineItemPrices);
 
         $subtotal = $lineItems->sum('total');
         $shipping = (float) ($request->validated('shipping') ?? 0);
@@ -106,5 +92,37 @@ class InvoiceController extends Controller
         $filename = 'invoice-'.str($submission->customer->name)->slug().'-'.now()->format('Y-m-d').'.pdf';
 
         return $pdf->download($filename);
+    }
+
+    /**
+     * @param  Collection<int, Card>  $cards
+     * @param  array<int|string, mixed>  $lineItemPrices
+     * @return Collection<int, array{name: string, rate_type: string, hours: float|null, unit_rate: float, total: float}>
+     */
+    private function lineItems(Collection $cards, float $hourlyRate, float $defaultFixedRate, array $lineItemPrices): Collection
+    {
+        return $cards->map(function ($card) use ($hourlyRate, $defaultFixedRate, $lineItemPrices) {
+            if ($card->restoration_hours !== null) {
+                $total = (float) ($lineItemPrices[$card->id] ?? ((float) $card->restoration_hours * $hourlyRate));
+
+                return [
+                    'name' => $card->name,
+                    'rate_type' => 'hourly',
+                    'hours' => (float) $card->restoration_hours,
+                    'unit_rate' => $hourlyRate,
+                    'total' => $total,
+                ];
+            }
+
+            $total = (float) ($lineItemPrices[$card->id] ?? $defaultFixedRate);
+
+            return [
+                'name' => $card->name,
+                'rate_type' => 'fixed',
+                'hours' => null,
+                'unit_rate' => $defaultFixedRate,
+                'total' => $total,
+            ];
+        });
     }
 }
