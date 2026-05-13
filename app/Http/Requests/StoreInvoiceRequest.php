@@ -25,6 +25,8 @@ class StoreInvoiceRequest extends FormRequest
                 'integer',
                 Rule::exists('cards', 'id')->where('submission_id', $submission->id),
             ],
+            'line_item_prices' => ['nullable', 'array'],
+            'line_item_prices.*' => ['numeric', 'min:0'],
             'shipping' => ['nullable', 'numeric', 'min:0'],
             'packaging' => ['nullable', 'numeric', 'min:0'],
             'handling' => ['nullable', 'numeric', 'min:0'],

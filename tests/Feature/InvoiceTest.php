@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\InvoiceController;
 use App\Models\Card;
 use App\Models\Customer;
 use App\Models\Submission;
@@ -84,6 +85,7 @@ test('invoice download returns pdf with valid signed url', function () {
 
     $response = $this->actingAs($user)->post(url($downloadUrl), [
         'card_ids' => [$card->id],
+        'line_item_prices' => [$card->id => 100],
     ]);
 
     $response->assertSuccessful();
@@ -137,6 +139,7 @@ test('invoice download validates cards belong to customer', function () {
 
     $response = $this->actingAs($user)->post(url($downloadUrl), [
         'card_ids' => [$otherCard->id],
+        'line_item_prices' => [$otherCard->id => 25],
     ]);
 
     $response->assertInvalid(['card_ids.0']);
@@ -155,6 +158,7 @@ test('invoice download forbidden for non-owner', function () {
 
     $response = $this->actingAs($user)->post(url($downloadUrl), [
         'card_ids' => [1],
+        'line_item_prices' => [1 => 25],
     ]);
 
     $response->assertForbidden();
@@ -182,6 +186,7 @@ test('invoice download includes shipping packaging handling in pdf', function ()
 
     $response = $this->actingAs($user)->post(url($downloadUrl), [
         'card_ids' => [$card->id],
+        'line_item_prices' => [$card->id => 25],
         'shipping' => 10.50,
         'packaging' => 5.25,
         'handling' => 3.00,
@@ -189,4 +194,22 @@ test('invoice download includes shipping packaging handling in pdf', function ()
 
     $response->assertSuccessful();
     $response->assertHeader('content-type', 'application/pdf');
+});
+
+test('invoice download uses submitted line item prices in pdf totals', function () {
+    $submission = Submission::factory()->create();
+    $card = Card::factory()->for($submission)->create(['restoration_hours' => 2]);
+
+    $method = new ReflectionMethod(InvoiceController::class, 'lineItems');
+    $method->setAccessible(true);
+    $lineItems = $method->invoke(new InvoiceController, collect([$card]), 50.0, 25.0, [$card->id => 175.25]);
+
+    expect($lineItems->first())->toMatchArray([
+        'name' => $card->name,
+        'rate_type' => 'hourly',
+        'hours' => 2.0,
+        'unit_rate' => 50.0,
+        'total' => 175.25,
+    ]);
+    expect($lineItems->sum('total'))->toBe(175.25);
 });
