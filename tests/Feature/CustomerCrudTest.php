@@ -1,6 +1,9 @@
 <?php
 
+use App\Models\Card;
 use App\Models\Customer;
+use App\Models\Payment;
+use App\Models\Shipment;
 use App\Models\Submission;
 use App\Models\User;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -16,6 +19,24 @@ test('submission index lists only own submissions', function () {
     $response->assertInertia(fn (Assert $page) => $page
         ->component('submissions/index')
         ->has('submissions', 2));
+});
+
+test('submission index includes required relation counts', function () {
+    $user = User::factory()->create();
+    $submission = Submission::factory()->for($user)->create();
+
+    Card::factory()->for($submission)->create();
+    Payment::factory()->for($submission)->create();
+    Shipment::factory()->for($submission)->create();
+
+    $response = $this->actingAs($user)->get(route('submissions.index'));
+
+    $response->assertSuccessful();
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('submissions/index')
+        ->where('submissions.0.cards_count', 1)
+        ->where('submissions.0.payments_count', 1)
+        ->where('submissions.0.shipments_count', 1));
 });
 
 test('submission can be created with an existing customer', function () {
