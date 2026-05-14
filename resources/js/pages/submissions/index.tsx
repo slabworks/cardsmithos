@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import { ClipboardList, Plus, Search } from 'lucide-react';
+import { ClipboardList, Plus, Search, TriangleAlert } from 'lucide-react';
 import { useState } from 'react';
 import SubmissionController from '@/actions/App/Http/Controllers/SubmissionController';
 import { Badge } from '@/components/ui/badge';
@@ -23,11 +23,24 @@ type SubmissionItem = {
     id: number;
     status: string | null;
     referral_source: string | null;
+    cards_count: number;
+    payments_count: number;
+    shipments_count: number;
     customer: {
         name: string;
         contact_detail: string | null;
     };
 };
+
+const missingRequirements = (submission: SubmissionItem) =>
+    [
+        submission.payments_count === 0 ? 'payment' : null,
+        submission.shipments_count === 0 ? 'shipping' : null,
+        submission.cards_count === 0 ? 'cards' : null,
+    ].filter((requirement): requirement is string => requirement !== null);
+
+const missingRequirementBadgeClassName =
+    'border-muted-foreground/20 bg-muted/40 px-1.5 text-muted-foreground';
 
 export default function SubmissionsIndex({
     submissions,
@@ -93,45 +106,65 @@ export default function SubmissionsIndex({
                         </div>
                     ) : (
                         <ul className="divide-y divide-sidebar-border">
-                            {filtered.map((submission) => (
-                                <li key={submission.id}>
-                                    <Link
-                                        href={SubmissionController.show.url(
-                                            submission,
-                                        )}
-                                        className="flex items-center justify-between px-4 py-3 hover:bg-muted/50"
-                                    >
-                                        <div className="flex flex-col gap-0.5">
-                                            <span className="font-medium">
-                                                {submission.customer.name}
-                                            </span>
-                                            {submission.customer
-                                                .contact_detail && (
-                                                <span className="text-sm text-muted-foreground">
-                                                    {
-                                                        submission.customer
-                                                            .contact_detail
-                                                    }
-                                                </span>
+                            {filtered.map((submission) => {
+                                const missing = missingRequirements(submission);
+
+                                return (
+                                    <li key={submission.id}>
+                                        <Link
+                                            href={SubmissionController.show.url(
+                                                submission,
                                             )}
-                                        </div>
-                                        {submission.status && (
-                                            <Badge
-                                                variant={
-                                                    statusBadgeVariant[
-                                                        submission.status
-                                                    ] ?? 'outline'
-                                                }
-                                            >
-                                                {submission.status.replace(
-                                                    '_',
-                                                    ' ',
+                                            className="flex items-center justify-between gap-3 px-4 py-3 hover:bg-muted/50"
+                                        >
+                                            <div className="flex min-w-0 flex-col gap-0.5">
+                                                <span className="truncate font-medium">
+                                                    {submission.customer.name}
+                                                </span>
+                                                {submission.customer
+                                                    .contact_detail && (
+                                                    <span className="truncate text-sm text-muted-foreground">
+                                                        {
+                                                            submission.customer
+                                                                .contact_detail
+                                                        }
+                                                    </span>
                                                 )}
-                                            </Badge>
-                                        )}
-                                    </Link>
-                                </li>
-                            ))}
+                                            </div>
+                                            <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
+                                                {missing.map((requirement) => (
+                                                    <Badge
+                                                        key={requirement}
+                                                        variant="outline"
+                                                        className={
+                                                            missingRequirementBadgeClassName
+                                                        }
+                                                        title={`Required: ${requirement}`}
+                                                    >
+                                                        <TriangleAlert />
+                                                        {requirement}
+                                                    </Badge>
+                                                ))}
+                                                {submission.status && (
+                                                    <Badge
+                                                        variant={
+                                                            statusBadgeVariant[
+                                                                submission
+                                                                    .status
+                                                            ] ?? 'outline'
+                                                        }
+                                                    >
+                                                        {submission.status.replace(
+                                                            '_',
+                                                            ' ',
+                                                        )}
+                                                    </Badge>
+                                                )}
+                                            </div>
+                                        </Link>
+                                    </li>
+                                );
+                            })}
                         </ul>
                     )}
                 </div>

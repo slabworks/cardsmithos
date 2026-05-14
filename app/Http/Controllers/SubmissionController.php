@@ -23,6 +23,7 @@ class SubmissionController extends Controller
         $submissions = $request->user()
             ->submissions()
             ->with('customer:id,name,contact_detail')
+            ->withCount(['cards', 'payments', 'shipments'])
             ->latest()
             ->get();
 
