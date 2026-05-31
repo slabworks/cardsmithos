@@ -56,19 +56,24 @@ class CardController extends Controller
         $hourlyRate = $settings?->hourly_rate;
         $taxRate = $settings?->tax_rate;
 
-        $photos = $card->getMedia('photos')->map(fn ($media) => [
-            'id' => $media->id,
-            'url' => route('submissions.cards.photos.show', [
-                'submission' => $submission,
-                'card' => $card,
-                'media' => $media->id,
-            ]),
-            'name' => $media->file_name,
-        ])->values()->all();
+        $photosEnabled = config('cardsmithos.photos_enabled');
+
+        $photos = $photosEnabled
+            ? $card->getMedia('photos')->map(fn ($media) => [
+                'id' => $media->id,
+                'url' => route('submissions.cards.photos.show', [
+                    'submission' => $submission,
+                    'card' => $card,
+                    'media' => $media->id,
+                ]),
+                'name' => $media->file_name,
+            ])->values()->all()
+            : [];
 
         return Inertia::render('cards/edit', [
             'submission' => $submission,
             'card' => $card,
+            'photosEnabled' => $photosEnabled,
             'photos' => $photos,
             'hourlyRate' => $hourlyRate !== null ? (float) $hourlyRate : null,
             'taxRate' => $taxRate !== null ? (float) $taxRate : null,

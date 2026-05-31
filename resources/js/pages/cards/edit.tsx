@@ -33,6 +33,7 @@ export default function CardsEdit({
     card,
     hourlyRate,
     taxRate,
+    photosEnabled = false,
     photos = [],
     statusOptions,
     conditionOptions,
@@ -48,6 +49,7 @@ export default function CardsEdit({
     };
     hourlyRate: number | null;
     taxRate: number | null;
+    photosEnabled?: boolean;
     photos?: Photo[];
     statusOptions: Array<{ value: string; label: string; color: string }>;
     conditionOptions: Array<{ value: string; label: string }>;
@@ -248,71 +250,73 @@ export default function CardsEdit({
                     )}
                 </Form>
 
-                <section className="max-w-xl space-y-4 border-t pt-8">
-                    <Heading
-                        variant="small"
-                        title="Photos"
-                        description="Upload photos of this card for documentation."
-                    />
-                    <div className="rounded-lg border border-sidebar-border bg-card p-4">
-                        <div className="flex items-center gap-2">
-                            <input
-                                ref={fileInputRef}
-                                type="file"
-                                accept="image/*"
-                                multiple
-                                onChange={handlePhotoUpload}
-                                className="hidden"
-                                id="photo-upload"
-                            />
-                            <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                disabled={uploading}
-                                onClick={() => fileInputRef.current?.click()}
-                            >
-                                <ImagePlus className="mr-1 size-4" />
-                                {uploading ? 'Uploading...' : 'Add photos'}
-                            </Button>
-                            <span className="text-xs text-muted-foreground">
-                                Max 10MB per image
-                            </span>
-                        </div>
-                        {photos.length > 0 && (
-                            <div className="mt-4 grid grid-cols-3 gap-3">
-                                {photos.map((photo) => (
-                                    <div
-                                        key={photo.id}
-                                        className="group relative overflow-hidden rounded-lg border"
-                                    >
-                                        <img
-                                            src={photo.url}
-                                            alt={photo.name}
-                                            className="aspect-square w-full object-cover"
-                                        />
-                                        <div className="absolute top-1 right-1 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-                                            <button
-                                                type="button"
-                                                onClick={() =>
-                                                    handlePhotoDelete(photo.id)
-                                                }
-                                                className="rounded-full bg-black/60 p-1 text-white hover:bg-black/80"
-                                            >
-                                                <X className="size-3" />
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
+                {photosEnabled && (
+                    <section className="max-w-xl space-y-4 border-t pt-8">
+                        <Heading
+                            variant="small"
+                            title="Photos"
+                            description="Upload photos of this card for documentation."
+                        />
+                        <div className="rounded-lg border border-sidebar-border bg-card p-4">
+                            <div className="flex items-center gap-2">
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    accept="image/*"
+                                    multiple
+                                    onChange={handlePhotoUpload}
+                                    className="hidden"
+                                    id="photo-upload"
+                                />
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    disabled={uploading}
+                                    onClick={() => fileInputRef.current?.click()}
+                                >
+                                    <ImagePlus className="mr-1 size-4" />
+                                    {uploading ? 'Uploading...' : 'Add photos'}
+                                </Button>
+                                <span className="text-xs text-muted-foreground">
+                                    Max 10MB per image
+                                </span>
                             </div>
-                        )}
-                        {photos.length === 0 && (
-                            <p className="mt-3 text-sm text-muted-foreground">
-                                No photos uploaded yet.
-                            </p>
-                        )}
-                    </div>
-                </section>
+                            {photos.length > 0 && (
+                                <div className="mt-4 grid grid-cols-3 gap-3">
+                                    {photos.map((photo) => (
+                                        <div
+                                            key={photo.id}
+                                            className="group relative overflow-hidden rounded-lg border"
+                                        >
+                                            <img
+                                                src={photo.url}
+                                                alt={photo.name}
+                                                className="aspect-square w-full object-cover"
+                                            />
+                                            <div className="absolute top-1 right-1 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        handlePhotoDelete(photo.id)
+                                                    }
+                                                    className="rounded-full bg-black/60 p-1 text-white hover:bg-black/80"
+                                                >
+                                                    <X className="size-3" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                            {photos.length === 0 && (
+                                <p className="mt-3 text-sm text-muted-foreground">
+                                    No photos uploaded yet.
+                                </p>
+                            )}
+                        </div>
+                    </section>
+                )}
 
                 <div className="max-w-xl space-y-4 border-t pt-8">
                     <Heading

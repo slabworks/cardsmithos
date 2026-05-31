@@ -8,7 +8,8 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
 beforeEach(function () {
-    Storage::fake('s3');
+    config(['cardsmithos.photos_enabled' => true]);
+    Storage::fake(config('media-library.disk_name'));
 });
 
 test('photos can be uploaded to a card', function () {
@@ -124,4 +125,47 @@ test('photo delete forbidden for other user', function () {
     );
 
     $response->assertForbidden();
+});
+
+test('photo routes return not found when photos are disabled', function () {
+    config(['cardsmithos.photos_enabled' => false]);
+
+    $user = User::factory()->create();
+    $customer = Customer::factory()->for($user)->create();
+    $submission = Submission::factory()->for($user)->for($customer)->create();
+    $card = Card::factory()->for($submission)->create();
+    $card->addMedia(UploadedFile::fake()->image('front.jpg'))->toMediaCollection('photos');
+    $media = $card->getMedia('photos')->first();
+
+    $this->actingAs($user)->post(
+        route('submissions.cards.photos.store', [$submission, $card]),
+        ['photos' => [UploadedFile::fake()->image('front.jpg')]]
+    )->assertNotFound();
+
+    $this->actingAs($user)->get(
+        route('submissions.cards.photos.show', [$submission, $card, $media->id])
+    )->assertNotFound();
+
+    $this->actingAs($user)->delete(
+        route('submissions.cards.photos.destroy', [$submission, $card, $media->id])
+    )->assertNotFound();
+});
+
+test('card edit page hides photos when photos are disabled', function () {
+    config(['cardsmithos.photos_enabled' => false]);
+
+    $user = User::factory()->create();
+    $customer = Customer::factory()->for($user)->create();
+    $submission = Submission::factory()->for($user)->for($customer)->create();
+    $card = Card::factory()->for($submission)->create();
+
+    $response = $this->actingAs($user)->get(
+        route('submissions.cards.edit', [$submission, $card])
+    );
+
+    $response->assertSuccessful();
+    $response->assertInertia(fn ($page) => $page
+        ->component('cards/edit')
+        ->where('photosEnabled', false)
+        ->has('photos', 0));
 });
