@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'photos_enabled' => (bool) env('PHOTOS_ENABLED', false),
+
     'name' => 'Cardsmith OS',
     'url' => 'https://cardsmithos.test',
     'description' => 'Trading card repair CRM and management software. Track submissions, manage repair jobs, and run your trading card repair shop—open-source, no lock-in or subscription fees.',

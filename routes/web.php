@@ -15,6 +15,7 @@ use App\Http\Controllers\ShipmentController;
 use App\Http\Controllers\StorefrontController;
 use App\Http\Controllers\SubmissionController;
 use App\Http\Controllers\WaiverController;
+use App\Http\Middleware\EnsurePhotosEnabled;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 
@@ -56,9 +57,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('submissions.cards', CardController::class)->except(['index', 'show'])->scoped();
     Route::resource('submissions.payments', PaymentController::class)->only(['store', 'update', 'destroy'])->scoped();
     Route::resource('submissions.shipments', ShipmentController::class)->only(['store', 'update', 'destroy'])->scoped();
-    Route::post('submissions/{submission}/cards/{card}/photos', [CardPhotoController::class, 'store'])->name('submissions.cards.photos.store');
-    Route::get('submissions/{submission}/cards/{card}/photos/{media}', [CardPhotoController::class, 'show'])->name('submissions.cards.photos.show');
-    Route::delete('submissions/{submission}/cards/{card}/photos/{media}', [CardPhotoController::class, 'destroy'])->name('submissions.cards.photos.destroy');
+    Route::middleware(EnsurePhotosEnabled::class)->group(function (): void {
+        Route::post('submissions/{submission}/cards/{card}/photos', [CardPhotoController::class, 'store'])->name('submissions.cards.photos.store');
+        Route::get('submissions/{submission}/cards/{card}/photos/{media}', [CardPhotoController::class, 'show'])->name('submissions.cards.photos.show');
+        Route::delete('submissions/{submission}/cards/{card}/photos/{media}', [CardPhotoController::class, 'destroy'])->name('submissions.cards.photos.destroy');
+    });
     Route::get('submissions/{submission}/invoices/create', [InvoiceController::class, 'create'])->name('submissions.invoices.create');
     Route::post('submissions/{submission}/invoices/download', [InvoiceController::class, 'download'])->name('submissions.invoices.download')->middleware('signed:relative');
 });
